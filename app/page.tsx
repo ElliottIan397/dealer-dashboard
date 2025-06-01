@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const customers = ["All", "McNaughton", "Friends University", "Other Customer"];
 
@@ -21,26 +19,36 @@ export default function DealerDashboard() {
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">Dealer Dashboard</h1>
 
-      <div className="w-64">
-        <Select onValueChange={setSelected} defaultValue="All">
-          <SelectTrigger>
-            <SelectValue placeholder="Select Customer" />
-          </SelectTrigger>
-          <SelectContent>
-            {customers.map(c => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="mb-4">
+        <label htmlFor="customer" className="block mb-2 text-sm font-medium">Select Customer:</label>
+        <select
+          id="customer"
+          className="p-2 border rounded w-64"
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+        >
+          {customers.map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card><CardContent><p className="text-sm">Total Devices</p><p className="text-xl font-bold">{filtered.reduce((a, b) => a + b.devices, 0)}</p></CardContent></Card>
-        <Card><CardContent><p className="text-sm">Contract Revenue</p><p className="text-xl font-bold text-green-600">${filtered.reduce((a, b) => a + b.contractRevenue, 0)}</p></CardContent></Card>
-        <Card><CardContent><p className="text-sm">Transactional Revenue</p><p className="text-xl font-bold text-yellow-600">${filtered.reduce((a, b) => a + b.transactionalRevenue, 0)}</p></CardContent></Card>
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-sm text-gray-600">Total Devices</p>
+          <p className="text-2xl font-bold">{filtered.reduce((a, b) => a + b.devices, 0)}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-sm text-gray-600">Contract Revenue</p>
+          <p className="text-2xl font-bold text-green-600">${filtered.reduce((a, b) => a + b.contractRevenue, 0)}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-sm text-gray-600">Transactional Revenue</p>
+          <p className="text-2xl font-bold text-yellow-600">${filtered.reduce((a, b) => a + b.transactionalRevenue, 0)}</p>
+        </div>
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow">
+      <div className="bg-white p-4 rounded shadow">
         <h2 className="text-lg font-semibold mb-2">Revenue Opportunity (Contract vs Transactional)</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={filtered}>
