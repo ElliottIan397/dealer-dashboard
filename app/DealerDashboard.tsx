@@ -81,6 +81,7 @@ export default function DealerDashboard() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard: Table 1</h1>
+
       <div className="flex gap-6 flex-wrap">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
@@ -94,6 +95,7 @@ export default function DealerDashboard() {
             ))}
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type:</label>
           <select
@@ -131,7 +133,63 @@ export default function DealerDashboard() {
             </tr>
           </thead>
           <tbody>
-            {/* ...existing rows go here... */}
+            {Object.entries(
+              filtered.reduce((acc, row) => {
+                acc[row.Monitor] = acc[row.Monitor] || [];
+                acc[row.Monitor].push(row);
+                return acc;
+              }, {} as Record<string, McarpRow[]>)
+            ).map(([customer, rows]) => {
+              const totals = rows.reduce(
+                (sum, row) => ({
+                  Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
+                  Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
+                  Fulfillment: sum.Fulfillment + row["12_Mth_Fulfillment_Cost"],
+                  SP: sum.SP + row["12_Mth_Transactional_SP"],
+                  Revenue: sum.Revenue + row.Contract_Total_Revenue
+                }),
+                { Black_Annual_Volume: 0, Color_Annual_Volume: 0, Fulfillment: 0, SP: 0, Revenue: 0 }
+              );
+
+              const transactionalGM = totals.SP > 0 ? (totals.SP - totals.Fulfillment) / totals.SP : 0;
+              const contractGM = totals.Revenue > 0 ? (totals.Revenue - totals.Fulfillment) / totals.Revenue : 0;
+
+              return (
+                <React.Fragment key={customer}>
+                  {rows.map((row, i) => (
+                    <tr key={i} className="border-t">
+                      <td className="px-3 py-2 whitespace-nowrap">{row.Monitor}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{row.Printer_Model}</td>
+                      <td className="px-3 py-2 text-center">{row.Device_Type}</td>
+                      <td className="px-3 py-2 text-right">{Number(row.Black_Annual_Volume).toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right">{Number(row.Color_Annual_Volume).toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right">{row["Black_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{row["Cyan_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{row["Magenta_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{row["Yellow_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
+                      <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Fulfillment_Cost"])}</td>
+                      <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Transactional_SP"])}</td>
+                      <td className="px-3 py-2 text-center">{formatPercent(computeGM(row["12_Mth_Transactional_SP"], row["12_Mth_Fulfillment_Cost"]))}</td>
+                      <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
+                      <td className="px-3 py-2 text-center">{formatPercent(computeContractGM(row["12_Mth_Fulfillment_Cost"], row.Contract_Total_Revenue))}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t bg-gray-100 font-semibold">
+                    <td className="px-3 py-2" colSpan={4}>{customer} Totals</td>
+                    <td className="px-3 py-2 text-right">{totals.Black_Annual_Volume.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-right">{totals.Color_Annual_Volume.toLocaleString()}</td>
+                    <td colSpan={5}></td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
+                    <td className="px-3 py-2 text-center">{formatPercent(transactionalGM)}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(totals.Revenue)}</td>
+                    <td className="px-3 py-2 text-center">{formatPercent(contractGM)}</td>
+                  </tr>
+                </React.Fragment>
+              );
+            })}
             <tr className="border-t bg-yellow-100 font-bold">
               <td className="px-3 py-2" colSpan={4}>Grand Totals</td>
               <td className="px-3 py-2 text-right">{grandTotals.Black_Annual_Volume.toLocaleString()}</td>
