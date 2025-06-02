@@ -12,12 +12,12 @@ export default function Table3({ filtered }: Props) {
   const formatPercent = (val: number) => `${val.toFixed(1)}%`;
 
   const grouped = Object.entries(
-    filtered.reduce((acc, row) => {
-      acc[row.Monitor] = acc[row.Monitor] || [];
-      acc[row.Monitor].push(row);
-      return acc;
-    }, {} as Record<string, Table3Row[]>)
-  );
+  filtered.reduce((acc: Record<string, any[]>, row) => {
+    acc[row.Monitor] = acc[row.Monitor] || [];
+    acc[row.Monitor].push(row);
+    return acc;
+  }, {})
+);
 
   return (
     <div className="overflow-x-auto w-full">
