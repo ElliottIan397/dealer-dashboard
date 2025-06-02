@@ -14,7 +14,7 @@ type McarpRow = {
   "Black_Full_Cartridges_Required_(365d)": number;
   "Cyan_Full_Cartridges_Required_(365d)": number;
   "Magenta_Full_Cartridges_Required_(365d)": number;
-  "Yellow_Full_Cartridges_Required_(365d)"": number;
+  "Yellow_Full_Cartridges_Required_(365d)": number;
   Contract_Status: string;
   "12_Mth_Fulfillment_Cost": number;
   "12_Mth_Transactional_SP": number;
