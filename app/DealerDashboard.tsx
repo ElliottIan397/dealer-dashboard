@@ -172,6 +172,21 @@ export default function DealerDashboard() {
                 </React.Fragment>
               );
             })}
+                <tr className="border-t bg-yellow-100 font-bold">
+                  <td className="px-3 py-2" colSpan={4}>Grand Totals</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Black_Annual_Volume.toLocaleString()}</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Color_Annual_Volume.toLocaleString()}</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Black}</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Cyan}</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Magenta}</td>
+                  <td className="px-3 py-2 text-right">{grandTotals.Yellow}</td>
+                  <td></td>
+                  <td className="px-3 py-2 text-right">{formatCurrency(grandTotals.Fulfillment)}</td>
+                  <td className="px-3 py-2 text-right">{formatCurrency(grandTotals.SP)}</td>
+                  <td className="px-3 py-2 text-center">{formatPercent(grandTransactionalGM)}</td>
+                  <td className="px-3 py-2 text-right">{formatCurrency(grandTotals.Revenue)}</td>
+                  <td className="px-3 py-2 text-center">{formatPercent(grandContractGM)}</td>
+                </tr>
           </tbody>
         </table>
       </div>
