@@ -13,7 +13,7 @@ export function useMCARPData() {
   useEffect(() => {
     fetch("/mcarp.json")
       .then((res) => res.json())
-      .then((json: McarpRow[]) => {
+      .then((json: any[]) => {
         setData(json);
         const uniqueCustomers = Array.from(new Set(json.map((r) => r.Monitor))).sort();
         setCustomers(uniqueCustomers);
