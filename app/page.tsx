@@ -61,7 +61,7 @@ export default function DealerDashboard() {
   const computeContractGM = (sp: number, cost: number, rev: number) => {
     if (rev > 0) return (sp - cost) / rev;
     return 0;
-  };
+  }; // ✅ Required semicolon to avoid JSX parsing issue
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
