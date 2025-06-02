@@ -9,7 +9,8 @@ type Props = {
 
 export default function Table3({ filtered }: Props) {
   const formatNumber = (val: number) => val.toLocaleString();
-  const formatPercent = (val: number) => `${val.toFixed(1)}%`;
+  const formatPercent = (val: number | undefined) =>
+  typeof val === "number" ? `${val.toFixed(1)}%` : "-";
 
   const grouped = Object.entries(
   filtered.reduce((acc: Record<string, any[]>, row) => {
