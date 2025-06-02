@@ -54,10 +54,10 @@ export default function Table3({ filtered }: Props) {
                 <td className="px-3 py-2 text-right">{formatNumber(row.Cyan_Pages_Left)}</td>
                 <td className="px-3 py-2 text-right">{formatNumber(row.Magenta_Pages_Left)}</td>
                 <td className="px-3 py-2 text-right">{formatNumber(row.Yellow_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row.Black_Page_Coverage_%)}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row.Cyan_Page_Coverage_%)}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row.Magenta_Page_Coverage_%)}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row.Yellow_Page_Coverage_%)}</td>
+                <td className="px-3 py-2 text-right">{formatPercent(row["Black_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{formatPercent(row["Cyan_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{formatPercent(row["Magenta_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{formatPercent(row["Yellow_Page_Coverage_%"])}</td>
                 <td className="px-3 py-2 text-right">{formatNumber(row.Black_Yield_Estimate)}</td>
                 <td className="px-3 py-2 text-right">{formatNumber(row.Cyan_Yield_Estimate)}</td>
                 <td className="px-3 py-2 text-right">{formatNumber(row.Magenta_Yield_Estimate)}</td>

@@ -43,10 +43,10 @@ export type Table3Row = {
   Cyan_Pages_Left: number;
   Magenta_Pages_Left: number;
   Yellow_Pages_Left: number;
-  Black_Page_Coverage_%: number;
-  Cyan_Page_Coverage_%: number;
-  Magenta_Page_Coverage_%: number;
-  Yellow_Page_Coverage_%: number;
+  "Black_Page_Coverage_%": number;
+  "Cyan_Page_Coverage_%": number;
+  "Magenta_Page_Coverage_%": number;
+  "Yellow_Page_Coverage_%": number;
   Black_Yield_Estimate: number;
   Cyan_Yield_Estimate: number;
   Magenta_Yield_Estimate: number;
