@@ -16,7 +16,7 @@ export default function DealerDashboard() {
     selectedContractType,
     setSelectedContractType,
   } = useMCARPData();
-  console.log("Filtered sample row:", filtered[0]);
+  console.log("Filtered sample row:", JSON.stringify(filtered[0], null, 2));
   const table2Data = filtered.map((row: any) => ({
   Monitor: row.Monitor,
   Serial_Number: row.Serial_Number,
