@@ -113,8 +113,8 @@ export default function Table2({ filtered }: Props) {
                     <td className="px-3 py-2 text-right">{formatNumber(row.Billable_Mono_Pages)}</td>
                     <td className="px-3 py-2 text-right">{formatNumber(row.Billable_Color_Pages)}</td>
                     <td className="px-3 py-2">{row.contract_end}</td>
-                    <td className="px-3 py-2 text-right">{row.Recalculated_Age_(Years).toFixed(1)}</td>
-                    <td className="px-3 py-2 text-right">{row.Usage_(%).toFixed(1)}%</td>
+                    <td className="px-3 py-2 text-right">{row["Recalculated_Age_(Years)"].toFixed(1)}</td>
+                    <td className="px-3 py-2 text-right">{row["Usage_(%)"].toFixed(1)}%</td>
                     <td className="px-3 py-2 text-right">{formatNumber(row.Engine_Cycles)}</td>
                     <td className="px-3 py-2">{row.Final_Risk_Level}</td>
                   </tr>
