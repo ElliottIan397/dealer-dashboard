@@ -1,8 +1,11 @@
 export type McarpRow = {
+  // Shared fields (Tables 1, 2, 3)
   Monitor: string;
   Serial_Number: string;
   Printer_Model: string;
   Device_Type: string;
+
+  // Table 1 fields
   Black_Annual_Volume: number;
   Color_Annual_Volume: number;
   "Black_Full_Cartridges_Required_(365d)": number;
@@ -13,13 +16,8 @@ export type McarpRow = {
   "12_Mth_Fulfillment_Cost": number;
   "12_Mth_Transactional_SP": number;
   Contract_Total_Revenue: number;
-};
 
-export type Table2Row = {
-  Monitor: string;
-  Serial_Number: string;
-  Printer_Model: string;
-  Device_Type: string;
+  // Table 2 fields
   Contract_Mono_CPP: number;
   Contract_Color_CPP: number;
   Contract_Base_Charge_Annual: number;
@@ -32,13 +30,8 @@ export type Table2Row = {
   "Usage_(%)": number;
   Engine_Cycles: number;
   Final_Risk_Level: string;
-};
 
-export type Table3Row = {
-  Monitor: string;
-  Serial_Number: string;
-  Printer_Model: string;
-  Device_Type: string;
+  // Table 3 fields
   Black_Pages_Left: number;
   Cyan_Pages_Left: number;
   Magenta_Pages_Left: number;
