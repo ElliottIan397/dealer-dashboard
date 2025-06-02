@@ -15,8 +15,8 @@ type Table2Row = {
   Billable_Mono_Pages: number;
   Billable_Color_Pages: number;
   contract_end: string;
-  Recalculated_Age_(Years): number;
-  Usage_(%): number;
+  "Recalculated_Age_(Years)": number;
+  "Usage_(%)": number;
   Engine_Cycles: number;
   Final_Risk_Level: string;
 };
