@@ -1,53 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-
-type McarpRow = {
-  Monitor: string;
-  Serial_Number: string;
-  Printer_Model: string;
-  Device_Type: string;
-  Black_Annual_Volume: number;
-  Color_Annual_Volume: number;
-  "Black_Full_Cartridges_Required_(365d)": number;
-  "Cyan_Full_Cartridges_Required_(365d)": number;
-  "Magenta_Full_Cartridges_Required_(365d)": number;
-  "Yellow_Full_Cartridges_Required_(365d)": number;
-  Contract_Status: string;
-  "12_Mth_Fulfillment_Cost": number;
-  "12_Mth_Transactional_SP": number;
-  Contract_Total_Revenue: number;
-};
+import React from "react";
+import Table2 from "./Table2";
+import Table3 from "./Table3";
+import { useMCARPData } from "./useMCARPData";
+import type { McarpRow } from "./types";
 
 export default function DealerDashboard() {
-  const [data, setData] = useState<McarpRow[]>([]);
-  const [filtered, setFiltered] = useState<McarpRow[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState("All");
-  const [selectedContractType, setSelectedContractType] = useState("All");
-  const [customers, setCustomers] = useState<string[]>(["All"]);
-
-  useEffect(() => {
-    fetch("/mcarp.json")
-      .then((res) => res.json())
-      .then((json: McarpRow[]) => {
-        setData(json);
-        const customerNames = Array.from(new Set(json.map((row) => row.Monitor))).sort();
-        setCustomers(["All", ...customerNames]);
-      });
-  }, []);
-
-  useEffect(() => {
-    let result = data;
-    if (selectedCustomer !== "All") {
-      result = result.filter((row) => row.Monitor === selectedCustomer);
-    }
-    if (selectedContractType !== "All") {
-      result = result.filter((row) =>
-        selectedContractType === "C" ? row.Contract_Status === "C" : row.Contract_Status === "Transactional"
-      );
-    }
-    setFiltered(result);
-  }, [selectedCustomer, selectedContractType, data]);
+  const {
+    loading,
+    filtered,
+    customers,
+    selectedCustomer,
+    setSelectedCustomer,
+    selectedContractType,
+    setSelectedContractType,
+  } = useMCARPData();
 
   const formatCurrency = (val: number | string) =>
     typeof val === "number"
@@ -70,13 +38,25 @@ export default function DealerDashboard() {
       Black: sum.Black + row["Black_Full_Cartridges_Required_(365d)"],
       Cyan: sum.Cyan + row["Cyan_Full_Cartridges_Required_(365d)"],
       Magenta: sum.Magenta + row["Magenta_Full_Cartridges_Required_(365d)"],
-      Yellow: sum.Yellow + row["Yellow_Full_Cartridges_Required_(365d)"]
+      Yellow: sum.Yellow + row["Yellow_Full_Cartridges_Required_(365d)"],
     }),
-    { Black_Annual_Volume: 0, Color_Annual_Volume: 0, Fulfillment: 0, SP: 0, Revenue: 0, Black: 0, Cyan: 0, Magenta: 0, Yellow: 0 }
+    {
+      Black_Annual_Volume: 0,
+      Color_Annual_Volume: 0,
+      Fulfillment: 0,
+      SP: 0,
+      Revenue: 0,
+      Black: 0,
+      Cyan: 0,
+      Magenta: 0,
+      Yellow: 0,
+    }
   );
 
   const grandTransactionalGM = grandTotals.SP > 0 ? (grandTotals.SP - grandTotals.Fulfillment) / grandTotals.SP : 0;
   const grandContractGM = grandTotals.Revenue > 0 ? (grandTotals.Revenue - grandTotals.Fulfillment) / grandTotals.Revenue : 0;
+
+  if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -146,7 +126,7 @@ export default function DealerDashboard() {
                   Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
                   Fulfillment: sum.Fulfillment + row["12_Mth_Fulfillment_Cost"],
                   SP: sum.SP + row["12_Mth_Transactional_SP"],
-                  Revenue: sum.Revenue + row.Contract_Total_Revenue
+                  Revenue: sum.Revenue + row.Contract_Total_Revenue,
                 }),
                 { Black_Annual_Volume: 0, Color_Annual_Volume: 0, Fulfillment: 0, SP: 0, Revenue: 0 }
               );
@@ -207,6 +187,16 @@ export default function DealerDashboard() {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
+        <Table2 filtered={filtered} />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
+        <Table3 filtered={filtered} />
       </div>
     </div>
   );

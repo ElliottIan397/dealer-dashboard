@@ -1,25 +1,7 @@
 "use client";
 
 import React from "react";
-
-type Table2Row = {
-  Monitor: string;
-  Serial_Number: string;
-  Printer_Model: string;
-  Device_Type: string;
-  Contract_Mono_CPP: number;
-  Contract_Color_CPP: number;
-  Contract_Base_Charge_Annual: number;
-  Included_Mono_Volume: number;
-  Included_Color_Volume: number;
-  Billable_Mono_Pages: number;
-  Billable_Color_Pages: number;
-  contract_end: string;
-  "Recalculated_Age_(Years)": number;
-  "Usage_(%)": number;
-  Engine_Cycles: number;
-  Final_Risk_Level: string;
-};
+import type { Table2Row } from "./types";
 
 type Props = {
   filtered: Table2Row[];
