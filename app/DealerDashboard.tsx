@@ -108,10 +108,10 @@ export default function DealerDashboard() {
         <table className="min-w-full table-auto border text-sm">
           <thead>
             <tr className="bg-gray-100 text-left">
-              <th className="px-3 py-2">Customer</th>
-              <th className="px-3 py-2">Serial Number</th>
-              <th className="px-3 py-2">Printer Model</th>
-              <th className="px-3 py-2 text-center">Device Type</th>
+              <th className="sticky left-0 z-20 bg-gray-100 px-3 py-2">Customer</th>
+              <th className="sticky left-40 z-20 bg-gray-100 px-3 py-2">Serial Number</th>
+              <th className="sticky left-[20rem] z-20 bg-gray-100 px-3 py-2">Printer Model</th>
+              <th className="sticky left-[30rem] z-20 bg-gray-100 px-3 py-2 text-center">Device Type</th>
               <th className="px-3 py-2 text-right">Black Annual Volume</th>
               <th className="px-3 py-2 text-right">Color Annual Volume</th>
               <th className="px-3 py-2 text-right">Black Cartridges</th>
@@ -149,10 +149,10 @@ export default function DealerDashboard() {
                 <React.Fragment key={customer}>
                   {rows.map((row, i) => (
                     <tr key={i} className="border-t">
-                      <td className="px-3 py-2 whitespace-nowrap">{row.Monitor}</td>
-                      <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
-                      <td className="px-3 py-2 whitespace-nowrap">{row.Printer_Model}</td>
-                      <td className="px-3 py-2 text-center">{row.Device_Type}</td>
+                      <td className="sticky left-0 bg-white z-10 px-3 py-2 whitespace-nowrap">{row.Monitor}</td>
+                      <td className="sticky left-40 bg-white z-10 px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
+                      <td className="sticky left-[20rem] bg-white z-10 px-3 py-2 whitespace-nowrap">{row.Printer_Model}</td>
+                      <td className="sticky left-[30rem] bg-white z-10 px-3 py-2 text-center">{row.Device_Type}</td>
                       <td className="px-3 py-2 text-right">{Number(row.Black_Annual_Volume).toLocaleString()}</td>
                       <td className="px-3 py-2 text-right">{Number(row.Color_Annual_Volume).toLocaleString()}</td>
                       <td className="px-3 py-2 text-right">{row["Black_Full_Cartridges_Required_(365d)"]}</td>
@@ -172,7 +172,7 @@ export default function DealerDashboard() {
                     </tr>
                   ))}
                   <tr className="border-t bg-gray-100 font-semibold">
-                    <td className="px-3 py-2" colSpan={4}>{customer} Totals</td>
+                    <td className="sticky left-0 bg-gray-100 z-10 px-3 py-2" colSpan={4}>{customer} Totals</td>
                     <td className="px-3 py-2 text-right">{totals.Black_Annual_Volume.toLocaleString()}</td>
                     <td className="px-3 py-2 text-right">{totals.Color_Annual_Volume.toLocaleString()}</td>
                     <td colSpan={5}></td>
