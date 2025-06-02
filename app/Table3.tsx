@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import type { Table3Row } from "./types";
 import { safeFixed, safePercent, safeNumber, safeCurrency } from "./utils";
 
+import type { McarpRow } from "./types";
+
 type Props = {
-  filtered: any[];
+  filtered: McarpRow[];
 };
 
 export default function Table3({ filtered }: Props) {
