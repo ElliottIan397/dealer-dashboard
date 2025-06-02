@@ -109,10 +109,10 @@ export default function DealerDashboard() {
                 <td className="px-3 py-2 text-center">{row.Device_Type}</td>
                 <td className="px-3 py-2 text-right">{Number(row.Black_Annual_Volume).toLocaleString()}</td>
                 <td className="px-3 py-2 text-right">{Number(row.Color_Annual_Volume).toLocaleString()}</td>
-                <td className="px-3 py-2 text-right">{row.Black_Full_Cartridges_Required_(365d)}</td>
-                <td className="px-3 py-2 text-right">{row.Cyan_Full_Cartridges_Required_(365d)}</td>
-                <td className="px-3 py-2 text-right">{row.Magenta_Full_Cartridges_Required_(365d)}</td>
-                <td className="px-3 py-2 text-right">{row.Yellow_Full_Cartridges_Required_(365d)}</td>
+                <td className="px-3 py-2 text-right">{row["Black_Full_Cartridges_Required_(365d)"]}</td>
+                <td className="px-3 py-2 text-right">{row["Cyan_Full_Cartridges_Required_(365d)"]}</td>
+                <td className="px-3 py-2 text-right">{row["Magenta_Full_Cartridges_Required_(365d)"]}</td>
+                <td className="px-3 py-2 text-right">{row["Yellow_Full_Cartridges_Required_(365d)"]}</td>
                 <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Fulfillment_Cost"])}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Transactional_SP"])}</td>
