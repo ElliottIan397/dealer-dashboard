@@ -22,7 +22,8 @@ type McarpRow = {
 export default function DealerDashboard() {
   const [data, setData] = useState<McarpRow[]>([]);
   const [filtered, setFiltered] = useState<McarpRow[]>([]);
-  const [selected, setSelected] = useState("All");
+  const [selectedCustomer, setSelectedCustomer] = useState("All");
+  const [selectedContractType, setSelectedContractType] = useState("All");
   const [customers, setCustomers] = useState<string[]>(["All"]);
 
   useEffect(() => {
@@ -36,10 +37,20 @@ export default function DealerDashboard() {
   }, []);
 
   useEffect(() => {
-    setFiltered(
-      selected === "All" ? data : data.filter((row) => row.Monitor === selected)
-    );
-  }, [selected, data]);
+    let result = data;
+
+    if (selectedCustomer !== "All") {
+      result = result.filter((row) => row.Monitor === selectedCustomer);
+    }
+
+    if (selectedContractType !== "All") {
+      result = result.filter((row) =>
+        selectedContractType === "C" ? row.Contract_Status === "C" : row.Contract_Status === "Transactional"
+      );
+    }
+
+    setFiltered(result);
+  }, [selectedCustomer, selectedContractType, data]);
 
   const formatCurrency = (val: number | string) => {
     return typeof val === "number"
@@ -65,17 +76,32 @@ export default function DealerDashboard() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard: Table 1</h1>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-64"
-        >
-          {customers.map((cust) => (
-            <option key={cust} value={cust}>{cust}</option>
-          ))}
-        </select>
+      <div className="flex gap-6 flex-wrap">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
+          <select
+            value={selectedCustomer}
+            onChange={(e) => setSelectedCustomer(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-64"
+          >
+            {customers.map((cust) => (
+              <option key={cust} value={cust}>{cust}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type:</label>
+          <select
+            value={selectedContractType}
+            onChange={(e) => setSelectedContractType(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-64"
+          >
+            <option value="All">All</option>
+            <option value="C">Contracted (C)</option>
+            <option value="T">Transactional (T)</option>
+          </select>
+        </div>
       </div>
 
       <div className="overflow-x-auto w-full">
