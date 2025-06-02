@@ -4,7 +4,7 @@ import React from "react";
 import type { Table2Row } from "./types";
 
 type Props = {
-  filtered: Table2Row[];
+  filtered: any[];
 };
 
 export default function Table2({ filtered }: Props) {
