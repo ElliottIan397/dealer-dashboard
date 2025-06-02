@@ -16,6 +16,43 @@ export default function DealerDashboard() {
     selectedContractType,
     setSelectedContractType,
   } = useMCARPData();
+  const table2Data = filtered.map((row: any) => ({
+  Monitor: row.Monitor,
+  Serial_Number: row.Serial_Number,
+  Printer_Model: row.Printer_Model,
+  Device_Type: row.Device_Type,
+  Contract_Mono_CPP: row.Contract_Mono_CPP,
+  Contract_Color_CPP: row.Contract_Color_CPP,
+  Contract_Base_Charge_Annual: row.Contract_Base_Charge_Annual,
+  Included_Mono_Volume: row.Included_Mono_Volume,
+  Included_Color_Volume: row.Included_Color_Volume,
+  Billable_Mono_Pages: row.Billable_Mono_Pages,
+  Billable_Color_Pages: row.Billable_Color_Pages,
+  contract_end: row.contract_end,
+  "Recalculated_Age_(Years)": row["Recalculated_Age_(Years)"],
+  "Usage_(%)": row["Usage_(%)"],
+  Engine_Cycles: row.Engine_Cycles,
+  Final_Risk_Level: row.Final_Risk_Level,
+})) as any[];
+
+const table3Data = filtered.map((row: any) => ({
+  Monitor: row.Monitor,
+  Serial_Number: row.Serial_Number,
+  Printer_Model: row.Printer_Model,
+  Device_Type: row.Device_Type,
+  Black_Pages_Left: row.Black_Pages_Left,
+  Cyan_Pages_Left: row.Cyan_Pages_Left,
+  Magenta_Pages_Left: row.Magenta_Pages_Left,
+  Yellow_Pages_Left: row.Yellow_Pages_Left,
+  "Black_Page_Coverage_%": row["Black_Page_Coverage_%"],
+  "Cyan_Page_Coverage_%": row["Cyan_Page_Coverage_%"],
+  "Magenta_Page_Coverage_%": row["Magenta_Page_Coverage_%"],
+  "Yellow_Page_Coverage_%": row["Yellow_Page_Coverage_%"],
+  Black_Yield_Estimate: row.Black_Yield_Estimate,
+  Cyan_Yield_Estimate: row.Cyan_Yield_Estimate,
+  Magenta_Yield_Estimate: row.Magenta_Yield_Estimate,
+  Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
+})) as any[];
 
   const formatCurrency = (val: number | string) =>
     typeof val === "number"
