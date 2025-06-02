@@ -13,12 +13,12 @@ export default function Table2({ filtered }: Props) {
     val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 
   const grouped = Object.entries(
-    filtered.reduce((acc, row) => {
-      acc[row.Monitor] = acc[row.Monitor] || [];
-      acc[row.Monitor].push(row);
-      return acc;
-    }, {} as Record<string, Table2Row[]>)
-  );
+  filtered.reduce((acc: Record<string, any[]>, row) => {
+    acc[row.Monitor] = acc[row.Monitor] || [];
+    acc[row.Monitor].push(row);
+    return acc;
+  }, {})
+);
 
   const grandTotals = filtered.reduce(
     (totals, row) => ({
