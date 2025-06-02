@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Table2Row } from "./types";
+import { safeFixed, safePercent, safeNumber, safeCurrency } from "./utils";
 
 type Props = {
   filtered: any[];
@@ -84,46 +85,44 @@ export default function Table2({ filtered }: Props) {
                 {rows.map((row, i) => (
                   <tr key={i} className="border-t">
                     <td className="px-3 py-2">{row.Monitor}</td>
-                    <td className="px-3 py-2">{row.Serial_Number}</td>
-                    <td className="px-3 py-2">{row.Printer_Model}</td>
-                    <td className="px-3 py-2">{row.Device_Type}</td>
-                    <td className="px-3 py-2 text-right">{row.Contract_Mono_CPP.toFixed(4)}</td>
-                    <td className="px-3 py-2 text-right">{row.Contract_Color_CPP.toFixed(4)}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Base_Charge_Annual)}</td>
-                    <td className="px-3 py-2 text-right">{formatNumber(row.Included_Mono_Volume)}</td>
-                    <td className="px-3 py-2 text-right">{formatNumber(row.Included_Color_Volume)}</td>
-                    <td className="px-3 py-2 text-right">{formatNumber(row.Billable_Mono_Pages)}</td>
-                    <td className="px-3 py-2 text-right">{formatNumber(row.Billable_Color_Pages)}</td>
-                    <td className="px-3 py-2">{row.contract_end}</td>
-                    <td className="px-3 py-2 text-right">{row["Recalculated_Age_(Years)"].toFixed(1)}</td>
-                    <td className="px-3 py-2 text-right">
-  {typeof row["Usage_(%)"] === "number" ? `${row["Usage_(%)"].toFixed(1)}%` : "-"}
-</td>
-                    <td className="px-3 py-2 text-right">{formatNumber(row.Engine_Cycles)}</td>
-                    <td className="px-3 py-2">{row.Final_Risk_Level}</td>
+<td className="px-3 py-2">{row.Serial_Number}</td>
+<td className="px-3 py-2">{row.Printer_Model}</td>
+<td className="px-3 py-2">{row.Device_Type}</td>
+<td className="px-3 py-2 text-right">{safeFixed(row.Contract_Mono_CPP, 4)}</td>
+<td className="px-3 py-2 text-right">{safeFixed(row.Contract_Color_CPP, 4)}</td>
+<td className="px-3 py-2 text-right">{safeCurrency(row.Contract_Base_Charge_Annual)}</td>
+<td className="px-3 py-2 text-right">{safeNumber(row.Included_Mono_Volume)}</td>
+<td className="px-3 py-2 text-right">{safeNumber(row.Included_Color_Volume)}</td>
+<td className="px-3 py-2 text-right">{safeNumber(row.Billable_Mono_Pages)}</td>
+<td className="px-3 py-2 text-right">{safeNumber(row.Billable_Color_Pages)}</td>
+<td className="px-3 py-2">{row.contract_end}</td>
+<td className="px-3 py-2 text-right">{safeFixed(row["Recalculated_Age_(Years)"], 1)}</td>
+<td className="px-3 py-2 text-right">{safePercent(row["Usage_(%)"])}</td>
+<td className="px-3 py-2 text-right">{safeNumber(row.Engine_Cycles)}</td>
+<td className="px-3 py-2">{row.Final_Risk_Level}</td>
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
-                  <td className="px-3 py-2" colSpan={6}>{customer} Subtotals</td>
-                  <td className="px-3 py-2 text-right">{formatCurrency(subtotal.Contract_Base_Charge_Annual)}</td>
-                  <td className="px-3 py-2 text-right">{formatNumber(subtotal.Included_Mono_Volume)}</td>
-                  <td className="px-3 py-2 text-right">{formatNumber(subtotal.Included_Color_Volume)}</td>
-                  <td className="px-3 py-2 text-right">{formatNumber(subtotal.Billable_Mono_Pages)}</td>
-                  <td className="px-3 py-2 text-right">{formatNumber(subtotal.Billable_Color_Pages)}</td>
-                  <td colSpan={5}></td>
-                </tr>
+  <td className="px-3 py-2" colSpan={6}>{customer} Subtotals</td>
+  <td className="px-3 py-2 text-right">{safeCurrency(subtotal.Contract_Base_Charge_Annual)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(subtotal.Included_Mono_Volume)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(subtotal.Included_Color_Volume)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(subtotal.Billable_Mono_Pages)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(subtotal.Billable_Color_Pages)}</td>
+  <td colSpan={5}></td>
+</tr>
               </React.Fragment>
             );
           })}
           <tr className="border-t bg-yellow-100 font-bold">
-            <td className="px-3 py-2" colSpan={6}>Grand Totals</td>
-            <td className="px-3 py-2 text-right">{formatCurrency(grandTotals.Contract_Base_Charge_Annual)}</td>
-            <td className="px-3 py-2 text-right">{formatNumber(grandTotals.Included_Mono_Volume)}</td>
-            <td className="px-3 py-2 text-right">{formatNumber(grandTotals.Included_Color_Volume)}</td>
-            <td className="px-3 py-2 text-right">{formatNumber(grandTotals.Billable_Mono_Pages)}</td>
-            <td className="px-3 py-2 text-right">{formatNumber(grandTotals.Billable_Color_Pages)}</td>
-            <td colSpan={5}></td>
-          </tr>
+  <td className="px-3 py-2" colSpan={6}>Grand Totals</td>
+  <td className="px-3 py-2 text-right">{safeCurrency(grandTotals.Contract_Base_Charge_Annual)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Included_Mono_Volume)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Included_Color_Volume)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Billable_Mono_Pages)}</td>
+  <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Billable_Color_Pages)}</td>
+  <td colSpan={5}></td>
+</tr>
         </tbody>
       </table>
     </div>

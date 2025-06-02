@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Table3Row } from "./types";
+import { safeFixed, safePercent, safeNumber, safeCurrency } from "./utils";
 
 type Props = {
   filtered: any[];
@@ -10,15 +11,15 @@ type Props = {
 export default function Table3({ filtered }: Props) {
   const formatNumber = (val: number) => val.toLocaleString();
   const formatPercent = (val: number | undefined) =>
-  typeof val === "number" ? `${val.toFixed(1)}%` : "-";
+    typeof val === "number" ? `${val.toFixed(1)}%` : "-";
 
   const grouped = Object.entries(
-  filtered.reduce((acc: Record<string, any[]>, row) => {
-    acc[row.Monitor] = acc[row.Monitor] || [];
-    acc[row.Monitor].push(row);
-    return acc;
-  }, {})
-);
+    filtered.reduce((acc: Record<string, any[]>, row) => {
+      acc[row.Monitor] = acc[row.Monitor] || [];
+      acc[row.Monitor].push(row);
+      return acc;
+    }, {})
+  );
 
   return (
     <div className="overflow-x-auto w-full">
@@ -51,18 +52,18 @@ export default function Table3({ filtered }: Props) {
                 <td className="px-3 py-2">{row.Serial_Number}</td>
                 <td className="px-3 py-2">{row.Printer_Model}</td>
                 <td className="px-3 py-2">{row.Device_Type}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Black_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Cyan_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Magenta_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Yellow_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row["Black_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row["Cyan_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row["Magenta_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{formatPercent(row["Yellow_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Black_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Cyan_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Magenta_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{formatNumber(row.Yellow_Yield_Estimate)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Black_Pages_Left)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Pages_Left)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Pages_Left)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Yellow_Pages_Left)}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row["Black_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row["Cyan_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row["Magenta_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row["Yellow_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Black_Yield_Estimate)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Yield_Estimate)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Yield_Estimate)}</td>
+                <td className="px-3 py-2 text-right">{safeNumber(row.Yellow_Yield_Estimate)}</td>
               </tr>
             ))
           )}
