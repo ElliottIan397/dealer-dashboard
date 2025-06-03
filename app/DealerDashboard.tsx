@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
 import { useMCARPData } from "./useMCARPData";
@@ -17,6 +18,24 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
   console.log("Filtered sample row:", JSON.stringify(filtered[0], null, 2));
+  const table1Data = filtered.map((row: any) => ({
+    Monitor: row.Monitor,
+    Serial_Number: row.Serial_Number,
+    Printer_Model: row.Printer_Model,
+    Device_Type: row.Device_Type,
+    Black_Annual_Volume: row.Black_Annual_Volume,
+    Color_Annual_Volume: row.Color_Annual_Volume,
+    Black_Full_Cartridges_Required_365d: row["Black_Full_Cartridges_Required_(365d)"],
+    Cyan_Full_Cartridges_Required_365d: row["Cyan_Full_Cartridges_Required_(365d)"],
+    Magenta_Full_Cartridges_Required_365d: row["Magenta_Full_Cartridges_Required_(365d)"],
+    Yellow_Full_Cartridges_Required_365d: row["Yellow_Full_Cartridges_Required_(365d)"],
+    Contract_Status: row.Contract_Status,
+    Fulfillment_Cost_12_Mth: row["12_Mth_Fulfillment_Cost"],
+    Transactional_SP_12_Mth: row["12_Mth_Transactional_SP"],
+    Contract_Total_Revenue: row.Contract_Total_Revenue,
+    Transactional_GM_Percent: row["Transactional_GM%"],
+    Contract_GM_Percent: row["Contract_GM%"],
+  }));
   const table2Data = filtered.map((row: any) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
@@ -240,7 +259,10 @@ export default function DealerDashboard() {
           </tbody>
         </table>
       </div>
-
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
+        <Table1 filtered={table1Data} />
+      </div>
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
         <Table2 filtered={filtered} />
