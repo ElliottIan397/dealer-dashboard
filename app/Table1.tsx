@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { formatCurrency, formatPercent } from "./utils";
+import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
 
 type Props = {
@@ -49,8 +49,8 @@ export default function Table1({ filtered }: Props) {
               (sum, row) => ({
                 Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
                 Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-                Fulfillment: sum.Fulfillment + (row["12_Mth_Fulfillment_Cost"] ?? 0),
-                SP: sum.SP + (row["12_Mth_Transactional_SP"] ?? 0),
+                Fulfillment: sum.Fulfillment + (row.Twelve_Month_Fulfillment_Cost ?? 0),
+                SP: sum.SP + (row.Twelve_Month_Transactional_SP ?? 0),
                 Revenue: sum.Revenue + row.Contract_Total_Revenue,
                 Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
                 Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
@@ -88,11 +88,11 @@ export default function Table1({ filtered }: Props) {
                     <td className="px-3 py-2 text-right">{row.Magenta_Full_Cartridges_Required_365d}</td>
                     <td className="px-3 py-2 text-right">{row.Yellow_Full_Cartridges_Required_365d}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Fulfillment_Cost"])}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Transactional_SP"])}</td>
-                    <td className="px-3 py-2 text-center">{formatPercent(computeGM(row["12_Mth_Transactional_SP"], row["12_Mth_Fulfillment_Cost"]))}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Fulfillment_Cost)}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Transactional_SP)}</td>
+                    <td className="px-3 py-2 text-center">{formatPercent(computeGM(row.Twelve_Month_Transactional_SP, row.Twelve_Month_Fulfillment_Cost))}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
-                    <td className="px-3 py-2 text-center">{formatPercent(computeContractGM(row["12_Mth_Fulfillment_Cost"], row.Contract_Total_Revenue))}</td>
+                    <td className="px-3 py-2 text-center">{formatPercent(computeContractGM(row.Twelve_Month_Fulfillment_Cost, row.Contract_Total_Revenue))}</td>
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
