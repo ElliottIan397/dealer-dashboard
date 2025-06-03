@@ -261,7 +261,7 @@ export default function DealerDashboard() {
       </div>
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
-        <Table1 filtered={table1Data} />
+        <Table1 filtered={table1Data as any[]} />
       </div>
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
