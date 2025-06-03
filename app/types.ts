@@ -8,13 +8,13 @@ export type McarpRow = {
   // Table 1 fields
   Black_Annual_Volume: number;
   Color_Annual_Volume: number;
-  "Black_Full_Cartridges_Required_(365d)": number;
-  "Cyan_Full_Cartridges_Required_(365d)": number;
-  "Magenta_Full_Cartridges_Required_(365d)": number;
-  "Yellow_Full_Cartridges_Required_(365d)": number;
+  Black_Full_Cartridges_Required_365d: number;
+  Cyan_Full_Cartridges_Required_365d: number;
+  Magenta_Full_Cartridges_Required_365d: number;
+  Yellow_Full_Cartridges_Required_365d: number;
   Contract_Status: string;
-  "12_Mth_Fulfillment_Cost": number;
-  "12_Mth_Transactional_SP": number;
+  Twelve_Month_Fulfillment_Cost: number;
+  Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
 
   // Table 2 fields
@@ -26,8 +26,8 @@ export type McarpRow = {
   Billable_Mono_Pages: number;
   Billable_Color_Pages: number;
   contract_end: string;
-  "Recalculated_Age_(Years)": number;
-  "Usage_(%)": number;
+  Recalculated_Age_Years: number;
+  Usage_Percent: number;
   Engine_Cycles: number;
   Final_Risk_Level: string;
 
@@ -36,10 +36,10 @@ export type McarpRow = {
   Cyan_Pages_Left: number;
   Magenta_Pages_Left: number;
   Yellow_Pages_Left: number;
-  "Black_Page_Coverage_%": number;
-  "Cyan_Page_Coverage_%": number;
-  "Magenta_Page_Coverage_%": number;
-  "Yellow_Page_Coverage_%": number;
+  Black_Page_Coverage_Percent: number;
+  Cyan_Page_Coverage_Percent: number;
+  Magenta_Page_Coverage_Percent: number;
+  Yellow_Page_Coverage_Percent: number;
   Black_Yield_Estimate: number;
   Cyan_Yield_Estimate: number;
   Magenta_Yield_Estimate: number;

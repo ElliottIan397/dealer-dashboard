@@ -18,42 +18,42 @@ export default function DealerDashboard() {
   } = useMCARPData();
   console.log("Filtered sample row:", JSON.stringify(filtered[0], null, 2));
   const table2Data = filtered.map((row: any) => ({
-  Monitor: row.Monitor,
-  Serial_Number: row.Serial_Number,
-  Printer_Model: row.Printer_Model,
-  Device_Type: row.Device_Type,
-  Contract_Mono_CPP: row.Contract_Mono_CPP,
-  Contract_Color_CPP: row.Contract_Color_CPP,
-  Contract_Base_Charge_Annual: row.Contract_Base_Charge_Annual,
-  Included_Mono_Volume: row.Included_Mono_Volume,
-  Included_Color_Volume: row.Included_Color_Volume,
-  Billable_Mono_Pages: row.Billable_Mono_Pages,
-  Billable_Color_Pages: row.Billable_Color_Pages,
-  contract_end: row.contract_end,
-  "Recalculated_Age_(Years)": row["Recalculated_Age_(Years)"],
-  "Usage_(%)": row["Usage_(%)"],
-  Engine_Cycles: row.Engine_Cycles,
-  Final_Risk_Level: row.Final_Risk_Level,
-})) as any[];
+    Monitor: row.Monitor,
+    Serial_Number: row.Serial_Number,
+    Printer_Model: row.Printer_Model,
+    Device_Type: row.Device_Type,
+    Contract_Mono_CPP: row.Contract_Mono_CPP,
+    Contract_Color_CPP: row.Contract_Color_CPP,
+    Contract_Base_Charge_Annual: row.Contract_Base_Charge_Annual,
+    Included_Mono_Volume: row.Included_Mono_Volume,
+    Included_Color_Volume: row.Included_Color_Volume,
+    Billable_Mono_Pages: row.Billable_Mono_Pages,
+    Billable_Color_Pages: row.Billable_Color_Pages,
+    contract_end: row.contract_end,
+    Recalculated_Age_Years: row.Recalculated_Age_Years,
+    Usage_Percent: row.Usage_Percent,
+    Engine_Cycles: row.Engine_Cycles,
+    Final_Risk_Level: row.Final_Risk_Level,
+  })) as any[];
 
-const table3Data = filtered.map((row: any) => ({
-  Monitor: row.Monitor,
-  Serial_Number: row.Serial_Number,
-  Printer_Model: row.Printer_Model,
-  Device_Type: row.Device_Type,
-  Black_Pages_Left: row.Black_Pages_Left,
-  Cyan_Pages_Left: row.Cyan_Pages_Left,
-  Magenta_Pages_Left: row.Magenta_Pages_Left,
-  Yellow_Pages_Left: row.Yellow_Pages_Left,
-  "Black_Page_Coverage_%": row["Black_Page_Coverage_%"],
-  "Cyan_Page_Coverage_%": row["Cyan_Page_Coverage_%"],
-  "Magenta_Page_Coverage_%": row["Magenta_Page_Coverage_%"],
-  "Yellow_Page_Coverage_%": row["Yellow_Page_Coverage_%"],
-  Black_Yield_Estimate: row.Black_Yield_Estimate,
-  Cyan_Yield_Estimate: row.Cyan_Yield_Estimate,
-  Magenta_Yield_Estimate: row.Magenta_Yield_Estimate,
-  Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
-})) as any[];
+  const table3Data = filtered.map((row: any) => ({
+    Monitor: row.Monitor,
+    Serial_Number: row.Serial_Number,
+    Printer_Model: row.Printer_Model,
+    Device_Type: row.Device_Type,
+    Black_Pages_Left: row.Black_Pages_Left,
+    Cyan_Pages_Left: row.Cyan_Pages_Left,
+    Magenta_Pages_Left: row.Magenta_Pages_Left,
+    Yellow_Pages_Left: row.Yellow_Pages_Left,
+    Black_Page_Coverage_Percent: row.Black_Page_Coverage_Percent,
+    Cyan_Page_Coverage_Percent: row.Cyan_Page_Coverage_Percent,
+    Magenta_Page_Coverage_Percent: row.Magenta_Page_Coverage_Percent,
+    Yellow_Page_Coverage_Percent: row.Yellow_Page_Coverage_Percent,
+    Black_Yield_Estimate: row.Black_Yield_Estimate,
+    Cyan_Yield_Estimate: row.Cyan_Yield_Estimate,
+    Magenta_Yield_Estimate: row.Magenta_Yield_Estimate,
+    Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
+  })) as any[];
 
   const formatCurrency = (val: number | string) =>
     typeof val === "number"
@@ -70,13 +70,13 @@ const table3Data = filtered.map((row: any) => ({
     (sum, row) => ({
       Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
       Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-      Fulfillment: sum.Fulfillment + row["12_Mth_Fulfillment_Cost"],
-      SP: sum.SP + row["12_Mth_Transactional_SP"],
+      Fulfillment: sum.Fulfillment + ((row as any)["12_Mth_Fulfillment_Cost"] ?? 0),
+      SP: sum.SP + ((row as any)["12_Mth_Transactional_SP"] ?? 0),
       Revenue: sum.Revenue + row.Contract_Total_Revenue,
-      Black: sum.Black + row["Black_Full_Cartridges_Required_(365d)"],
-      Cyan: sum.Cyan + row["Cyan_Full_Cartridges_Required_(365d)"],
-      Magenta: sum.Magenta + row["Magenta_Full_Cartridges_Required_(365d)"],
-      Yellow: sum.Yellow + row["Yellow_Full_Cartridges_Required_(365d)"],
+      Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
+      Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
+      Magenta: sum.Magenta + row.Magenta_Full_Cartridges_Required_365d,
+      Yellow: sum.Yellow + row.Yellow_Full_Cartridges_Required_365d,
     }),
     {
       Black_Annual_Volume: 0,
@@ -162,8 +162,8 @@ const table3Data = filtered.map((row: any) => ({
                 (sum, row) => ({
                   Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
                   Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-                  Fulfillment: sum.Fulfillment + row["12_Mth_Fulfillment_Cost"],
-                  SP: sum.SP + row["12_Mth_Transactional_SP"],
+                  Fulfillment: sum.Fulfillment + ((row as any)["12_Mth_Fulfillment_Cost"] ?? 0),
+                  SP: sum.SP + ((row as any)["12_Mth_Transactional_SP"] ?? 0),
                   Revenue: sum.Revenue + row.Contract_Total_Revenue,
                 }),
                 { Black_Annual_Volume: 0, Color_Annual_Volume: 0, Fulfillment: 0, SP: 0, Revenue: 0 }
@@ -182,16 +182,30 @@ const table3Data = filtered.map((row: any) => ({
                       <td className="px-3 py-2 text-center">{row.Device_Type}</td>
                       <td className="px-3 py-2 text-right">{Number(row.Black_Annual_Volume).toLocaleString()}</td>
                       <td className="px-3 py-2 text-right">{Number(row.Color_Annual_Volume).toLocaleString()}</td>
-                      <td className="px-3 py-2 text-right">{row["Black_Full_Cartridges_Required_(365d)"]}</td>
-                      <td className="px-3 py-2 text-right">{row["Cyan_Full_Cartridges_Required_(365d)"]}</td>
-                      <td className="px-3 py-2 text-right">{row["Magenta_Full_Cartridges_Required_(365d)"]}</td>
-                      <td className="px-3 py-2 text-right">{row["Yellow_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{(row as any)["Black_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{(row as any)["Cyan_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{(row as any)["Magenta_Full_Cartridges_Required_(365d)"]}</td>
+                      <td className="px-3 py-2 text-right">{(row as any)["Yellow_Full_Cartridges_Required_(365d)"]}</td>
                       <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
-                      <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Fulfillment_Cost"])}</td>
-                      <td className="px-3 py-2 text-right">{formatCurrency(row["12_Mth_Transactional_SP"])}</td>
-                      <td className="px-3 py-2 text-center">{formatPercent(computeGM(row["12_Mth_Transactional_SP"], row["12_Mth_Fulfillment_Cost"]))}</td>
+                      <td className="px-3 py-2 text-right">{formatCurrency((row as any)["12_Mth_Fulfillment_Cost"])}</td>
+                      <td className="px-3 py-2 text-right">{formatCurrency((row as any)["12_Mth_Transactional_SP"])}</td>
+                      <td className="px-3 py-2 text-center">
+                        {formatPercent(
+                          computeGM(
+                            (row as any)["12_Mth_Transactional_SP"],
+                            (row as any)["12_Mth_Fulfillment_Cost"]
+                          )
+                        )}
+                      </td>
                       <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
-                      <td className="px-3 py-2 text-center">{formatPercent(computeContractGM(row["12_Mth_Fulfillment_Cost"], row.Contract_Total_Revenue))}</td>
+                      <td className="px-3 py-2 text-center">
+                        {formatPercent(
+                          computeContractGM(
+                            (row as any)["12_Mth_Fulfillment_Cost"],
+                            row.Contract_Total_Revenue
+                          )
+                        )}
+                      </td>
                     </tr>
                   ))}
                   <tr className="border-t bg-gray-100 font-semibold">

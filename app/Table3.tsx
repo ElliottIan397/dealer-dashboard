@@ -57,10 +57,10 @@ export default function Table3({ filtered }: Props) {
                 <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Pages_Left)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Pages_Left)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Yellow_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row["Black_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row["Cyan_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row["Magenta_Page_Coverage_%"])}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row["Yellow_Page_Coverage_%"])}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row.Black_Page_Coverage_Percent)}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row.Cyan_Page_Coverage_Percent)}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row.Magenta_Page_Coverage_Percent)}</td>
+                <td className="px-3 py-2 text-right">{safePercent(row.Yellow_Page_Coverage_Percent)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Black_Yield_Estimate)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Yield_Estimate)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Yield_Estimate)}</td>
