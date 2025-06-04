@@ -12,7 +12,13 @@ type Props = {
 export default function Table3({ filtered }: Props) {
   const formatNumber = (val: number) => val.toLocaleString();
   const formatPercent = (val: number | undefined) =>
-    typeof val === "number" ? `${(val *100).toFixed(1)}%` : "-";
+    typeof val === "number" ? `${(val * 100).toFixed(1)}%` : "-";
+
+  const renderColorField = (value: any, type: string) =>
+    type === "Mono" ? <span className="text-gray-400">-</span> : safeNumber(value);
+
+  const renderColorPercent = (value: any, type: string) =>
+    type === "Mono" ? <span className="text-gray-400">-</span> : safePercent(value);
 
   const grouped = Object.entries(
     filtered.reduce((acc: Record<string, any[]>, row) => {
@@ -54,17 +60,17 @@ export default function Table3({ filtered }: Props) {
                 <td className="px-3 py-2">{row.Printer_Model}</td>
                 <td className="px-3 py-2">{row.Device_Type}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Black_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Pages_Left)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Yellow_Pages_Left)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Cyan_Pages_Left, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Magenta_Pages_Left, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Yellow_Pages_Left, row.Device_Type)}</td>
                 <td className="px-3 py-2 text-right">{safePercent(row.Black_Page_Coverage_Percent)}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row.Cyan_Page_Coverage_Percent)}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row.Magenta_Page_Coverage_Percent)}</td>
-                <td className="px-3 py-2 text-right">{safePercent(row.Yellow_Page_Coverage_Percent)}</td>
+                <td className="px-3 py-2 text-right">{renderColorPercent(row.Cyan_Page_Coverage_Percent, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorPercent(row.Magenta_Page_Coverage_Percent, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorPercent(row.Yellow_Page_Coverage_Percent, row.Device_Type)}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Black_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Cyan_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Magenta_Yield_Estimate)}</td>
-                <td className="px-3 py-2 text-right">{safeNumber(row.Yellow_Yield_Estimate)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Cyan_Yield_Estimate, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Magenta_Yield_Estimate, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderColorField(row.Yellow_Yield_Estimate, row.Device_Type)}</td>
               </tr>
             ))
           )}
