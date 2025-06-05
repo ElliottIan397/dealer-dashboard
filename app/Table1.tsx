@@ -83,7 +83,7 @@ export default function Table1({ filtered }: Props) {
                   <tr key={i} className="border-t">
                     <td className="px-3 py-2 whitespace-nowrap">{row.Monitor}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{row.Printer_Model}</td>
+                    <td className="px-3 py-2">{row.Printer_Model}</td>
                     <td className="px-3 py-2 text-center">{row.Device_Type}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Black_Annual_Volume)}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Color_Annual_Volume)}</td>
