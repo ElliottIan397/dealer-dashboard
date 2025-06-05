@@ -33,8 +33,8 @@ export default function ChartBlock({ filtered }: Props) {
   const contractGM = contractRevenue > 0 ? ((contractRevenue - contractCost) / contractRevenue) * 100 : 0;
 
   const chart1Data = [
-    { type: "Black Volume", value: blackVol },
-    { type: "Color Volume", value: colorVol },
+    { type: "Black Volume", value: blackVol, color: "#8884d8" },
+    { type: "Color Volume", value: colorVol, color: "#82ca9d" },
   ];
 
   const chart2Data = [
@@ -55,6 +55,8 @@ export default function ChartBlock({ filtered }: Props) {
     },
   ];
 
+  const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost);
+
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
@@ -64,8 +66,12 @@ export default function ChartBlock({ filtered }: Props) {
             <XAxis dataKey="type" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="value" fill="#8884d8">
+            <Legend />
+            <Bar dataKey="value">
               <LabelList dataKey="value" position="top" />
+              {chart1Data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -76,7 +82,7 @@ export default function ChartBlock({ filtered }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart2Data}>
             <XAxis dataKey="label" />
-            <YAxis yAxisId="left" />
+            <YAxis yAxisId="left" domain={[0, maxDollar]} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
             <Legend />
@@ -92,7 +98,7 @@ export default function ChartBlock({ filtered }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart3Data}>
             <XAxis dataKey="label" />
-            <YAxis yAxisId="left" />
+            <YAxis yAxisId="left" domain={[0, maxDollar]} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
             <Legend />
