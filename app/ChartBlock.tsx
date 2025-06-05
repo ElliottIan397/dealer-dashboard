@@ -74,22 +74,13 @@ export default function ChartBlock({ filtered }: Props) {
 
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
-      <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
+      <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
         <h3 className="text-lg font-semibold mb-2 text-center">Annual Volume</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
             <YAxis tickFormatter={formatYAxisTicks} />
             <Tooltip />
-            <Legend
-              verticalAlign="bottom"
-              align="center"
-              payload={chart1Data.map((item) => ({
-                value: item.type,
-                type: "square",
-                color: item.color,
-              }))}
-            />
             <Bar dataKey="value">
               <LabelList dataKey="value" position="top" />
               {chart1Data.map((entry, index) => (
@@ -98,6 +89,14 @@ export default function ChartBlock({ filtered }: Props) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        <div className="mt-1 text-sm">
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Black Volume
+          </span>
+          <span>
+            <span className="inline-block w-3 h-3 bg-[#82ca9d] mr-1" />Color Volume
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
@@ -110,7 +109,10 @@ export default function ChartBlock({ filtered }: Props) {
             <Tooltip />
             <Legend
               formatter={(value) =>
-                value === "SP" ? "SP$" : value === "Cost" ? "Cost $" : value
+                value === "SP" ? "SP$" :
+                value === "Cost" ? "Cost $" :
+                value === "GM" ? "GM%" :
+                value
               }
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
@@ -130,7 +132,10 @@ export default function ChartBlock({ filtered }: Props) {
             <Tooltip />
             <Legend
               formatter={(value) =>
-                value === "SP" ? "SP$" : value === "Cost" ? "Cost $" : value
+                value === "SP" ? "SP$" :
+                value === "Cost" ? "Cost $" :
+                value === "GM" ? "GM%" :
+                value
               }
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
