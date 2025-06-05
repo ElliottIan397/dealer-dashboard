@@ -23,23 +23,6 @@ export default function Table2({ filtered }: Props) {
     }, {})
   );
 
-  const grandTotals = filtered.reduce(
-    (totals, row) => ({
-      Contract_Base_Charge_Annual: totals.Contract_Base_Charge_Annual + (row.Contract_Base_Charge_Annual || 0),
-      Included_Mono_Volume: totals.Included_Mono_Volume + (row.Included_Mono_Volume || 0),
-      Included_Color_Volume: totals.Included_Color_Volume + (row.Included_Color_Volume || 0),
-      Billable_Mono_Pages: totals.Billable_Mono_Pages + (row.Billable_Mono_Pages || 0),
-      Billable_Color_Pages: totals.Billable_Color_Pages + (row.Billable_Color_Pages || 0),
-    }),
-    {
-      Contract_Base_Charge_Annual: 0,
-      Included_Mono_Volume: 0,
-      Included_Color_Volume: 0,
-      Billable_Mono_Pages: 0,
-      Billable_Color_Pages: 0,
-    }
-  );
-
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-full border text-sm">
@@ -105,7 +88,7 @@ export default function Table2({ filtered }: Props) {
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
-                  <td className="px-3 py-2" colSpan={6}>{customer} Subtotals</td>
+                  <td className="px-3 py-2" colSpan={6}>{customer} Totals</td>
                   <td className="px-3 py-2 text-right">{safeCurrency(subtotal.Contract_Base_Charge_Annual)}</td>
                   <td className="px-3 py-2 text-right">{safeNumber(subtotal.Included_Mono_Volume)}</td>
                   <td className="px-3 py-2 text-right">{safeNumber(subtotal.Included_Color_Volume)}</td>
@@ -116,15 +99,6 @@ export default function Table2({ filtered }: Props) {
               </React.Fragment>
             );
           })}
-          <tr className="border-t bg-yellow-100 font-bold">
-            <td className="px-3 py-2" colSpan={6}>Grand Totals</td>
-            <td className="px-3 py-2 text-right">{safeCurrency(grandTotals.Contract_Base_Charge_Annual)}</td>
-            <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Included_Mono_Volume)}</td>
-            <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Included_Color_Volume)}</td>
-            <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Billable_Mono_Pages)}</td>
-            <td className="px-3 py-2 text-right">{safeNumber(grandTotals.Billable_Color_Pages)}</td>
-            <td colSpan={5}></td>
-          </tr>
         </tbody>
       </table>
     </div>
