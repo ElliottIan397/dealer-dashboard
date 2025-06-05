@@ -21,14 +21,19 @@ export default function Table3({ filtered }: Props) {
     type === "Mono" ? <span className="text-gray-400">-</span> : safePercent(value);
 
   const renderCoverageWithFlag = (value: number | undefined, type: string) => {
-    if (type === "Mono" || typeof value !== "number") return <span className="text-gray-400">-</span>;
+    if (typeof value !== "number") return <span className="text-gray-400">-</span>;
     const percent = value * 100;
     const flagColor =
       percent > 5.5 ? "bg-orange-400" : percent < 4.5 ? "bg-green-500" : null;
     return (
       <span className="flex items-center justify-end gap-1">
         {safePercent(value)}
-        {flagColor && <span className={`inline-block w-2 h-2 rounded-full ${flagColor}`} title={`${percent.toFixed(1)}%`} />}
+        {flagColor && (
+          <span
+            className={`inline-block w-2 h-2 rounded-full ${flagColor}`}
+            title={`${percent.toFixed(1)}%`}
+          />
+        )}
       </span>
     );
   };
