@@ -152,7 +152,7 @@ export default function DealerDashboard() {
       </div>
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
-        <Table2 filtered={filtered} />
+        <Table2 filtered={table2Data} />
       </div>
 
       <div className="mt-10">
