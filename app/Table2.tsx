@@ -9,6 +9,12 @@ type Props = {
 };
 
 export default function Table2({ filtered }: Props) {
+  const renderColorField = (val: any, type: string) =>
+    type === "Mono" ? <span className="text-gray-400">-</span> : safeNumber(val);
+
+  const renderColorFixed = (val: any, type: string, digits = 4) =>
+    type === "Mono" ? <span className="text-gray-400">-</span> : safeFixed(val, digits);
+
   const grouped = Object.entries(
     filtered.reduce((acc: Record<string, McarpRow[]>, row) => {
       acc[row.Monitor] = acc[row.Monitor] || [];
@@ -85,12 +91,12 @@ export default function Table2({ filtered }: Props) {
                     <td className="px-3 py-2">{row.Printer_Model}</td>
                     <td className="px-3 py-2">{row.Device_Type}</td>
                     <td className="px-3 py-2 text-right">{safeFixed(row.Contract_Mono_CPP, 4)}</td>
-                    <td className="px-3 py-2 text-right">{safeFixed(row.Contract_Color_CPP, 4)}</td>
+                    <td className="px-3 py-2 text-right">{renderColorFixed(row.Contract_Color_CPP, row.Device_Type)}</td>
                     <td className="px-3 py-2 text-right">{safeCurrency(row.Contract_Base_Charge_Annual)}</td>
                     <td className="px-3 py-2 text-right">{safeNumber(row.Included_Mono_Volume)}</td>
-                    <td className="px-3 py-2 text-right">{safeNumber(row.Included_Color_Volume)}</td>
+                    <td className="px-3 py-2 text-right">{renderColorField(row.Included_Color_Volume, row.Device_Type)}</td>
                     <td className="px-3 py-2 text-right">{safeNumber(row.Billable_Mono_Pages)}</td>
-                    <td className="px-3 py-2 text-right">{safeNumber(row.Billable_Color_Pages)}</td>
+                    <td className="px-3 py-2 text-right">{renderColorField(row.Billable_Color_Pages, row.Device_Type)}</td>
                     <td className="px-3 py-2">{row.contract_end}</td>
                     <td className="px-3 py-2 text-right">{safeFixed(row.Recalculated_Age_Years, 1)}</td>
                     <td className="px-3 py-2 text-right">{safePercent(row.Usage_Percent)}</td>
