@@ -14,6 +14,7 @@ export default function Table1({ filtered }: Props) {
 
   const grouped = Object.entries(
     filtered.reduce((acc: Record<string, McarpRow[]>, row) => {
+      if (!row) return acc;
       acc[row.Monitor] = acc[row.Monitor] || [];
       acc[row.Monitor].push(row);
       return acc;
