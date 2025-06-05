@@ -10,6 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
   LabelList,
+  Cell,
 } from "recharts";
 
 import type { McarpRow } from "./types";
