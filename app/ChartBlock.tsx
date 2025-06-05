@@ -72,6 +72,9 @@ export default function ChartBlock({ filtered }: Props) {
     return `$${value.toFixed(0)}`;
   };
 
+  const currencyFormatter = (value: number) => `$${value.toFixed(2)}`;
+  const percentFormatter = (value: number) => `${value.toFixed(0)}%`;
+
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
@@ -80,9 +83,9 @@ export default function ChartBlock({ filtered }: Props) {
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
             <YAxis tickFormatter={formatYAxisTicks} />
-            <Tooltip />
+            <Tooltip formatter={(value: number) => value.toLocaleString()} />
             <Bar dataKey="value">
-              <LabelList dataKey="value" position="top" />
+              <LabelList dataKey="value" position="top" formatter={(value: number) => value.toLocaleString()} />
               {chart1Data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
@@ -106,7 +109,12 @@ export default function ChartBlock({ filtered }: Props) {
             <XAxis dataKey="label" />
             <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
-            <Tooltip />
+            <Tooltip
+              formatter={(value: number, name: string) => {
+                if (name === "GM") return [percentFormatter(value), "GM"];
+                return [currencyFormatter(value), name];
+              }}
+            />
             <Legend
               formatter={(value) =>
                 value === "SP" ? "SP$" :
@@ -129,7 +137,12 @@ export default function ChartBlock({ filtered }: Props) {
             <XAxis dataKey="label" />
             <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
-            <Tooltip />
+            <Tooltip
+              formatter={(value: number, name: string) => {
+                if (name === "GM") return [percentFormatter(value), "GM"];
+                return [currencyFormatter(value), name];
+              }}
+            />
             <Legend
               formatter={(value) =>
                 value === "SP" ? "SP$" :
