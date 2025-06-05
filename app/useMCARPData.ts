@@ -7,7 +7,7 @@ export function useMCARPData() {
   const [filtered, setFiltered] = useState<McarpRow[]>([]);
   const [customers, setCustomers] = useState<string[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-  const [selectedContractType, setSelectedContractType] = useState<string>("All");
+  const [selectedContractType, setSelectedContractType] = useState<string>("C");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
