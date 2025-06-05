@@ -22,6 +22,7 @@ export default function Table3({ filtered }: Props) {
 
   const renderCoverageWithFlag = (value: number | undefined, type: string) => {
     if (typeof value !== "number") return <span className="text-gray-400">-</span>;
+    if (type === "Mono" && value === 0) return <span className="text-gray-400">-</span>;
     const percent = value * 100;
     const flagColor =
       percent > 5.5 ? "bg-orange-400" : percent < 4.5 ? "bg-green-500" : null;
