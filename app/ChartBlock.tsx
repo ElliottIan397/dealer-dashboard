@@ -56,8 +56,8 @@ export default function ChartBlock({ filtered }: Props) {
   ];
 
   return (
-    <div className="flex flex-wrap gap-6 justify-between w-full">
-      <div className="w-full md:w-1/3 h-80">
+    <div className="flex flex-row flex-wrap gap-4 w-full">
+      <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
         <h3 className="text-lg font-semibold mb-2">Annual Volume</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart1Data}>
@@ -71,7 +71,7 @@ export default function ChartBlock({ filtered }: Props) {
         </ResponsiveContainer>
       </div>
 
-      <div className="w-full md:w-1/3 h-80">
+      <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
         <h3 className="text-lg font-semibold mb-2">Transactional GM%</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart2Data}>
@@ -87,7 +87,7 @@ export default function ChartBlock({ filtered }: Props) {
         </ResponsiveContainer>
       </div>
 
-      <div className="w-full md:w-1/3 h-80">
+      <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
         <h3 className="text-lg font-semibold mb-2">Contract GM%</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart3Data}>
