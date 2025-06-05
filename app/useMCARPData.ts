@@ -17,16 +17,16 @@ export function useMCARPData() {
         setData(json);
         const uniqueCustomers = Array.from(new Set(json.map((r) => r.Monitor))).sort();
         setCustomers(uniqueCustomers);
-        setSelectedCustomer(uniqueCustomers[0]); // Default = first customer
+        setSelectedCustomer("All"); // Default = charts only - all customers
         setLoading(false);
       });
   }, []);
 
   useEffect(() => {
     let result = data;
-    if (selectedCustomer) {
-      result = result.filter((r) => r.Monitor === selectedCustomer);
-    }
+    if (selectedCustomer !== "All") {
+  result = result.filter((r) => r.Monitor === selectedCustomer);
+}
     if (selectedContractType !== "All") {
       result = result.filter((r) =>
         selectedContractType === "C"
