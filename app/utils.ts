@@ -8,6 +8,6 @@ export const safeNumber = (val: number | undefined | null) =>
   typeof val === "number" ? val.toLocaleString() : "-";
 
 export const safeCurrency = (val: number | undefined | null) =>
-  typeof val === "number"
+  val !== undefined && val !== null
     ? val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 })
     : "-";
