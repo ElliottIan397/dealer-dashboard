@@ -20,6 +20,14 @@ type Props = {
 };
 
 export default function ChartBlock({ filtered }: Props) {
+  if (!filtered || filtered.length === 0) {
+    return (
+      <div className="mt-6 text-center text-gray-500">
+        No data available. Select a customer or contract type to view charts.
+      </div>
+    );
+  }
+
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
 
   const blackVol = total(filtered.map((r) => r.Black_Annual_Volume));
