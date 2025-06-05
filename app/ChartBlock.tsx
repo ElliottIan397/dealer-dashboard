@@ -66,6 +66,12 @@ export default function ChartBlock({ filtered }: Props) {
 
   const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost);
 
+  const formatYAxisTicks = (value: number) => {
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+    return `$${value.toFixed(0)}`;
+  };
+
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
@@ -73,9 +79,13 @@ export default function ChartBlock({ filtered }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
-            <YAxis />
+            <YAxis tickFormatter={formatYAxisTicks} />
             <Tooltip />
-            <Legend />
+            <Legend payload={chart1Data.map((item) => ({
+              value: item.type,
+              type: "square",
+              color: item.color,
+            }))} />
             <Bar dataKey="value">
               <LabelList dataKey="value" position="top" />
               {chart1Data.map((entry, index) => (
@@ -91,7 +101,7 @@ export default function ChartBlock({ filtered }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart2Data}>
             <XAxis dataKey="label" />
-            <YAxis yAxisId="left" domain={[0, maxDollar]} />
+            <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
             <Legend />
@@ -107,7 +117,7 @@ export default function ChartBlock({ filtered }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart3Data}>
             <XAxis dataKey="label" />
-            <YAxis yAxisId="left" domain={[0, maxDollar]} />
+            <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
             <Legend />
