@@ -84,7 +84,23 @@ export default function Table2({ filtered }: Props) {
                     <td className="px-3 py-2 text-right">{safeFixed(row.Recalculated_Age_Years, 1)}</td>
                     <td className="px-3 py-2 text-right">{safePercent(row.Usage_Percent)}</td>
                     <td className="px-3 py-2 text-right">{safeNumber(row.Engine_Cycles)}</td>
-                    <td className="px-3 py-2">{row.Final_Risk_Level}</td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={`inline-block w-3 h-3 rounded-full mr-2 align-middle ${
+                          row.Final_Risk_Level === "Critical"
+                            ? "bg-red-500"
+                            : row.Final_Risk_Level === "High"
+                            ? "bg-orange-400"
+                            : row.Final_Risk_Level === "Moderate"
+                            ? "bg-yellow-400"
+                            : row.Final_Risk_Level === "Low"
+                            ? "bg-green-500"
+                            : "bg-gray-400"
+                        }`}
+                        title={row.Final_Risk_Level}
+                      ></span>
+                      {row.Final_Risk_Level}
+                    </td>
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
