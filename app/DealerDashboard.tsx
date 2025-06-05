@@ -6,7 +6,7 @@ import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
 import { useMCARPData } from "./useMCARPData";
-import type { McarpRow } from "./types";
+import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 
 export default function DealerDashboard() {
   const {
@@ -18,7 +18,45 @@ export default function DealerDashboard() {
     selectedContractType,
     setSelectedContractType,
   } = useMCARPData();
-  console.log("Filtered sample row:", JSON.stringify(filtered[0], null, 2));
+
+  const customerOptions = ["All", ...customers];
+
+  if (loading) return <div className="p-6 text-xl">Loading data...</div>;
+
+  const grouped = Object.entries(
+    filtered.reduce((acc: any, row: any) => {
+      const cust = row.Customer;
+      if (!acc[cust]) acc[cust] = [];
+      acc[cust].push(row);
+      return acc;
+    }, {})
+  );
+
+  const grandTotals = filtered.reduce(
+    (sum, row) => ({
+      Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
+      Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
+      Fulfillment: sum.Fulfillment + (row.Twelve_Month_Fulfillment_Cost ?? 0),
+      SP: sum.SP + (row.Twelve_Month_Transactional_SP ?? 0),
+      Revenue: sum.Revenue + row.Contract_Total_Revenue,
+      Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
+      Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
+      Magenta: sum.Magenta + row.Magenta_Full_Cartridges_Required_365d,
+      Yellow: sum.Yellow + row.Yellow_Full_Cartridges_Required_365d,
+    }),
+    {
+      Black_Annual_Volume: 0,
+      Color_Annual_Volume: 0,
+      Fulfillment: 0,
+      SP: 0,
+      Revenue: 0,
+      Black: 0,
+      Cyan: 0,
+      Magenta: 0,
+      Yellow: 0,
+    }
+  );
+
   const table1Data = filtered.map((row: any) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
@@ -37,6 +75,7 @@ export default function DealerDashboard() {
     Transactional_GM_Percent: row["Transactional_GM%"],
     Contract_GM_Percent: row["Contract_GM%"],
   }));
+
   const table2Data = filtered.map((row: any) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
@@ -75,50 +114,11 @@ export default function DealerDashboard() {
     Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
   })) as any[];
 
-  const formatCurrency = (val: number | string) =>
-    typeof val === "number"
-      ? val.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 })
-      : val;
-
-  const formatPercent = (num: number | string) =>
-    typeof num === "number" ? `${Math.round(num * 100)}%` : num;
-
-  const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
-  const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
-
-  const grandTotals = filtered.reduce(
-    (sum, row) => ({
-      Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
-      Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-      Fulfillment: sum.Fulfillment + ((row as any)["Twelve_Month_Fulfillment_Cost"] ?? 0),
-      SP: sum.SP + ((row as any)["Twelve_Month_Transactional_SP"] ?? 0),
-      Revenue: sum.Revenue + row.Contract_Total_Revenue,
-      Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
-      Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
-      Magenta: sum.Magenta + row.Magenta_Full_Cartridges_Required_365d,
-      Yellow: sum.Yellow + row.Yellow_Full_Cartridges_Required_365d,
-    }),
-    {
-      Black_Annual_Volume: 0,
-      Color_Annual_Volume: 0,
-      Fulfillment: 0,
-      SP: 0,
-      Revenue: 0,
-      Black: 0,
-      Cyan: 0,
-      Magenta: 0,
-      Yellow: 0,
-    }
-  );
-
-  const grandTransactionalGM = grandTotals.SP > 0 ? (grandTotals.SP - grandTotals.Fulfillment) / grandTotals.SP : 0;
-  const grandContractGM = grandTotals.Revenue > 0 ? (grandTotals.Revenue - grandTotals.Fulfillment) / grandTotals.Revenue : 0;
-
-  if (loading) return <div className="p-6 text-xl">Loading data...</div>;
+  console.log("Filtered sample row:", filtered[0]);
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-4">Dealer Dashboard: Table 1</h1>
+      <h1 className="text-3xl font-bold mb-4">Dealer Dashboard</h1>
 
       <div className="flex gap-6 flex-wrap">
         <div>
@@ -128,7 +128,7 @@ export default function DealerDashboard() {
             onChange={(e) => setSelectedCustomer(e.target.value)}
             className="p-2 border border-gray-300 rounded w-64"
           >
-            {customers.map((cust) => (
+            {customerOptions.map((cust) => (
               <option key={cust} value={cust}>{cust}</option>
             ))}
           </select>
@@ -147,25 +147,30 @@ export default function DealerDashboard() {
           </select>
         </div>
       </div>
+
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Summary Charts</h2>
         <ChartBlock filtered={filtered} />
       </div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
-        <Table1 filtered={table1Data as any[]} />
-      </div>
+      {selectedCustomer !== "All" && (
+        <>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
+            <Table1 filtered={table1Data as any[]} />
+          </div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
-        <Table2 filtered={table2Data} />
-      </div>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
+            <Table2 filtered={table2Data} />
+          </div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
-        <Table3 filtered={filtered} />
-      </div>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
+            <Table3 filtered={filtered} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
