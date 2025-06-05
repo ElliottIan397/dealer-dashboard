@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
@@ -31,7 +32,7 @@ export default function DealerDashboard() {
     Yellow_Full_Cartridges_Required_365d: row["Yellow_Full_Cartridges_Required_365d"],
     Contract_Status: row.Contract_Status,
     Twelve_Month_Fulfillment_Cost: row.Twelve_Month_Fulfillment_Cost,
-Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
+    Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
     Contract_Total_Revenue: row.Contract_Total_Revenue,
     Transactional_GM_Percent: row["Transactional_GM%"],
     Contract_GM_Percent: row["Contract_GM%"],
@@ -147,9 +148,15 @@ Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
         </div>
       </div>
       <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Summary Charts</h2>
+        <ChartBlock filtered={filtered} />
+      </div>
+
+      <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
         <Table1 filtered={table1Data as any[]} />
       </div>
+
       <div className="mt-10">
         <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
         <Table2 filtered={table2Data} />
