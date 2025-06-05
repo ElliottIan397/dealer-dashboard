@@ -49,8 +49,8 @@ export default function ChartBlock({ filtered }: Props) {
   const chart2Data = [
     {
       label: "Transactional",
-      Cost: transactionalCost,
       SP: transactionalSP,
+      Cost: transactionalCost,
       GM: parseFloat(transactionalGM.toFixed(0)),
     },
   ];
@@ -58,8 +58,8 @@ export default function ChartBlock({ filtered }: Props) {
   const chart3Data = [
     {
       label: "Contract",
+      SP: contractRevenue,
       Cost: contractCost,
-      Revenue: contractRevenue,
       GM: parseFloat(contractGM.toFixed(0)),
     },
   ];
@@ -75,17 +75,21 @@ export default function ChartBlock({ filtered }: Props) {
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80">
-        <h3 className="text-lg font-semibold mb-2">Annual Volume</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">Annual Volume</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
             <YAxis tickFormatter={formatYAxisTicks} />
             <Tooltip />
-            <Legend payload={chart1Data.map((item) => ({
-              value: item.type,
-              type: "square",
-              color: item.color,
-            }))} />
+            <Legend
+              verticalAlign="bottom"
+              align="center"
+              payload={chart1Data.map((item) => ({
+                value: item.type,
+                type: "square",
+                color: item.color,
+              }))}
+            />
             <Bar dataKey="value">
               <LabelList dataKey="value" position="top" />
               {chart1Data.map((entry, index) => (
@@ -104,9 +108,13 @@ export default function ChartBlock({ filtered }: Props) {
             <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
-            <Legend />
-            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
+            <Legend
+              formatter={(value) =>
+                value === "SP" ? "SP$" : value === "Cost" ? "Cost $" : value
+              }
+            />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
+            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
@@ -120,9 +128,13 @@ export default function ChartBlock({ filtered }: Props) {
             <YAxis yAxisId="left" domain={[0, maxDollar]} tickFormatter={formatYAxisTicks} />
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip />
-            <Legend />
+            <Legend
+              formatter={(value) =>
+                value === "SP" ? "SP$" : value === "Cost" ? "Cost $" : value
+              }
+            />
+            <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
             <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
-            <Bar yAxisId="left" dataKey="Revenue" fill="#82ca9d" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
