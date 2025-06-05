@@ -12,6 +12,9 @@ export default function Table1({ filtered }: Props) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
 
+  const formatCell = (value: number) =>
+    value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
+
   const grouped = Object.entries(
     filtered.reduce((acc: Record<string, McarpRow[]>, row) => {
       if (!row) return acc;
@@ -82,12 +85,12 @@ export default function Table1({ filtered }: Props) {
                     <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{row.Printer_Model}</td>
                     <td className="px-3 py-2 text-center">{row.Device_Type}</td>
-                    <td className="px-3 py-2 text-right">{Number(row.Black_Annual_Volume).toLocaleString()}</td>
-                    <td className="px-3 py-2 text-right">{Number(row.Color_Annual_Volume).toLocaleString()}</td>
-                    <td className="px-3 py-2 text-right">{row.Black_Full_Cartridges_Required_365d}</td>
-                    <td className="px-3 py-2 text-right">{row.Cyan_Full_Cartridges_Required_365d}</td>
-                    <td className="px-3 py-2 text-right">{row.Magenta_Full_Cartridges_Required_365d}</td>
-                    <td className="px-3 py-2 text-right">{row.Yellow_Full_Cartridges_Required_365d}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Black_Annual_Volume)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Color_Annual_Volume)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Black_Full_Cartridges_Required_365d)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Cyan_Full_Cartridges_Required_365d)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Magenta_Full_Cartridges_Required_365d)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(row.Yellow_Full_Cartridges_Required_365d)}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Fulfillment_Cost)}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Transactional_SP)}</td>
@@ -98,8 +101,8 @@ export default function Table1({ filtered }: Props) {
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
                   <td className="px-3 py-2" colSpan={4}>{customer} Totals</td>
-                  <td className="px-3 py-2 text-right">{totals.Black_Annual_Volume.toLocaleString()}</td>
-                  <td className="px-3 py-2 text-right">{totals.Color_Annual_Volume.toLocaleString()}</td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Black_Annual_Volume)}</td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Color_Annual_Volume)}</td>
                   <td colSpan={5}></td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
