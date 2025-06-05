@@ -20,9 +20,9 @@ export default function Table3({ filtered }: Props) {
   const renderColorPercent = (value: any, type: string) =>
     type === "Mono" ? <span className="text-gray-400">-</span> : safePercent(value);
 
-  const renderCoverageWithFlag = (value: number | undefined, type: string) => {
+  const renderCoverageWithFlag = (value: number | undefined, type: string, colorKey?: string) => {
     if (typeof value !== "number") return <span className="text-gray-400">-</span>;
-    if (type === "Mono" && value === 0) return <span className="text-gray-400">-</span>;
+    if (type === "Mono" && colorKey) return <span className="text-gray-400">-</span>;
     const percent = value * 100;
     const flagColor =
       percent > 5.5 ? "bg-orange-400" : percent < 4.5 ? "bg-green-500" : null;
@@ -83,9 +83,9 @@ export default function Table3({ filtered }: Props) {
                 <td className="px-3 py-2 text-right">{renderColorField(row.Magenta_Pages_Left, row.Device_Type)}</td>
                 <td className="px-3 py-2 text-right">{renderColorField(row.Yellow_Pages_Left, row.Device_Type)}</td>
                 <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Black_Page_Coverage_Percent, row.Device_Type)}</td>
-                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Cyan_Page_Coverage_Percent, row.Device_Type)}</td>
-                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Magenta_Page_Coverage_Percent, row.Device_Type)}</td>
-                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Yellow_Page_Coverage_Percent, row.Device_Type)}</td>
+                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Cyan_Page_Coverage_Percent, row.Device_Type, 'Cyan')}</td>
+                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Magenta_Page_Coverage_Percent, row.Device_Type, 'Magenta')}</td>
+                <td className="px-3 py-2 text-right">{renderCoverageWithFlag(row.Yellow_Page_Coverage_Percent, row.Device_Type, 'Yellow')}</td>
                 <td className="px-3 py-2 text-right">{safeNumber(row.Black_Yield_Estimate)}</td>
                 <td className="px-3 py-2 text-right">{renderColorField(row.Cyan_Yield_Estimate, row.Device_Type)}</td>
                 <td className="px-3 py-2 text-right">{renderColorField(row.Magenta_Yield_Estimate, row.Device_Type)}</td>
