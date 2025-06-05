@@ -22,8 +22,8 @@ export default function Table1({ filtered }: Props) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm text-gray-900">
-        <thead className="bg-gray-100 text-xs font-semibold uppercase">
+      <table className="min-w-full border text-sm text-gray-900">
+        <thead className="bg-gray-100 text-xs font-semibold">
           <tr>
             <th className="px-3 py-2 text-left">Customer</th>
             <th className="px-3 py-2 text-left">Serial Number</th>

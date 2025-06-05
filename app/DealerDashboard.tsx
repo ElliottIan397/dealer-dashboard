@@ -89,8 +89,8 @@ export default function DealerDashboard() {
     (sum, row) => ({
       Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
       Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-      Fulfillment: sum.Fulfillment + ((row as any)["12_Mth_Fulfillment_Cost"] ?? 0),
-      SP: sum.SP + ((row as any)["12_Mth_Transactional_SP"] ?? 0),
+      Fulfillment: sum.Fulfillment + ((row as any)["Twelve_Mth_Fulfillment_Cost"] ?? 0),
+      SP: sum.SP + ((row as any)["Twelve_Mth_Transactional_SP"] ?? 0),
       Revenue: sum.Revenue + row.Contract_Total_Revenue,
       Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
       Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
