@@ -115,19 +115,22 @@ export default function ChartBlock({ filtered }: Props) {
                 return [currencyFormatter(value), name];
               }}
             />
-            <Legend
-              formatter={(value) =>
-                value === "SP" ? "SP$" :
-                value === "Cost" ? "Cost $" :
-                value === "GM" ? "GM%" :
-                value
-              }
-            />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
             <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
+        <div className="mt-1 text-sm">
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#82ca9d] mr-1" />SP$
+          </span>
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
+          </span>
+          <span>
+            <span className="inline-block w-3 h-3 bg-[#ffc658] mr-1" />GM%
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
@@ -143,19 +146,22 @@ export default function ChartBlock({ filtered }: Props) {
                 return [currencyFormatter(value), name];
               }}
             />
-            <Legend
-              formatter={(value) =>
-                value === "SP" ? "SP$" :
-                value === "Cost" ? "Cost $" :
-                value === "GM" ? "GM%" :
-                value
-              }
-            />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
             <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
+        <div className="mt-1 text-sm">
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#82ca9d] mr-1" />SP$
+          </span>
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
+          </span>
+          <span>
+            <span className="inline-block w-3 h-3 bg-[#ffc658] mr-1" />GM%
+          </span>
+        </div>
       </div>
     </div>
   );
