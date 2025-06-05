@@ -49,7 +49,7 @@ export default function DealerDashboard() {
     Billable_Mono_Pages: row.Billable_Mono_Pages,
     Billable_Color_Pages: row.Billable_Color_Pages,
     contract_end: row.contract_end,
-    Recalculated_Age_Years: row.Recalculated_Age_Years,
+    Recalculated_Age_Years: row["Recalculated_Age_(Years)"],
     Usage_Percent: row.Usage_Percent,
     Engine_Cycles: row.Engine_Cycles,
     Final_Risk_Level: row.Final_Risk_Level,
