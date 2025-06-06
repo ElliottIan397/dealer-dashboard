@@ -5,6 +5,7 @@ import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
+import RiskMarginTable from "./RiskMarginTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 
@@ -168,6 +169,11 @@ export default function DealerDashboard() {
           <div className="mt-10">
             <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
             <Table3 filtered={filtered} />
+          </div>
+
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
+            <RiskMarginTable filtered={filtered} />
           </div>
         </>
       )}
