@@ -55,6 +55,7 @@ export default function DealerDashboard() {
     Magenta_Full_Cartridges_Required_365d: row["Magenta_Full_Cartridges_Required_365d"],
     Yellow_Full_Cartridges_Required_365d: row["Yellow_Full_Cartridges_Required_365d"],
     Contract_Status: row.Contract_Status,
+    Last_Updated: row.Last_Updated,
     Twelve_Month_Fulfillment_Cost: row.Twelve_Month_Fulfillment_Cost,
     Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
     Contract_Total_Revenue: row.Contract_Total_Revenue,

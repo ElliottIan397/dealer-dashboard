@@ -4,6 +4,13 @@ import React from "react";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
 
+function isStale(lastUpdated: string, latestDate: Date, days: number): boolean {
+  const updatedDate = new Date(lastUpdated);
+  const diffMs = latestDate.getTime() - updatedDate.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays > days;
+}
+
 type Table1Row = {
   Monitor: string;
   Serial_Number: string;
@@ -19,6 +26,7 @@ type Table1Row = {
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
+  Last_Updated: string;
 };
 
 type Props = {
@@ -28,9 +36,12 @@ type Props = {
 export default function Table1({ data }: Props) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
+  const formatCell = (value: number) => value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
-  const formatCell = (value: number) =>
-    value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
+  const latestDate = data.reduce((latest, row) => {
+    const current = new Date(row.Last_Updated);
+    return current > latest ? current : latest;
+  }, new Date(0));
 
   const grouped = Object.entries(
     data.reduce((acc: Record<string, Table1Row[]>, row) => {
@@ -98,7 +109,17 @@ export default function Table1({ data }: Props) {
               <React.Fragment key={customer}>
                 {rows.map((row, i) => (
                   <tr key={i} className="border-t">
-                    <td className="px-3 py-2 whitespace-nowrap">{row.Monitor}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <span className="flex items-center gap-1">
+                        {row.Monitor}
+                        {isStale(row.Last_Updated, latestDate, 5) && (
+                          <span
+                            className="w-2 h-2 bg-red-500 rounded-full"
+                            title={`Last updated: ${new Date(row.Last_Updated).toLocaleDateString()}`}
+                          ></span>
+                        )}
+                      </span>
+                    </td>
                     <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
                     <td className="px-3 py-2">{row.Printer_Model}</td>
                     <td className="px-3 py-2 text-center">{row.Device_Type}</td>
