@@ -35,6 +35,17 @@ export default function RiskMarginTable({ filtered }: Props) {
     return riskRank(b.Final_Risk_Level) - riskRank(a.Final_Risk_Level);
   });
 
+  const totals = rows.reduce(
+    (sum, row) => ({
+      black: sum.black + row.Black_Annual_Volume,
+      color: sum.color + row.Color_Annual_Volume,
+      revenue: sum.revenue + row.revenue,
+      cost: sum.cost + row.cost,
+      gmDollar: sum.gmDollar + row.gmDollar,
+    }),
+    { black: 0, color: 0, revenue: 0, cost: 0, gmDollar: 0 }
+  );
+
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-full border text-sm">
@@ -79,6 +90,15 @@ export default function RiskMarginTable({ filtered }: Props) {
               </td>
             </tr>
           ))}
+          <tr className="border-t font-bold bg-gray-100">
+            <td className="px-3 py-2" colSpan={4}>Grand Total</td>
+            <td className="px-3 py-2 text-right">{safeNumber(totals.black)}</td>
+            <td className="px-3 py-2 text-right">{safeNumber(totals.color)}</td>
+            <td className="px-3 py-2 text-right">{safeCurrency(totals.revenue)}</td>
+            <td className="px-3 py-2 text-right">{safeCurrency(totals.cost)}</td>
+            <td className="px-3 py-2 text-right">{safeCurrency(totals.gmDollar)}</td>
+            <td className="px-3 py-2"></td>
+          </tr>
         </tbody>
       </table>
     </div>
