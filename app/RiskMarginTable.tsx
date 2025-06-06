@@ -47,7 +47,7 @@ export default function RiskMarginTable({ filtered }: Props) {
   );
 
   return (
-    <div className="overflow-x-auto w-full">
+    <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto">
       <table className="min-w-full border text-sm">
         <thead className="sticky top-0 bg-white z-10 shadow-sm">
           <tr className="bg-gray-100 text-left">
