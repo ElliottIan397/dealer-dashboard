@@ -49,7 +49,7 @@ export default function RiskMarginTable({ filtered }: Props) {
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-full border text-sm">
-        <thead>
+        <thead className="sticky top-0 bg-white z-10 shadow-sm">
           <tr className="bg-gray-100 text-left">
             <th className="px-3 py-2">Customer</th>
             <th className="px-3 py-2">Serial Number</th>
