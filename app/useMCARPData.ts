@@ -31,7 +31,7 @@ export function useMCARPData() {
       result = result.filter((r) =>
         selectedContractType === "C"
           ? r.Contract_Status === "C"
-          : r.Contract_Status === "Transactional"
+          : r.Contract_Status === "T"
       );
     }
     setFiltered(result);
