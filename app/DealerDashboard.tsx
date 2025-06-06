@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
@@ -13,6 +13,7 @@ export default function DealerDashboard() {
   const {
     loading,
     filtered,
+    data,
     customers,
     selectedCustomer,
     setSelectedCustomer,
@@ -20,45 +21,29 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
 
+  const [showRiskTable, setShowRiskTable] = useState(false);
+
+  useEffect(() => {
+    if (showRiskTable) {
+      setSelectedCustomer("All");
+      setSelectedContractType("All");
+    }
+  }, [showRiskTable, setSelectedCustomer, setSelectedContractType]);
+
   const customerOptions = ["All", ...customers];
 
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
   const grouped = Object.entries(
-    filtered.reduce((acc: any, row: any) => {
-      const cust = row.Customer;
+    filtered.reduce<Record<string, typeof filtered>>((acc, row: (typeof filtered)[number]) => {
+      const cust = row.Monitor;
       if (!acc[cust]) acc[cust] = [];
       acc[cust].push(row);
       return acc;
     }, {})
   );
 
-  const grandTotals = filtered.reduce(
-    (sum, row) => ({
-      Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
-      Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-      Fulfillment: sum.Fulfillment + (row.Twelve_Month_Fulfillment_Cost ?? 0),
-      SP: sum.SP + (row.Twelve_Month_Transactional_SP ?? 0),
-      Revenue: sum.Revenue + row.Contract_Total_Revenue,
-      Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
-      Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
-      Magenta: sum.Magenta + row.Magenta_Full_Cartridges_Required_365d,
-      Yellow: sum.Yellow + row.Yellow_Full_Cartridges_Required_365d,
-    }),
-    {
-      Black_Annual_Volume: 0,
-      Color_Annual_Volume: 0,
-      Fulfillment: 0,
-      SP: 0,
-      Revenue: 0,
-      Black: 0,
-      Cyan: 0,
-      Magenta: 0,
-      Yellow: 0,
-    }
-  );
-
-  const table1Data = filtered.map((row: any) => ({
+  const table1Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
     Printer_Model: row.Printer_Model,
@@ -73,11 +58,9 @@ export default function DealerDashboard() {
     Twelve_Month_Fulfillment_Cost: row.Twelve_Month_Fulfillment_Cost,
     Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
     Contract_Total_Revenue: row.Contract_Total_Revenue,
-    Transactional_GM_Percent: row["Transactional_GM%"],
-    Contract_GM_Percent: row["Contract_GM%"],
   }));
 
-  const table2Data = filtered.map((row: any) => ({
+  const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
     Printer_Model: row.Printer_Model,
@@ -89,14 +72,17 @@ export default function DealerDashboard() {
     Included_Color_Volume: row.Included_Color_Volume,
     Billable_Mono_Pages: row.Billable_Mono_Pages,
     Billable_Color_Pages: row.Billable_Color_Pages,
-    contract_end: new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US"),
-    Recalculated_Age_Years: row["Recalculated_Age_(Years)"],
+    contract_end:
+  typeof row.contract_end === "number"
+    ? new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US")
+    : "-",
+    Recalculated_Age_Years: row["Recalculated_Age_Years"] ?? 0,
     Usage_Percent: row.Usage_Percent,
     Engine_Cycles: row.Engine_Cycles / 100,
     Final_Risk_Level: row.Final_Risk_Level,
-  })) as any[];
+  }));
 
-  const table3Data = filtered.map((row: any) => ({
+  const table3Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
     Printer_Model: row.Printer_Model,
@@ -113,15 +99,13 @@ export default function DealerDashboard() {
     Cyan_Yield_Estimate: row.Cyan_Yield_Estimate,
     Magenta_Yield_Estimate: row.Magenta_Yield_Estimate,
     Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
-  })) as any[];
-
-  console.log("Filtered sample row:", filtered[0]);
+  }));
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard</h1>
 
-      <div className="flex gap-6 flex-wrap">
+      <div className="flex gap-6 flex-wrap items-end">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
           <select
@@ -147,34 +131,48 @@ export default function DealerDashboard() {
             <option value="T">Transactional (T)</option>
           </select>
         </div>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="toggleRisk"
+            checked={showRiskTable}
+            onChange={() => setShowRiskTable(!showRiskTable)}
+          />
+          <label htmlFor="toggleRisk" className="text-sm font-medium text-gray-700">Show Margin & Risk Summary</label>
+        </div>
       </div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Summary Charts</h2>
-        <ChartBlock filtered={filtered} />
-      </div>
-
-      {selectedCustomer !== "All" && (
+      {showRiskTable ? (
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
+          <RiskMarginTable filtered={filtered} />
+        </div>
+      ) : (
         <>
           <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
-            <Table1 filtered={table1Data as any[]} />
+            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Summary Charts</h2>
+            <ChartBlock filtered={filtered} />
           </div>
 
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
-            <Table2 filtered={table2Data} />
-          </div>
+          {selectedCustomer !== "All" && (
+            <>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
+                <Table1 data={table1Data} />
+              </div>
 
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
-            <Table3 filtered={filtered} />
-          </div>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 2</h2>
+                <Table2 data={table2Data} />
+              </div>
 
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
-            <RiskMarginTable filtered={filtered} />
-          </div>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 3</h2>
+                <Table3 filtered={filtered} />
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

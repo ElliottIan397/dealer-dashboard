@@ -4,11 +4,30 @@ import React from "react";
 import { safeFixed, safePercent, safeNumber, safeCurrency } from "./utils";
 import type { McarpRow } from "./types";
 
-type Props = {
-  filtered: McarpRow[];
+type Table2Row = {
+  Monitor: string;
+  Serial_Number: string;
+  Printer_Model: string;
+  Device_Type: string;
+  Contract_Mono_CPP: number;
+  Contract_Color_CPP: number;
+  Contract_Base_Charge_Annual: number;
+  Included_Mono_Volume: number;
+  Included_Color_Volume: number;
+  Billable_Mono_Pages: number;
+  Billable_Color_Pages: number;
+  contract_end: string;
+  Recalculated_Age_Years: number;
+  Usage_Percent: number;
+  Engine_Cycles: number;
+  Final_Risk_Level: string;
 };
 
-export default function Table2({ filtered }: Props) {
+type Props = {
+  data: Table2Row[];
+};
+
+export default function Table2({ data }: Props) {
   const renderColorField = (val: any, type: string) =>
     type === "Mono" ? <span className="text-gray-400">-</span> : safeNumber(val);
 
@@ -16,7 +35,7 @@ export default function Table2({ filtered }: Props) {
     type === "Mono" ? <span className="text-gray-400">-</span> : safeFixed(val, digits);
 
   const grouped = Object.entries(
-    filtered.reduce((acc: Record<string, McarpRow[]>, row) => {
+    data.reduce((acc: Record<string, Table2Row[]>, row) => {
       acc[row.Monitor] = acc[row.Monitor] || [];
       acc[row.Monitor].push(row);
       return acc;

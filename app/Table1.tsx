@@ -4,11 +4,28 @@ import React from "react";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
 
-type Props = {
-  filtered: McarpRow[];
+type Table1Row = {
+  Monitor: string;
+  Serial_Number: string;
+  Printer_Model: string;
+  Device_Type: string;
+  Black_Annual_Volume: number;
+  Color_Annual_Volume: number;
+  Black_Full_Cartridges_Required_365d: number;
+  Cyan_Full_Cartridges_Required_365d: number;
+  Magenta_Full_Cartridges_Required_365d: number;
+  Yellow_Full_Cartridges_Required_365d: number;
+  Contract_Status: string;
+  Twelve_Month_Fulfillment_Cost: number;
+  Twelve_Month_Transactional_SP: number;
+  Contract_Total_Revenue: number;
 };
 
-export default function Table1({ filtered }: Props) {
+type Props = {
+  data: Table1Row[];
+};
+
+export default function Table1({ data }: Props) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
 
@@ -16,7 +33,7 @@ export default function Table1({ filtered }: Props) {
     value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
   const grouped = Object.entries(
-    filtered.reduce((acc: Record<string, McarpRow[]>, row) => {
+    data.reduce((acc: Record<string, Table1Row[]>, row) => {
       if (!row) return acc;
       acc[row.Monitor] = acc[row.Monitor] || [];
       acc[row.Monitor].push(row);
