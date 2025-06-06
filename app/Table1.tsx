@@ -112,10 +112,10 @@ export default function Table1({ data }: Props) {
                     <td className="px-3 py-2 whitespace-nowrap">
                       <span className="flex items-center gap-1">
                         {row.Monitor}
-                        {isStale(row.Last_Updated, latestDate, 5) && (
+                        {isStale(row.Last_Updated, latestDate, 5) && row.Last_Updated && !isNaN(new Date(row.Last_Updated).getTime()) && (
                           <span
                             className="w-2 h-2 bg-red-500 rounded-full"
-                            title={`Last updated: ${new Date(row.Last_Updated).toLocaleDateString()}`}
+                            title={`Last updated: ${new Date(row.Last_Updated).toLocaleDateString("en-US")}`}
                           ></span>
                         )}
                       </span>
