@@ -47,7 +47,7 @@ export default function RiskMarginTable({ filtered }: Props) {
   );
 
   return (
-    <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto">
+    <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto relative">
       <table className="min-w-full border text-sm">
         <thead className="sticky top-0 bg-white z-10 shadow-sm">
           <tr className="bg-gray-100 text-left">
@@ -90,6 +90,8 @@ export default function RiskMarginTable({ filtered }: Props) {
               </td>
             </tr>
           ))}
+        </tbody>
+        <tfoot className="sticky bottom-0 bg-white z-10 shadow-sm">
           <tr className="border-t font-bold bg-gray-100">
             <td className="px-3 py-2" colSpan={4}>Grand Total</td>
             <td className="px-3 py-2 text-right">{safeNumber(totals.black)}</td>
@@ -99,7 +101,7 @@ export default function RiskMarginTable({ filtered }: Props) {
             <td className="px-3 py-2 text-right">{safeCurrency(totals.gmDollar)}</td>
             <td className="px-3 py-2"></td>
           </tr>
-        </tbody>
+        </tfoot>
       </table>
     </div>
   );
