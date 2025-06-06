@@ -78,7 +78,7 @@ export default function DealerDashboard() {
     : "-",
     Recalculated_Age_Years: row["Recalculated_Age_Years"] ?? 0,
     Usage_Percent: row.Usage_Percent,
-    Engine_Cycles: row.Engine_Cycles / 100,
+    Engine_Cycles: row.Engine_Cycles,
     Final_Risk_Level: row.Final_Risk_Level,
   }));
 
