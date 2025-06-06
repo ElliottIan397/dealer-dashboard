@@ -29,6 +29,8 @@ export default function RiskMarginTable({ filtered }: Props) {
 
     return { ...row, revenue, cost, gmDollar };
   }).sort((a, b) => {
+    if (a.gmDollar === 0 && b.gmDollar !== 0) return 1;
+    if (b.gmDollar === 0 && a.gmDollar !== 0) return -1;
     if (a.gmDollar !== b.gmDollar) return a.gmDollar - b.gmDollar;
     return riskRank(b.Final_Risk_Level) - riskRank(a.Final_Risk_Level);
   });
