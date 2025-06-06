@@ -20,9 +20,9 @@ const riskRank = (level: string): number => {
 
 export default function RiskMarginTable({ filtered }: Props) {
   const rows = [...filtered].map(row => {
-    const revenue = row.Contract_Status === "C"
-      ? row.Contract_Total_Revenue
-      : row.Twelve_Month_Transactional_SP;
+    const revenue = row.Contract_Status === "T"
+      ? row.Twelve_Month_Transactional_SP ?? 0
+      : row.Contract_Total_Revenue ?? 0;
 
     const cost = row.Twelve_Month_Fulfillment_Cost ?? 0;
     const gmDollar = revenue - cost;
