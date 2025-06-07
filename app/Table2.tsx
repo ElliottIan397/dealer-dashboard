@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -21,11 +22,22 @@ type Table2Row = {
   Usage_Percent: number;
   Engine_Cycles: number;
   Final_Risk_Level: string;
+  Last_Updated: number;
 };
 
 type Props = {
   data: Table2Row[];
 };
+
+function excelDateToJSDate(serial: number): Date {
+  return new Date((serial - 25569) * 86400 * 1000);
+}
+
+function isStale(lastUpdated: number, currentDate: Date, days: number): boolean {
+  const last = excelDateToJSDate(lastUpdated);
+  const diff = (currentDate.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+  return diff > days;
+}
 
 export default function Table2({ data }: Props) {
   const renderColorField = (val: any, type: string) =>
@@ -41,6 +53,8 @@ export default function Table2({ data }: Props) {
       return acc;
     }, {})
   );
+
+  const latestDate = new Date();
 
   return (
     <div className="overflow-x-auto w-full">
@@ -88,7 +102,17 @@ export default function Table2({ data }: Props) {
               <React.Fragment key={customer}>
                 {rows.map((row, i) => (
                   <tr key={i} className="border-t">
-                    <td className="px-3 py-2">{row.Monitor}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        {row.Monitor}
+                        {isStale(row.Last_Updated, latestDate, 5) && (
+                          <span
+                            className="w-2 h-2 bg-red-500 rounded-full"
+                            title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
+                          ></span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-3 py-2">{row.Serial_Number}</td>
                     <td className="px-3 py-2">{row.Printer_Model}</td>
                     <td className="px-3 py-2">{row.Device_Type}</td>
@@ -103,23 +127,7 @@ export default function Table2({ data }: Props) {
                     <td className="px-3 py-2 text-right">{safeFixed(row.Recalculated_Age_Years, 1)}</td>
                     <td className="px-3 py-2 text-right">{safePercent(row.Usage_Percent)}</td>
                     <td className="px-3 py-2 text-right">{safeNumber(row.Engine_Cycles)}</td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={`inline-block w-3 h-3 rounded-full mr-2 align-middle ${
-                          row.Final_Risk_Level === "Critical"
-                            ? "bg-red-500"
-                            : row.Final_Risk_Level === "High"
-                            ? "bg-orange-400"
-                            : row.Final_Risk_Level === "Moderate"
-                            ? "bg-yellow-400"
-                            : row.Final_Risk_Level === "Low"
-                            ? "bg-green-500"
-                            : "bg-gray-400"
-                        }`}
-                        title={row.Final_Risk_Level}
-                      ></span>
-                      {row.Final_Risk_Level}
-                    </td>
+                    <td className="px-3 py-2">{row.Final_Risk_Level}</td>
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
