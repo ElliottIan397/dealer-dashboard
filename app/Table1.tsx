@@ -3,16 +3,6 @@
 import React from "react";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
-function excelDateToJSDate(serial: number): Date {
-  return new Date((serial - 25569) * 86400 * 1000);
-}
-
-function isStale(lastUpdated: number, latestDate: Date, days: number): boolean {
-  const updatedDate = excelDateToJSDate(lastUpdated);
-  const diffMs = latestDate.getTime() - updatedDate.getTime();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  return diffDays > days;
-}
 
 type Table1Row = {
   Monitor: string;
@@ -26,25 +16,32 @@ type Table1Row = {
   Magenta_Full_Cartridges_Required_365d: number;
   Yellow_Full_Cartridges_Required_365d: number;
   Contract_Status: string;
+  Last_Updated: number;
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
-  Last_Updated: number;
 };
 
 type Props = {
   data: Table1Row[];
 };
 
+function excelDateToJSDate(serial: number): Date {
+  return new Date((serial - 25569) * 86400 * 1000);
+}
+
+function isStale(lastUpdated: number, currentDate: Date, days: number): boolean {
+  const last = excelDateToJSDate(lastUpdated);
+  const diff = (currentDate.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+  return diff > days;
+}
+
 export default function Table1({ data }: Props) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
-  const formatCell = (value: number) => value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
-  const latestDate = data.reduce((latest, row) => {
-    const current = excelDateToJSDate(row.Last_Updated);
-    return current > latest ? current : latest;
-  }, new Date(0));
+  const formatCell = (value: number) =>
+    value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
   const grouped = Object.entries(
     data.reduce((acc: Record<string, Table1Row[]>, row) => {
@@ -54,6 +51,8 @@ export default function Table1({ data }: Props) {
       return acc;
     }, {})
   );
+
+  const latestDate = new Date();
 
   return (
     <div className="overflow-x-auto">
@@ -113,7 +112,7 @@ export default function Table1({ data }: Props) {
                 {rows.map((row, i) => (
                   <tr key={i} className="border-t">
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         {row.Monitor}
                         {isStale(row.Last_Updated, latestDate, 5) && (
                           <span
@@ -121,7 +120,7 @@ export default function Table1({ data }: Props) {
                             title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
                           ></span>
                         )}
-                      </span>
+                      </div>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">{row.Serial_Number}</td>
                     <td className="px-3 py-2">{row.Printer_Model}</td>
@@ -135,13 +134,19 @@ export default function Table1({ data }: Props) {
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Fulfillment_Cost)}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Transactional_SP)}</td>
-                    <td className="px-3 py-2 text-center">{formatPercent(computeGM(row.Twelve_Month_Transactional_SP, row.Twelve_Month_Fulfillment_Cost))}</td>
+                    <td className="px-3 py-2 text-center">
+                      {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, row.Twelve_Month_Fulfillment_Cost))}
+                    </td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
-                    <td className="px-3 py-2 text-center">{formatPercent(computeContractGM(row.Twelve_Month_Fulfillment_Cost, row.Contract_Total_Revenue))}</td>
+                    <td className="px-3 py-2 text-center">
+                      {formatPercent(computeContractGM(row.Twelve_Month_Fulfillment_Cost, row.Contract_Total_Revenue))}
+                    </td>
                   </tr>
                 ))}
                 <tr className="border-t bg-gray-100 font-semibold">
-                  <td className="px-3 py-2" colSpan={4}>{customer} Totals</td>
+                  <td className="px-3 py-2" colSpan={4}>
+                    {customer} Totals
+                  </td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Black_Annual_Volume)}</td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Color_Annual_Volume)}</td>
                   <td colSpan={5}></td>
