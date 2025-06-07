@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -9,16 +10,19 @@ type Props = {
   filtered: McarpRow[];
 };
 
-export default function Table3({ filtered }: Props) {
-  const formatNumber = (val: number) => val.toLocaleString();
-  const formatPercent = (val: number | undefined) =>
-    typeof val === "number" ? `${(val * 100).toFixed(1)}%` : "-";
+function excelDateToJSDate(serial: number): Date {
+  return new Date((serial - 25569) * 86400 * 1000);
+}
 
+function isStale(lastUpdated: number, currentDate: Date, days: number): boolean {
+  const last = excelDateToJSDate(lastUpdated);
+  const diff = (currentDate.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+  return diff > days;
+}
+
+export default function Table3({ filtered }: Props) {
   const renderColorField = (value: any, type: string) =>
     type === "Mono" ? <span className="text-gray-400">-</span> : safeNumber(value);
-
-  const renderColorPercent = (value: any, type: string) =>
-    type === "Mono" ? <span className="text-gray-400">-</span> : safePercent(value);
 
   const renderCoverageWithFlag = (value: number | undefined, type: string, colorKey?: string) => {
     if (typeof value !== "number") return <span className="text-gray-400">-</span>;
@@ -47,6 +51,8 @@ export default function Table3({ filtered }: Props) {
     }, {})
   );
 
+  const latestDate = new Date();
+
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-full border text-sm">
@@ -74,7 +80,17 @@ export default function Table3({ filtered }: Props) {
           {grouped.map(([customer, rows]) =>
             rows.map((row, i) => (
               <tr key={i} className="border-t">
-                <td className="px-3 py-2">{row.Monitor}</td>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    {row.Monitor}
+                    {isStale(row.Last_Updated, latestDate, 5) && (
+                      <span
+                        className="w-2 h-2 bg-red-500 rounded-full"
+                        title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
+                      ></span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-3 py-2">{row.Serial_Number}</td>
                 <td className="px-3 py-2">{row.Printer_Model}</td>
                 <td className="px-3 py-2">{row.Device_Type}</td>

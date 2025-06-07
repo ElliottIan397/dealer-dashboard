@@ -101,6 +101,7 @@ export default function DealerDashboard() {
     Cyan_Yield_Estimate: row.Cyan_Yield_Estimate,
     Magenta_Yield_Estimate: row.Magenta_Yield_Estimate,
     Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
+    Last_Updated: row.Last_Updated,
   }));
 
   return (
