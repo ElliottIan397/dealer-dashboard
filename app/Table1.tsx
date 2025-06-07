@@ -3,9 +3,12 @@
 import React from "react";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
+function excelDateToJSDate(serial: number): Date {
+  return new Date((serial - 25569) * 86400 * 1000);
+}
 
-function isStale(lastUpdated: string, latestDate: Date, days: number): boolean {
-  const updatedDate = new Date(lastUpdated);
+function isStale(lastUpdated: number, latestDate: Date, days: number): boolean {
+  const updatedDate = excelDateToJSDate(lastUpdated);
   const diffMs = latestDate.getTime() - updatedDate.getTime();
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
   return diffDays > days;
@@ -26,7 +29,7 @@ type Table1Row = {
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
-  Last_Updated: string;
+  Last_Updated: number;
 };
 
 type Props = {
@@ -39,7 +42,7 @@ export default function Table1({ data }: Props) {
   const formatCell = (value: number) => value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
   const latestDate = data.reduce((latest, row) => {
-    const current = new Date(row.Last_Updated);
+    const current = excelDateToJSDate(row.Last_Updated);
     return current > latest ? current : latest;
   }, new Date(0));
 
@@ -112,10 +115,10 @@ export default function Table1({ data }: Props) {
                     <td className="px-3 py-2 whitespace-nowrap">
                       <span className="flex items-center gap-1">
                         {row.Monitor}
-                        {isStale(row.Last_Updated, latestDate, 5) && row.Last_Updated && !isNaN(new Date(row.Last_Updated).getTime()) && (
+                        {isStale(row.Last_Updated, latestDate, 5) && (
                           <span
                             className="w-2 h-2 bg-red-500 rounded-full"
-                            title={`Last updated: ${new Date(row.Last_Updated).toLocaleDateString("en-US")}`}
+                            title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
                           ></span>
                         )}
                       </span>

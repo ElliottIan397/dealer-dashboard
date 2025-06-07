@@ -74,9 +74,9 @@ export default function DealerDashboard() {
     Billable_Mono_Pages: row.Billable_Mono_Pages,
     Billable_Color_Pages: row.Billable_Color_Pages,
     contract_end:
-  typeof row.contract_end === "number"
-    ? new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US")
-    : "-",
+      typeof row.contract_end === "number"
+        ? new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US")
+        : "-",
     Recalculated_Age_Years: row["Recalculated_Age_Years"] ?? 0,
     Usage_Percent: row.Usage_Percent,
     Engine_Cycles: row.Engine_Cycles,

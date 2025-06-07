@@ -13,7 +13,7 @@ export type McarpRow = {
   Magenta_Full_Cartridges_Required_365d: number;
   Yellow_Full_Cartridges_Required_365d: number;
   Contract_Status: string;
-  Last_Updated: string;
+  Last_Updated: number;
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
