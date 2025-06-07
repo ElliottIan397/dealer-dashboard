@@ -81,6 +81,7 @@ export default function DealerDashboard() {
     Usage_Percent: row.Usage_Percent,
     Engine_Cycles: row.Engine_Cycles,
     Final_Risk_Level: row.Final_Risk_Level,
+    Last_Updated: row.Last_Updated,
   }));
 
   const table3Data = filtered.map((row) => ({
