@@ -84,21 +84,6 @@ export default function DealerDashboard() {
     Last_Updated: row.Last_Updated,
   }));
 
-
-  const table4Data = filtered.map((row) => ({
-    Monitor: row.Monitor,
-    Serial_Number: row.Serial_Number,
-    Printer_Model: row.Printer_Model,
-    Contract_Status: row.Contract_Status,
-    Black_Annual_Volume: row.Black_Annual_Volume,
-    Color_Annual_Volume: row.Color_Annual_Volume,
-    Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
-    Contract_Total_Revenue: row.Contract_Total_Revenue,
-    Twelve_Month_Fulfillment_Cost: row.Twelve_Month_Fulfillment_Cost,
-    Final_Risk_Level: row.Final_Risk_Level,
-    Last_Updated: row.Last_Updated,
-  }));
-
   const table3Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
@@ -164,7 +149,7 @@ export default function DealerDashboard() {
       {showRiskTable ? (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
-          <RiskMarginTable filtered={table4Data} />
+          <RiskMarginTable filtered={filtered} />
         </div>
       ) : (
         <>

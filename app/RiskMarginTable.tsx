@@ -6,7 +6,7 @@ import { safeNumber, safeCurrency } from "./utils";
 import type { McarpRow } from "./types";
 
 type Props = {
-  filtered: Partial<McarpRow>[];
+  filtered: McarpRow[];
 };
 
 const riskRank = (level: string): number => {
@@ -40,7 +40,7 @@ export default function RiskMarginTable({ filtered }: Props) {
 
     const cost = row.Twelve_Month_Fulfillment_Cost ?? 0;
     const gmDollar = revenue - cost;
-    const offline = row.Last_Updated !== undefined && isStale(row.Last_Updated, latestDate, 5);
+    const offline = isStale(row.Last_Updated, latestDate, 5);
 
     return { ...row, revenue, cost, gmDollar, offline };
   });
@@ -55,24 +55,22 @@ export default function RiskMarginTable({ filtered }: Props) {
       if (a.gmDollar === 0 && b.gmDollar !== 0) return 1;
       if (b.gmDollar === 0 && a.gmDollar !== 0) return -1;
       if (a.gmDollar !== b.gmDollar) return a.gmDollar - b.gmDollar;
-      return riskRank(b.Final_Risk_Level ?? "") - riskRank(a.Final_Risk_Level ?? "");
+      return riskRank(b.Final_Risk_Level) - riskRank(a.Final_Risk_Level);
     });
 
   const totals = filteredRows.reduce(
     (sum, row) => ({
-      black: sum.black + (row.Black_Annual_Volume ?? 0),
-      color: sum.color + (row.Color_Annual_Volume ?? 0),
-      revenue: sum.revenue + (row.revenue ?? 0),
-      cost: sum.cost + (row.cost ?? 0),
-      gmDollar: sum.gmDollar + (row.gmDollar ?? 0),
+      black: sum.black + row.Black_Annual_Volume,
+      color: sum.color + row.Color_Annual_Volume,
+      revenue: sum.revenue + row.revenue,
+      cost: sum.cost + row.cost,
+      gmDollar: sum.gmDollar + row.gmDollar,
     }),
     { black: 0, color: 0, revenue: 0, cost: 0, gmDollar: 0 }
   );
 
   return (
-
-
-<div className="mb-4 z-30 relative">
+    <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto relative">
       <div className="flex items-center gap-4 mb-2">
         <label htmlFor="offlineFilter" className="text-sm font-medium">Offline Devices:</label>
         <select
@@ -85,9 +83,6 @@ export default function RiskMarginTable({ filtered }: Props) {
           <option value="offline">Offline Only</option>
           <option value="online">Hide Offline</option>
         </select>
-</div>
-
-    <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto relative">
       </div>
 
       <table className="min-w-full border text-sm">
@@ -114,7 +109,7 @@ export default function RiskMarginTable({ filtered }: Props) {
                   {row.offline && (
                     <span
                       className="w-2 h-2 bg-red-500 rounded-full"
-                      title={`Last updated: ${excelDateToJSDate(row.Last_Updated ?? 0).toLocaleDateString()}`}
+                      title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
                     ></span>
                   )}
                 </div>
@@ -122,11 +117,11 @@ export default function RiskMarginTable({ filtered }: Props) {
               <td className="px-3 py-2">{row.Serial_Number}</td>
               <td className="px-3 py-2">{row.Printer_Model}</td>
               <td className="px-3 py-2">{row.Contract_Status}</td>
-              <td className="px-3 py-2 text-right">{safeNumber(row.Black_Annual_Volume ?? 0)}</td>
-              <td className="px-3 py-2 text-right">{safeNumber(row.Color_Annual_Volume ?? 0)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.revenue ?? 0)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.cost ?? 0)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.gmDollar ?? 0)}</td>
+              <td className="px-3 py-2 text-right">{safeNumber(row.Black_Annual_Volume)}</td>
+              <td className="px-3 py-2 text-right">{safeNumber(row.Color_Annual_Volume)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.revenue)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.cost)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.gmDollar)}</td>
               <td className="px-3 py-2">
                 <span
                   className={`inline-block w-3 h-3 rounded-full mr-2 align-middle ${row.Final_Risk_Level === "Critical"
