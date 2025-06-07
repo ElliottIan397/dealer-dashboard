@@ -61,16 +61,18 @@ export default function RiskMarginTable({ filtered }: Props) {
   const totals = filteredRows.reduce(
     (sum, row) => ({
       black: sum.black + (row.Black_Annual_Volume ?? 0),
-color: sum.color + (row.Color_Annual_Volume ?? 0),
-      revenue: sum.revenue + row.revenue,
-      cost: sum.cost + row.cost,
-      gmDollar: sum.gmDollar + row.gmDollar,
+      color: sum.color + (row.Color_Annual_Volume ?? 0),
+      revenue: sum.revenue + (row.revenue ?? 0),
+      cost: sum.cost + (row.cost ?? 0),
+      gmDollar: sum.gmDollar + (row.gmDollar ?? 0),
     }),
     { black: 0, color: 0, revenue: 0, cost: 0, gmDollar: 0 }
   );
 
   return (
 
+
+<div className="mb-4 z-30 relative">
       <div className="flex items-center gap-4 mb-2">
         <label htmlFor="offlineFilter" className="text-sm font-medium">Offline Devices:</label>
         <select
@@ -83,6 +85,7 @@ color: sum.color + (row.Color_Annual_Volume ?? 0),
           <option value="offline">Offline Only</option>
           <option value="online">Hide Offline</option>
         </select>
+</div>
 
     <div className="overflow-x-auto w-full max-h-[600px] overflow-y-auto relative">
       </div>
@@ -119,11 +122,11 @@ color: sum.color + (row.Color_Annual_Volume ?? 0),
               <td className="px-3 py-2">{row.Serial_Number}</td>
               <td className="px-3 py-2">{row.Printer_Model}</td>
               <td className="px-3 py-2">{row.Contract_Status}</td>
-              <td className="px-3 py-2 text-right">{safeNumber(row.Black_Annual_Volume)}</td>
-              <td className="px-3 py-2 text-right">{safeNumber(row.Color_Annual_Volume)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.revenue)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.cost)}</td>
-              <td className="px-3 py-2 text-right">{safeCurrency(row.gmDollar)}</td>
+              <td className="px-3 py-2 text-right">{safeNumber(row.Black_Annual_Volume ?? 0)}</td>
+              <td className="px-3 py-2 text-right">{safeNumber(row.Color_Annual_Volume ?? 0)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.revenue ?? 0)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.cost ?? 0)}</td>
+              <td className="px-3 py-2 text-right">{safeCurrency(row.gmDollar ?? 0)}</td>
               <td className="px-3 py-2">
                 <span
                   className={`inline-block w-3 h-3 rounded-full mr-2 align-middle ${row.Final_Risk_Level === "Critical"
