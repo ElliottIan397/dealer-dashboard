@@ -63,17 +63,17 @@ export default function Table1({ data }: Props) {
             <th className="px-3 py-2 text-left">Serial Number</th>
             <th className="px-3 py-2 text-left">Printer Model</th>
             <th className="px-3 py-2 text-center">Device Type</th>
-            <th className="px-3 py-2 text-right">Black Vol Fcst</th>
-            <th className="px-3 py-2 text-right">Color Vol Fcst</th>
-            <th className="px-3 py-2 text-right">Black Ctgs</th>
-            <th className="px-3 py-2 text-right">Cyan Ctgs</th>
-            <th className="px-3 py-2 text-right">Magenta Ctgs</th>
-            <th className="px-3 py-2 text-right">Yellow Ctgs</th>
+            <th className="px-3 py-2 text-center">Black Vol Fcst</th>
+            <th className="px-3 py-2 text-center">Color Vol Fcst</th>
+            <th className="px-3 py-2 text-center">Black Ctgs</th>
+            <th className="px-3 py-2 text-center">Cyan Ctgs</th>
+            <th className="px-3 py-2 text-center">Magenta Ctgs</th>
+            <th className="px-3 py-2 text-center">Yellow Ctgs</th>
             <th className="px-3 py-2 text-center">Contract Status</th>
-            <th className="px-3 py-2 text-right">Fulfillment</th>
-            <th className="px-3 py-2 text-right">Trans Rev</th>
+            <th className="px-3 py-2 text-center">Fulfillment Cost</th>
+            <th className="px-3 py-2 text-center">Transact Rev</th>
             <th className="px-3 py-2 text-center">Trans GM%</th>
-            <th className="px-3 py-2 text-right">Contract Rev</th>
+            <th className="px-3 py-2 text-center">Contract Rev</th>
             <th className="px-3 py-2 text-center">Contract GM%</th>
           </tr>
         </thead>
