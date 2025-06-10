@@ -63,17 +63,17 @@ export default function Table1({ data }: Props) {
             <th className="px-3 py-2 text-left">Serial Number</th>
             <th className="px-3 py-2 text-left">Printer Model</th>
             <th className="px-3 py-2 text-center">Device Type</th>
-            <th className="px-3 py-2 text-right">Black Vol</th>
-            <th className="px-3 py-2 text-right">Color Vol</th>
-            <th className="px-3 py-2 text-right">Black</th>
-            <th className="px-3 py-2 text-right">Cyan</th>
-            <th className="px-3 py-2 text-right">Magenta</th>
-            <th className="px-3 py-2 text-right">Yellow</th>
+            <th className="px-3 py-2 text-right">Black Vol Fcst</th>
+            <th className="px-3 py-2 text-right">Color Vol Fcst</th>
+            <th className="px-3 py-2 text-right">Black Ctgs</th>
+            <th className="px-3 py-2 text-right">Cyan Ctgs</th>
+            <th className="px-3 py-2 text-right">Magenta Ctgs</th>
+            <th className="px-3 py-2 text-right">Yellow Ctgs</th>
             <th className="px-3 py-2 text-center">Contract Status</th>
             <th className="px-3 py-2 text-right">Fulfillment</th>
-            <th className="px-3 py-2 text-right">Trans SP</th>
+            <th className="px-3 py-2 text-right">Trans Rev</th>
             <th className="px-3 py-2 text-center">Trans GM%</th>
-            <th className="px-3 py-2 text-right">Revenue</th>
+            <th className="px-3 py-2 text-right">Contract Rev</th>
             <th className="px-3 py-2 text-center">Contract GM%</th>
           </tr>
         </thead>
