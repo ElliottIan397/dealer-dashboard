@@ -169,7 +169,7 @@ const table1Data = filtered.map((row) => ({
       {showRiskTable ? (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
-          <RiskMarginTable filtered={filtered} />
+          <RiskMarginTable filtered={filtered} bias={selectedBias} />
         </div>
       ) : (
         <>
