@@ -175,7 +175,7 @@ const table1Data = filtered.map((row) => ({
         <>
           <div className="mt-10">
             <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Summary Charts</h2>
-            <ChartBlock filtered={filtered} />
+            <ChartBlock filtered={filtered} bias={selectedBias} />
           </div>
 
           {selectedCustomer !== "All" && (

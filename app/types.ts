@@ -46,3 +46,9 @@ export type McarpRow = {
   Magenta_Yield_Estimate: number;
   Yellow_Yield_Estimate: number;
 };
+
+
+export type ChartBlockProps = {
+  filtered: McarpRow[];
+  bias: 'O' | 'R' | 'N';
+};

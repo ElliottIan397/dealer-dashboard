@@ -15,11 +15,9 @@ import {
 
 import type { McarpRow } from "./types";
 
-type Props = {
-  filtered: McarpRow[];
-};
+import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered }: Props) {
+export default function ChartBlock({ filtered }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -30,15 +28,15 @@ export default function ChartBlock({ filtered }: Props) {
 
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
 
-  const blackVol = total(filtered.map((r) => r.Black_Annual_Volume));
-  const colorVol = total(filtered.map((r) => r.Color_Annual_Volume));
+  const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
+  const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
-  const transactionalSP = total(filtered.map((r) => r.Twelve_Month_Transactional_SP));
-  const transactionalCost = total(filtered.map((r) => r.Twelve_Month_Fulfillment_Cost));
+  const transactionalSP = total(filtered.map((r: McarpRow) => r.Twelve_Month_Transactional_SP));
+  const transactionalCost = total(filtered.map((r: McarpRow) => r.Twelve_Month_Fulfillment_Cost));
   const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
 
-  const contractRevenue = total(filtered.map((r) => r.Contract_Total_Revenue));
-  const contractCost = total(filtered.map((r) => r.Twelve_Month_Fulfillment_Cost));
+  const contractRevenue = total(filtered.map((r: McarpRow) => r.Contract_Total_Revenue));
+  const contractCost = total(filtered.map((r: McarpRow) => r.Twelve_Month_Fulfillment_Cost));
   const contractGM = contractRevenue > 0 ? ((contractRevenue - contractCost) / contractRevenue) * 100 : 0;
 
   const chart1Data = [
