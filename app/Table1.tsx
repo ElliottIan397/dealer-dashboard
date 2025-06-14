@@ -154,7 +154,11 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                   </td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Black_Annual_Volume)}</td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Color_Annual_Volume)}</td>
-                  <td colSpan={5}></td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Black)}</td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Cyan)}</td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Magenta)}</td>
+                  <td className="px-3 py-2 text-right">{formatCell(totals.Yellow)}</td>
+                  <td className="px-3 py-2 text-center"></td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(transactionalGM)}</td>
