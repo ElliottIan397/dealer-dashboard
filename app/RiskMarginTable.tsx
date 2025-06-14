@@ -5,8 +5,13 @@ import React, { useState } from "react";
 import { safeNumber, safeCurrency } from "./utils";
 import type { McarpRow } from "./types";
 
+const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+};
+
 type Props = {
   filtered: McarpRow[];
+  bias: "O" | "R" | "N";
 };
 
 const riskRank = (level: string): number => {
@@ -29,16 +34,16 @@ function isStale(lastUpdated: number, currentDate: Date, days: number): boolean 
   return diff > days;
 }
 
-export default function RiskMarginTable({ filtered }: Props) {
+export default function RiskMarginTable({ filtered, bias }: Props) {
   const [offlineFilter, setOfflineFilter] = useState<"all" | "offline" | "online">("all");
   const latestDate = new Date();
 
   const enrichedRows = filtered.map(row => {
     const revenue = row.Contract_Status === "T"
-      ? row.Twelve_Month_Transactional_SP ?? 0
-      : row.Contract_Total_Revenue ?? 0;
+  ? getBiasField(row, "Twelve_Month_Transactional_SP", bias)
+  : row.Contract_Total_Revenue ?? 0;
 
-    const cost = row.Twelve_Month_Fulfillment_Cost ?? 0;
+const cost = getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias);
     const gmDollar = revenue - cost;
     const offline = isStale(row.Last_Updated, latestDate, 5);
 
