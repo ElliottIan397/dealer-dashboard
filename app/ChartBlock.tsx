@@ -14,10 +14,9 @@ import {
 } from "recharts";
 
 import type { McarpRow } from "./types";
-
 import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered }: ChartBlockProps) {
+export default function ChartBlock({ filtered, bias }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -26,17 +25,21 @@ export default function ChartBlock({ filtered }: ChartBlockProps) {
     );
   }
 
+  const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+    return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+  };
+
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
 
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
-  const transactionalSP = total(filtered.map((r: McarpRow) => r.Twelve_Month_Transactional_SP));
-  const transactionalCost = total(filtered.map((r: McarpRow) => r.Twelve_Month_Fulfillment_Cost));
+  const transactionalSP = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias)));
+  const transactionalCost = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
   const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
 
   const contractRevenue = total(filtered.map((r: McarpRow) => r.Contract_Total_Revenue));
-  const contractCost = total(filtered.map((r: McarpRow) => r.Twelve_Month_Fulfillment_Cost));
+  const contractCost = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
   const contractGM = contractRevenue > 0 ? ((contractRevenue - contractCost) / contractRevenue) * 100 : 0;
 
   const chart1Data = [
