@@ -51,21 +51,21 @@ export default function DealerDashboard() {
 
   
 const table1Data = filtered.map((row) => ({
-    Monitor: row.Monitor,
-    Serial_Number: row.Serial_Number,
-    Printer_Model: row.Printer_Model,
-    Device_Type: row.Device_Type,
-    Black_Annual_Volume: row.Black_Annual_Volume,
-    Color_Annual_Volume: row.Color_Annual_Volume,
-    Black_Full_Cartridges_Required_365d: getBiasField(row, "Black_Full_Cartridges_Required_365d", selectedBias),
-    Cyan_Full_Cartridges_Required_365d: getBiasField(row, "Cyan_Full_Cartridges_Required_365d", selectedBias),
-    Magenta_Full_Cartridges_Required_365d: getBiasField(row, "Magenta_Full_Cartridges_Required_365d", selectedBias),
-    Yellow_Full_Cartridges_Required_365d: getBiasField(row, "Yellow_Full_Cartridges_Required_365d", selectedBias),
-    Contract_Status: row.Contract_Status,
-    Last_Updated: row.Last_Updated,
-    Twelve_Month_Fulfillment_Cost: getBiasField(row, "Twelve_Month_Fulfillment_Cost", selectedBias),
-    Twelve_Month_Transactional_SP: row.Twelve_Month_Transactional_SP,
-    Contract_Total_Revenue: row.Contract_Total_Revenue,
+  Monitor: row.Monitor,
+  Serial_Number: row.Serial_Number,
+  Printer_Model: row.Printer_Model,
+  Device_Type: row.Device_Type,
+  Black_Annual_Volume: row.Black_Annual_Volume,
+  Color_Annual_Volume: row.Color_Annual_Volume,
+  Black_Full_Cartridges_Required_365d: getBiasField(row, "Black_Full_Cartridges_Required_365d", selectedBias),
+  Cyan_Full_Cartridges_Required_365d: getBiasField(row, "Cyan_Full_Cartridges_Required_365d", selectedBias),
+  Magenta_Full_Cartridges_Required_365d: getBiasField(row, "Magenta_Full_Cartridges_Required_365d", selectedBias),
+  Yellow_Full_Cartridges_Required_365d: getBiasField(row, "Yellow_Full_Cartridges_Required_365d", selectedBias),
+  Contract_Status: row.Contract_Status,
+  Last_Updated: row.Last_Updated,
+  Twelve_Month_Fulfillment_Cost: getBiasField(row, "Twelve_Month_Fulfillment_Cost", selectedBias),
+  Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", selectedBias),
+  Contract_Total_Revenue: row.Contract_Total_Revenue,
 }));
 
 
