@@ -1,6 +1,11 @@
 "use client";
 
 import React from "react";
+
+const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
+  return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+};
+
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
 
@@ -36,7 +41,7 @@ function isStale(lastUpdated: number, currentDate: Date, days: number): boolean 
   return diff > days;
 }
 
-export default function Table1({ data }: Props) {
+export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 'N' }) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
 
@@ -83,13 +88,13 @@ export default function Table1({ data }: Props) {
               (sum, row) => ({
                 Black_Annual_Volume: sum.Black_Annual_Volume + row.Black_Annual_Volume,
                 Color_Annual_Volume: sum.Color_Annual_Volume + row.Color_Annual_Volume,
-                Fulfillment: sum.Fulfillment + (row.Twelve_Month_Fulfillment_Cost ?? 0),
+                Fulfillment: sum.Fulfillment + getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias),
                 SP: sum.SP + (row.Twelve_Month_Transactional_SP ?? 0),
                 Revenue: sum.Revenue + row.Contract_Total_Revenue,
-                Black: sum.Black + row.Black_Full_Cartridges_Required_365d,
-                Cyan: sum.Cyan + row.Cyan_Full_Cartridges_Required_365d,
-                Magenta: sum.Magenta + row.Magenta_Full_Cartridges_Required_365d,
-                Yellow: sum.Yellow + row.Yellow_Full_Cartridges_Required_365d,
+                Black: sum.Black + getBiasField(row, "Black_Full_Cartridges_Required_365d", bias),
+                Cyan: sum.Cyan + getBiasField(row, "Cyan_Full_Cartridges_Required_365d", bias),
+                Magenta: sum.Magenta + getBiasField(row, "Magenta_Full_Cartridges_Required_365d", bias),
+                Yellow: sum.Yellow + getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias),
               }),
               {
                 Black_Annual_Volume: 0,
@@ -127,19 +132,19 @@ export default function Table1({ data }: Props) {
                     <td className="px-3 py-2 text-center">{row.Device_Type}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Black_Annual_Volume)}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Color_Annual_Volume)}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(row.Black_Full_Cartridges_Required_365d)}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(row.Cyan_Full_Cartridges_Required_365d)}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(row.Magenta_Full_Cartridges_Required_365d)}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(row.Yellow_Full_Cartridges_Required_365d)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Black_Full_Cartridges_Required_365d", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Cyan_Full_Cartridges_Required_365d", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Magenta_Full_Cartridges_Required_365d", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Fulfillment_Cost)}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias))}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Transactional_SP)}</td>
                     <td className="px-3 py-2 text-center">
-                      {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, row.Twelve_Month_Fulfillment_Cost))}
+                      {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias)))}
                     </td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
                     <td className="px-3 py-2 text-center">
-                      {formatPercent(computeContractGM(row.Twelve_Month_Fulfillment_Cost, row.Contract_Total_Revenue))}
+                      {formatPercent(computeContractGM(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias), row.Contract_Total_Revenue))}
                     </td>
                   </tr>
                 ))}

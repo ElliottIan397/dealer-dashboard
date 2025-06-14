@@ -175,7 +175,7 @@ export default function DealerDashboard() {
             <>
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Dealer Dashboard: Table 1</h2>
-                <Table1 data={table1Data} />
+                <Table1 data={table1Data} bias={selectedBias} />
               </div>
 
               <div className="mt-10">
