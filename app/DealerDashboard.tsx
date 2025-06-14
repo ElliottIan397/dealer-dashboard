@@ -22,6 +22,7 @@ export default function DealerDashboard() {
   } = useMCARPData();
 
   const [showRiskTable, setShowRiskTable] = useState(false);
+  const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
 
   useEffect(() => {
     if (showRiskTable) {
@@ -109,6 +110,18 @@ export default function DealerDashboard() {
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard</h1>
 
       <div className="flex gap-6 flex-wrap items-end">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">SKU Bias:</label>
+          <select
+            value={selectedBias}
+            onChange={(e) => setSelectedBias(e.target.value as "O" | "R" | "N")}
+            className="p-2 border border-gray-300 rounded w-64"
+          >
+            <option value="O">OEM</option>
+            <option value="R">Reman</option>
+            <option value="N">New Build</option>
+          </select>
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
           <select
