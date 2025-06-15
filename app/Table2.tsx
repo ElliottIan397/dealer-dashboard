@@ -57,26 +57,26 @@ export default function Table2({ data }: Props) {
   const latestDate = new Date();
 
   return (
-    <div className="overflow-x-auto w-full">
-      <table className="min-w-full border text-sm">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="px-3 py-2">Customer</th>
-            <th className="px-3 py-2">Serial Number</th>
-            <th className="px-3 py-2">Printer Model</th>
-            <th className="px-3 py-2">Device Type</th>
-            <th className="px-3 py-2 text-right">Mono CPP</th>
-            <th className="px-3 py-2 text-right">Color CPP</th>
-            <th className="px-3 py-2 text-right">Base Charge</th>
-            <th className="px-3 py-2 text-right">Included Mono</th>
-            <th className="px-3 py-2 text-right">Included Color</th>
-            <th className="px-3 py-2 text-right">Billable Mono</th>
-            <th className="px-3 py-2 text-right">Billable Color</th>
-            <th className="px-3 py-2">Contract End</th>
-            <th className="px-3 py-2 text-right">Age (Yrs)</th>
-            <th className="px-3 py-2 text-right">Usage (%)</th>
-            <th className="px-3 py-2 text-right">Engine Cycles</th>
-            <th className="px-3 py-2">Risk Level</th>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border text-sm text-gray-900">
+        <thead className="bg-gray-100 text-xs font-semibold">
+          <tr>
+            <th className="px-3 py-2 text-left">Customer</th>
+            <th className="px-3 py-2 text-left">Serial Number</th>
+            <th className="px-3 py-2 text-left">Printer Model</th>
+            <th className="px-3 py-2 text-center">Device Type</th>
+            <th className="px-3 py-2 text-center">Mono CPP</th>
+            <th className="px-3 py-2 text-center">Color CPP</th>
+            <th className="px-3 py-2 text-center">Base Charge</th>
+            <th className="px-3 py-2 text-center">Included Mono</th>
+            <th className="px-3 py-2 text-center">Included Color</th>
+            <th className="px-3 py-2 text-center">Billable Mono</th>
+            <th className="px-3 py-2 text-center">Billable Color</th>
+            <th className="px-3 py-2 text-center">Contract End</th>
+            <th className="px-3 py-2 text-center">Age (Yrs)</th>
+            <th className="px-3 py-2 text-center">Usage (%)</th>
+            <th className="px-3 py-2 text-center">Engine Cycles</th>
+            <th className="px-3 py-2 text-center">Risk Level</th>
           </tr>
         </thead>
         <tbody>
