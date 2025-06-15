@@ -96,13 +96,13 @@ const cost = getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias);
             <th className="px-3 py-2">Customer</th>
             <th className="px-3 py-2">Serial Number</th>
             <th className="px-3 py-2">Printer Model</th>
-            <th className="px-3 py-2">Status</th>
-            <th className="px-3 py-2 text-right">Black Vol</th>
-            <th className="px-3 py-2 text-right">Color Vol</th>
-            <th className="px-3 py-2 text-right">Revenue</th>
-            <th className="px-3 py-2 text-right">Cost</th>
-            <th className="px-3 py-2 text-right">GM $</th>
-            <th className="px-3 py-2">Risk</th>
+            <th className="px-3 py-2 text-center">Status</th>
+            <th className="px-3 py-2 text-center">Black Vol</th>
+            <th className="px-3 py-2 text-center">Color Vol</th>
+            <th className="px-3 py-2 text-center">Revenue</th>
+            <th className="px-3 py-2 text-center">Cost</th>
+            <th className="px-3 py-2 text-center">GM $</th>
+            <th className="px-3 py-2 text-center">Risk</th>
           </tr>
         </thead>
         <tbody>

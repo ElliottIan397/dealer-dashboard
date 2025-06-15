@@ -61,7 +61,7 @@ export default function Table3({ filtered }: Props) {
             <th className="px-3 py-2 text-left">Customer</th>
             <th className="px-3 py-2 text-left">Serial Number</th>
             <th className="px-3 py-2 text-left">Printer Model</th>
-            <th className="px-3 py-2 text-left">Device Type</th>
+            <th className="px-3 py-2 text-center">Device Type</th>
             <th className="px-3 py-2 text-center">BK Pages Left</th>
             <th className="px-3 py-2 text-center">CY Pages Left</th>
             <th className="px-3 py-2 text-center">MG Pages Left</th>
