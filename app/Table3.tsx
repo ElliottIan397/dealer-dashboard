@@ -54,26 +54,26 @@ export default function Table3({ filtered }: Props) {
   const latestDate = new Date();
 
   return (
-    <div className="overflow-x-auto w-full">
-      <table className="min-w-full border text-sm">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="px-3 py-2">Customer</th>
-            <th className="px-3 py-2">Serial Number</th>
-            <th className="px-3 py-2">Printer Model</th>
-            <th className="px-3 py-2">Device Type</th>
-            <th className="px-3 py-2 text-right">Black Pages Left</th>
-            <th className="px-3 py-2 text-right">Cyan</th>
-            <th className="px-3 py-2 text-right">Magenta</th>
-            <th className="px-3 py-2 text-right">Yellow</th>
-            <th className="px-3 py-2 text-right">Black %</th>
-            <th className="px-3 py-2 text-right">Cyan %</th>
-            <th className="px-3 py-2 text-right">Magenta %</th>
-            <th className="px-3 py-2 text-right">Yellow %</th>
-            <th className="px-3 py-2 text-right">Black Yield</th>
-            <th className="px-3 py-2 text-right">Cyan</th>
-            <th className="px-3 py-2 text-right">Magenta</th>
-            <th className="px-3 py-2 text-right">Yellow</th>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border text-sm text-gray-900">
+        <thead className="bg-gray-100 text-xs font-semibold">
+          <tr>
+            <th className="px-3 py-2 text-left">Customer</th>
+            <th className="px-3 py-2 text-left">Serial Number</th>
+            <th className="px-3 py-2 text-left">Printer Model</th>
+            <th className="px-3 py-2 text-left">Device Type</th>
+            <th className="px-3 py-2 text-center">BK Pages Left</th>
+            <th className="px-3 py-2 text-center">CY Pages Left</th>
+            <th className="px-3 py-2 text-center">MG Pages Left</th>
+            <th className="px-3 py-2 text-center">YE Pages Left</th>
+            <th className="px-3 py-2 text-center">BK % Coverage</th>
+            <th className="px-3 py-2 text-center">CY % Coverage</th>
+            <th className="px-3 py-2 text-center">MG % Coverage</th>
+            <th className="px-3 py-2 text-center">YE % Coverage</th>
+            <th className="px-3 py-2 text-center">BK Fcst Yield</th>
+            <th className="px-3 py-2 text-center">CY Fcst Yield</th>
+            <th className="px-3 py-2 text-center">MG Fcst Yield</th>
+            <th className="px-3 py-2 text-center">YE Fcst Yield</th>
           </tr>
         </thead>
         <tbody>
