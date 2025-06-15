@@ -82,7 +82,7 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
   return (
     <div className="flex flex-row flex-wrap gap-4 w-full">
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
-        <h3 className="text-lg font-semibold mb-2 text-center">Annual Volume</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">Fcst Annual Page Volume</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
@@ -107,7 +107,7 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
       </div>
 
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
-        <h3 className="text-lg font-semibold mb-2 text-center">Transactional GM%</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">Transactional Potential</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart2Data}>
             <XAxis dataKey="label" />
@@ -138,7 +138,7 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
       </div>
 
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
-        <h3 className="text-lg font-semibold mb-2 text-center">Contract GM%</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">Current Contracts</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart3Data}>
             <XAxis dataKey="label" />
