@@ -117,9 +117,7 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
-            {contractType !== "T" && (
-              <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
-            )}
+            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
@@ -150,7 +148,9 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
-            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
+            {contractType !== "T" && (
+              <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
+            )}
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
