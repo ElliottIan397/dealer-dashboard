@@ -38,8 +38,11 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
   const transactionalCost = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
   const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
 
-  const contractRevenue = total(filtered.map((r: McarpRow) => r.Contract_Total_Revenue));
-  const contractCost = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
+  const contractDevices = filtered.filter((r) => r.Contract_Status === "C");
+
+  const contractRevenue = total(contractDevices.map((r) => r.Contract_Total_Revenue ?? 0));
+  const contractCost = total(contractDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
+
   const contractGM = contractRevenue > 0 ? ((contractRevenue - contractCost) / contractRevenue) * 100 : 0;
 
   const chart1Data = [
