@@ -47,8 +47,8 @@ export type McarpRow = {
   Yellow_Yield_Estimate: number;
 };
 
-
-export type ChartBlockProps = {
+export interface ChartBlockProps {
   filtered: McarpRow[];
-  bias: 'O' | 'R' | 'N';
-};
+  bias: "O" | "R" | "N";
+  contractType: string; // Add this line to support conditional logic in ChartBlock
+}

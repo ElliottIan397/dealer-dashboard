@@ -16,7 +16,7 @@ import {
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered, bias }: ChartBlockProps) {
+export default function ChartBlock({ filtered, bias, contractType }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -117,7 +117,9 @@ export default function ChartBlock({ filtered, bias }: ChartBlockProps) {
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
-            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
+            {contractType !== "T" && (
+              <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
+            )}
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
