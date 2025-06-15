@@ -34,16 +34,22 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
-  const transactionalSP = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias)));
-  const transactionalCost = total(filtered.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
-  const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
-
+  const transactionalDevices = filtered.filter((r) => r.Contract_Status === "T");
   const contractDevices = filtered.filter((r) => r.Contract_Status === "C");
+
+  const transactionalSP = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias)));
+  const transactionalCost = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
+  const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
+  const avgTransactionalMonthlyRevenue = transactionalDevices.length > 0
+    ? transactionalSP / transactionalDevices.length / 12
+    : 0;
 
   const contractRevenue = total(contractDevices.map((r) => r.Contract_Total_Revenue ?? 0));
   const contractCost = total(contractDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
-
   const contractGM = contractRevenue > 0 ? ((contractRevenue - contractCost) / contractRevenue) * 100 : 0;
+  const avgContractMonthlyRevenue = contractDevices.length > 0
+    ? contractRevenue / contractDevices.length / 12
+    : 0;
 
   const chart1Data = [
     { type: "Black Volume", value: blackVol, color: "#8884d8" },
@@ -116,7 +122,11 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") return [percentFormatter(value), "GM"];
-                return [currencyFormatter(value), name];
+                const label =
+                  name === "SP"
+                    ? `SP$ (Avg/Device: $${avgTransactionalMonthlyRevenue.toFixed(2)}/mo)`
+                    : name;
+                return [currencyFormatter(value), label];
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
@@ -147,7 +157,11 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") return [percentFormatter(value), "GM"];
-                return [currencyFormatter(value), name];
+                const label =
+                  name === "SP"
+                    ? `SP$ (Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo)`
+                    : name;
+                return [currencyFormatter(value), label];
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
@@ -161,9 +175,11 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
           <span className="inline-block mr-4">
             <span className="inline-block w-3 h-3 bg-[#82ca9d] mr-1" />SP$
           </span>
-          <span className="inline-block mr-4">
-            <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
-          </span>
+          {contractType !== "T" && (
+            <span className="inline-block mr-4">
+              <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
+            </span>
+          )}
           <span>
             <span className="inline-block w-3 h-3 bg-[#ffc658] mr-1" />GM%
           </span>
