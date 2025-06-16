@@ -50,5 +50,6 @@ export type McarpRow = {
 export interface ChartBlockProps {
   filtered: McarpRow[];
   bias: "O" | "R" | "N";
+  contractOnly?: McarpRow[];
   contractType: string; // Add this line to support conditional logic in ChartBlock
 }

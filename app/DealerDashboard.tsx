@@ -114,10 +114,8 @@ export default function DealerDashboard() {
     (row) => selectedCustomer === "All" || row.Monitor === selectedCustomer
   );
 
-  const contractFocused = data.filter(
-    (row) =>
-      (selectedCustomer === "All" || row.Monitor === selectedCustomer) &&
-      (selectedContractType === "C" ? row.Contract_Status === "C" : true)
+  const contractOnly = filtered.filter(
+    (row) => row.Contract_Status === "C"
   );
 
   return (
@@ -183,7 +181,7 @@ export default function DealerDashboard() {
         <>
           <div className="mt-10">
             <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-            <ChartBlock filtered={contractFocused} bias={selectedBias} contractType={selectedContractType} />
+            <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
           </div>
 
           {selectedCustomer !== "All" && (

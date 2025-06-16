@@ -16,7 +16,7 @@ import {
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered, bias, contractType }: ChartBlockProps) {
+export default function ChartBlock({ filtered, contractOnly, bias, contractType }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -34,8 +34,11 @@ export default function ChartBlock({ filtered, bias, contractType }: ChartBlockP
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
-  const transactionalDevices = filtered.filter((r) => r.Contract_Status === "T");
-  const contractDevices = filtered.filter((r) => r.Contract_Status === "C");
+  const transactionalDevices = contractType === "C"
+    ? contractOnly ?? []
+    : filtered.filter((r: McarpRow) => r.Contract_Status === "T");
+
+  const contractDevices = filtered.filter((r: McarpRow) => r.Contract_Status === "C");
 
   const transactionalSP = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias)));
   const transactionalCost = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
