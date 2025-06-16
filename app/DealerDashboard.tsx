@@ -110,6 +110,10 @@ export default function DealerDashboard() {
     Last_Updated: row.Last_Updated,
   }));
 
+  const customerFiltered = data.filter(
+    (row) => selectedCustomer === "All" || row.Monitor === selectedCustomer
+  );
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard</h1>
@@ -173,7 +177,7 @@ export default function DealerDashboard() {
         <>
           <div className="mt-10">
             <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-            <ChartBlock filtered={data} bias={selectedBias} contractType={selectedContractType} />
+            <ChartBlock filtered={customerFiltered} bias={selectedBias} contractType={selectedContractType} />
           </div>
 
           {selectedCustomer !== "All" && (
