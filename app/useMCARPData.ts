@@ -1,43 +1,49 @@
-// useMCARPData.ts
-import { useEffect, useState } from "react";
-import type { McarpRow } from "./types";
+import { useEffect, useState, useMemo } from "react";
 import { DASHBOARD_MODE } from "./config";
+import type { McarpRow } from "./types";
 
 export function useMCARPData() {
   const [data, setData] = useState<McarpRow[]>([]);
-  const [filtered, setFiltered] = useState<McarpRow[]>([]);
-  const [customers, setCustomers] = useState<string[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-  const [selectedContractType, setSelectedContractType] = useState<string>("All");
   const [loading, setLoading] = useState(true);
+  const [selectedCustomer, setSelectedCustomer] = useState("All");
+  const [selectedContractType, setSelectedContractType] = useState("All");
 
   useEffect(() => {
-    const fileName = DASHBOARD_MODE === "demo" ? "/mcarp_demo.json" : "/mcarp.json";
-    fetch(fileName)
+    const dataUrl = DASHBOARD_MODE === "demo" ? "/mcarp_demo.json" : "/mcarp.json";
+    fetch(dataUrl)
       .then((res) => res.json())
-      .then((json: any[]) => {
+      .then((json) => {
         setData(json);
-        const uniqueCustomers = Array.from(new Set(json.map((r) => r.Monitor))).sort();
-        setCustomers(uniqueCustomers);
-        setSelectedCustomer("All"); // Default = charts only - all customers
         setLoading(false);
       });
   }, []);
 
-  useEffect(() => {
-    let result = data;
-    if (selectedCustomer !== "All") {
-      result = result.filter((r) => r.Monitor === selectedCustomer);
-    }
-    if (selectedContractType !== "All") {
-      result = result.filter((r) =>
-        selectedContractType === "C"
-          ? r.Contract_Status === "C"
-          : r.Contract_Status === "T"
-      );
-    }
-    setFiltered(result);
+  const customers = useMemo(() => {
+    const unique = Array.from(new Set(data.map((row) => row.Monitor).filter(Boolean)));
+    return unique.sort();
+  }, [data]);
+
+  const filtered = useMemo(() => {
+    return data.filter((row) => {
+      const customerMatch = selectedCustomer === "All" || row.Monitor === selectedCustomer;
+      const contractMatch = selectedContractType === "All" || row.Contract_Status === selectedContractType;
+      return customerMatch && contractMatch;
+    });
   }, [data, selectedCustomer, selectedContractType]);
+
+  const contractDevices = useMemo(() => {
+    return data.filter((row) => {
+      const customerMatch = selectedCustomer === "All" || row.Monitor === selectedCustomer;
+      return row.Contract_Status === "C" && customerMatch;
+    });
+  }, [data, selectedCustomer]);
+
+  const transactionalDevices = useMemo(() => {
+    return data.filter((row) => {
+      const customerMatch = selectedCustomer === "All" || row.Monitor === selectedCustomer;
+      return row.Contract_Status === "T" && customerMatch;
+    });
+  }, [data, selectedCustomer]);
 
   return {
     loading,
@@ -48,5 +54,7 @@ export function useMCARPData() {
     setSelectedCustomer,
     selectedContractType,
     setSelectedContractType,
+    contractDevices,
+    transactionalDevices,
   };
 }

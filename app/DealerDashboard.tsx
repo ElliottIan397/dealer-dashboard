@@ -1,11 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-
-
-const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
-  return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
-};
 import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
@@ -13,6 +8,11 @@ import Table3 from "./Table3";
 import RiskMarginTable from "./RiskMarginTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
+import { DASHBOARD_MODE } from "./config";
+
+const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
+  return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+};
 
 export default function DealerDashboard() {
   const {
@@ -49,25 +49,23 @@ export default function DealerDashboard() {
     }, {})
   );
 
-  
-const table1Data = filtered.map((row) => ({
-  Monitor: row.Monitor,
-  Serial_Number: row.Serial_Number,
-  Printer_Model: row.Printer_Model,
-  Device_Type: row.Device_Type,
-  Black_Annual_Volume: row.Black_Annual_Volume,
-  Color_Annual_Volume: row.Color_Annual_Volume,
-  Black_Full_Cartridges_Required_365d: getBiasField(row, "Black_Full_Cartridges_Required_365d", selectedBias),
-  Cyan_Full_Cartridges_Required_365d: getBiasField(row, "Cyan_Full_Cartridges_Required_365d", selectedBias),
-  Magenta_Full_Cartridges_Required_365d: getBiasField(row, "Magenta_Full_Cartridges_Required_365d", selectedBias),
-  Yellow_Full_Cartridges_Required_365d: getBiasField(row, "Yellow_Full_Cartridges_Required_365d", selectedBias),
-  Contract_Status: row.Contract_Status,
-  Last_Updated: row.Last_Updated,
-  Twelve_Month_Fulfillment_Cost: getBiasField(row, "Twelve_Month_Fulfillment_Cost", selectedBias),
-  Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", selectedBias),
-  Contract_Total_Revenue: row.Contract_Total_Revenue,
-}));
-
+  const table1Data = filtered.map((row) => ({
+    Monitor: row.Monitor,
+    Serial_Number: row.Serial_Number,
+    Printer_Model: row.Printer_Model,
+    Device_Type: row.Device_Type,
+    Black_Annual_Volume: row.Black_Annual_Volume,
+    Color_Annual_Volume: row.Color_Annual_Volume,
+    Black_Full_Cartridges_Required_365d: getBiasField(row, "Black_Full_Cartridges_Required_365d", selectedBias),
+    Cyan_Full_Cartridges_Required_365d: getBiasField(row, "Cyan_Full_Cartridges_Required_365d", selectedBias),
+    Magenta_Full_Cartridges_Required_365d: getBiasField(row, "Magenta_Full_Cartridges_Required_365d", selectedBias),
+    Yellow_Full_Cartridges_Required_365d: getBiasField(row, "Yellow_Full_Cartridges_Required_365d", selectedBias),
+    Contract_Status: row.Contract_Status,
+    Last_Updated: row.Last_Updated,
+    Twelve_Month_Fulfillment_Cost: getBiasField(row, "Twelve_Month_Fulfillment_Cost", selectedBias),
+    Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", selectedBias),
+    Contract_Total_Revenue: row.Contract_Total_Revenue,
+  }));
 
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
@@ -201,3 +199,4 @@ const table1Data = filtered.map((row) => ({
     </div>
   );
 }
+
