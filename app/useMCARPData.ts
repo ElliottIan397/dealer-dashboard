@@ -1,6 +1,7 @@
 // useMCARPData.ts
 import { useEffect, useState } from "react";
 import type { McarpRow } from "./types";
+import { DASHBOARD_MODE } from "./config";
 
 export function useMCARPData() {
   const [data, setData] = useState<McarpRow[]>([]);
@@ -11,7 +12,8 @@ export function useMCARPData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/mcarp.json")
+    const fileName = DASHBOARD_MODE === "demo" ? "/mcarp_demo.json" : "/mcarp.json";
+    fetch(fileName)
       .then((res) => res.json())
       .then((json: any[]) => {
         setData(json);
@@ -25,8 +27,8 @@ export function useMCARPData() {
   useEffect(() => {
     let result = data;
     if (selectedCustomer !== "All") {
-  result = result.filter((r) => r.Monitor === selectedCustomer);
-}
+      result = result.filter((r) => r.Monitor === selectedCustomer);
+    }
     if (selectedContractType !== "All") {
       result = result.filter((r) =>
         selectedContractType === "C"
