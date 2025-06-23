@@ -87,7 +87,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
     return `$${value.toFixed(0)}`;
   };
 
-  const currencyFormatter = (value: number) => `$${value.toFixed(2)}`;
+  const currencyFormatter = (value: number) => `$${value.toFixed(0)}`;
   const percentFormatter = (value: number) => `${value.toFixed(0)}%`;
 
   return (
