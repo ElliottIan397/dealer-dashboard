@@ -126,13 +126,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip
               formatter={(value: number, name: string) => {
-                if (name === "GM") return [`${percentFormatter(value)} (GM$: ${currencyFormatter(transactionalGMdollar)})`, "GM"];
-                const label =
-                  name === "SP"
-                    ? `SP$ (Avg/Device: $${avgTransactionalMonthlyRevenue.toFixed(2)}/mo, Devices: ${transactionalDevices.length})`
-                    : name === "Cost"
-                    ? "Cost$"
-                    : name;
+                if (name === "GM") return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(transactionalGMdollar)})`, "GM"];
+                const label = name === "SP"
+                  ? `SP$\n(Avg/Device: $${avgTransactionalMonthlyRevenue.toFixed(2)}/mo, Devices: ${transactionalDevices.length})`
+                  : name === "Cost"
+                  ? "Cost$"
+                  : name;
                 return [currencyFormatter(value), label];
               }}
             />
@@ -163,13 +162,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip
               formatter={(value: number, name: string) => {
-                if (name === "GM") return [`${percentFormatter(value)} (GM$: ${currencyFormatter(contractGMdollar)})`, "GM"];
-                const label =
-                  name === "SP"
-                    ? `SP$ (Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`
-                    : name === "Cost"
-                    ? "Cost$"
-                    : name;
+                if (name === "GM") return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(contractGMdollar)})`, "GM"];
+                const label = name === "SP"
+                  ? `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`
+                  : name === "Cost"
+                  ? "Cost$"
+                  : name;
                 return [currencyFormatter(value), label];
               }}
             />
