@@ -175,34 +175,38 @@ export default function DealerDashboard() {
         </div>
       )}
 
-      {!viewMode && selectedCustomer !== "All" && (
-        <>
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-            <ChartBlock
-              filtered={filtered}
-              contractOnly={contractOnly}
-              bias={selectedBias}
-              contractType={selectedContractType}
-            />
-          </div>
+{!viewMode && (
+  <>
+    <div className="mt-10">
+      <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+      <ChartBlock
+        filtered={filtered}
+        contractOnly={contractOnly}
+        bias={selectedBias}
+        contractType={selectedContractType}
+      />
+    </div>
 
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-            <Table1 data={table1Data} bias={selectedBias} />
-          </div>
+    {selectedCustomer !== "All" && (
+      <>
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
+          <Table1 data={table1Data} bias={selectedBias} />
+        </div>
 
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
-            <Table2 data={table2Data} />
-          </div>
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
+          <Table2 data={table2Data} />
+        </div>
 
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
-            <Table3 filtered={filtered} />
-          </div>
-        </>
-      )}
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
+          <Table3 filtered={filtered} />
+        </div>
+      </>
+    )}
+  </>
+)}
     </div>
   );
 }
