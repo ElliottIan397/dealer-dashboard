@@ -6,12 +6,13 @@ import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
 import RiskMarginTable from "./RiskMarginTable";
+import VendorSummaryTable from "./VendorSummaryTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
 
-const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
-  return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 };
 
 export default function DealerDashboard() {
@@ -26,28 +27,21 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
 
-  const [showRiskTable, setShowRiskTable] = useState(false);
+  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
 
   useEffect(() => {
-    if (showRiskTable) {
+    if (viewMode === "risk") {
       setSelectedCustomer("All");
       setSelectedContractType("All");
     }
-  }, [showRiskTable, setSelectedCustomer, setSelectedContractType]);
+  }, [viewMode]);
 
   const customerOptions = ["All", ...customers];
 
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
-  const grouped = Object.entries(
-    filtered.reduce<Record<string, typeof filtered>>((acc, row: (typeof filtered)[number]) => {
-      const cust = row.Monitor;
-      if (!acc[cust]) acc[cust] = [];
-      acc[cust].push(row);
-      return acc;
-    }, {})
-  );
+  const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
   const table1Data = filtered.map((row) => ({
     Monitor: row.Monitor,
@@ -79,11 +73,10 @@ export default function DealerDashboard() {
     Included_Color_Volume: row.Included_Color_Volume,
     Billable_Mono_Pages: row.Billable_Mono_Pages,
     Billable_Color_Pages: row.Billable_Color_Pages,
-    contract_end:
-      typeof row.contract_end === "number"
-        ? new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US")
-        : "-",
-    Recalculated_Age_Years: row["Recalculated_Age_Years"] ?? 0,
+    contract_end: typeof row.contract_end === "number"
+      ? new Date((row.contract_end - 25569) * 86400 * 1000).toLocaleDateString("en-US")
+      : "-",
+    Recalculated_Age_Years: row.Recalculated_Age_Years ?? 0,
     Usage_Percent: row.Usage_Percent,
     Engine_Cycles: row.Engine_Cycles,
     Final_Risk_Level: row.Final_Risk_Level,
@@ -110,14 +103,6 @@ export default function DealerDashboard() {
     Last_Updated: row.Last_Updated,
   }));
 
-  const customerFiltered = data.filter(
-    (row) => selectedCustomer === "All" || row.Monitor === selectedCustomer
-  );
-
-  const contractOnly = filtered.filter(
-    (row) => row.Contract_Status === "C"
-  );
-
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold mb-4">Dealer Dashboard</h1>
@@ -135,6 +120,7 @@ export default function DealerDashboard() {
             <option value="N">New Build</option>
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer:</label>
           <select
@@ -161,49 +147,66 @@ export default function DealerDashboard() {
           </select>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="toggleRisk"
-            checked={showRiskTable}
-            onChange={() => setShowRiskTable(!showRiskTable)}
-          />
-          <label htmlFor="toggleRisk" className="text-sm font-medium text-gray-700">Show Margin & Risk Summary</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Other Options:</label>
+          <select
+            value={viewMode}
+            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor")}
+            className="p-2 border border-gray-300 rounded w-64"
+          >
+            <option value="">-- None --</option>
+            <option value="risk">Show Margin & Risk Summary</option>
+            <option value="vendor">Show Vendor Summary</option>
+          </select>
         </div>
       </div>
 
-      {showRiskTable ? (
+      {viewMode === "risk" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
           <RiskMarginTable filtered={filtered} bias={selectedBias} />
         </div>
-      ) : (
-        <>
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-            <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
-          </div>
-
-          {selectedCustomer !== "All" && (
-            <>
-              <div className="mt-10">
-                <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-                <Table1 data={table1Data} bias={selectedBias} />
-              </div>
-
-              <div className="mt-10">
-                <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
-                <Table2 data={table2Data} />
-              </div>
-
-              <div className="mt-10">
-                <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
-                <Table3 filtered={filtered} />
-              </div>
-            </>
-          )}
-        </>
       )}
+
+      {viewMode === "vendor" && (
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
+          <VendorSummaryTable filtered={filtered} bias={selectedBias} />
+        </div>
+      )}
+
+{!viewMode && (
+  <>
+    <div className="mt-10">
+      <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+      <ChartBlock
+        filtered={filtered}
+        contractOnly={contractOnly}
+        bias={selectedBias}
+        contractType={selectedContractType}
+      />
+    </div>
+
+    {selectedCustomer !== "All" && (
+      <>
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
+          <Table1 data={table1Data} bias={selectedBias} />
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
+          <Table2 data={table2Data} />
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
+          <Table3 filtered={filtered} />
+        </div>
+      </>
+    )}
+  </>
+)}
     </div>
   );
 }
