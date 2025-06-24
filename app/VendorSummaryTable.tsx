@@ -15,8 +15,36 @@ type Props = {
 };
 
 export default function VendorSummaryTable({ filtered, bias }: Props) {
-  const getBiasField = (row: Row, field: string): number => {
-    return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+  // Fallback field logic for numeric values (quantities and prices)
+  const getBiasValue = (row: Row, baseField: string): number => {
+    const biasPriority =
+      bias === "O"
+        ? [baseField, `R_${baseField}`, `N_${baseField}`]
+        : bias === "R"
+        ? [`R_${baseField}`, `N_${baseField}`, baseField]
+        : [`N_${baseField}`, `R_${baseField}`, baseField];
+
+    for (const field of biasPriority) {
+      const val = row[field];
+      if (typeof val === "number" && !isNaN(val)) return val;
+    }
+    return 0;
+  };
+
+  // Fallback logic for supplier/vendor names
+  const getBiasSupplier = (row: Row, baseField: string): string | null => {
+    const biasPriority =
+      bias === "O"
+        ? [baseField, `R_${baseField}`, `N_${baseField}`]
+        : bias === "R"
+        ? [`R_${baseField}`, `N_${baseField}`, baseField]
+        : [`N_${baseField}`, `R_${baseField}`, baseField];
+
+    for (const field of biasPriority) {
+      const val = row[field];
+      if (val && typeof val === "string" && val.trim() && val !== "Not Reqd") return val;
+    }
+    return null;
   };
 
   type VendorData = {
@@ -29,18 +57,18 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
   for (const row of filtered) {
     const fields = [
-      { color: "Black", qty: "Black_Full_Cartridges_Required_365d", cost: "Buy_Price", vendor: "Supplier_Black" },
-      { color: "Cyan", qty: "Cyan_Full_Cartridges_Required_365d", cost: "Cyan_Cartridge_Cost", vendor: "Supplier_Cyan" },
-      { color: "Magenta", qty: "Magenta_Full_Cartridges_Required_365d", cost: "Magenta_Cartridge_Cost", vendor: "Supplier_Magenta" },
-      { color: "Yellow", qty: "Yellow_Full_Cartridges_Required_365d", cost: "Yellow_Cartridge_Cost", vendor: "Supplier_Yellow" },
+      { qty: "Black_Full_Cartridges_Required_365d", cost: "Buy_Price", vendor: "Supplier_Black" },
+      { qty: "Cyan_Full_Cartridges_Required_365d", cost: "Cyan_Cartridge_Cost", vendor: "Supplier_Cyan" },
+      { qty: "Magenta_Full_Cartridges_Required_365d", cost: "Magenta_Cartridge_Cost", vendor: "Supplier_Magenta" },
+      { qty: "Yellow_Full_Cartridges_Required_365d", cost: "Yellow_Cartridge_Cost", vendor: "Supplier_Yellow" },
     ];
 
     for (const field of fields) {
-      const quantity = getBiasField(row, field.qty);
-      const price = getBiasField(row, field.cost);
-      const supplier = row[field.vendor];
+      const quantity = getBiasValue(row, field.qty);
+      const price = getBiasValue(row, field.cost);
+      const supplier = getBiasSupplier(row, field.vendor);
 
-      if (!supplier || supplier === "Not Reqd" || quantity <= 0 || price <= 0) continue;
+      if (!supplier || quantity <= 0 || price <= 0) continue;
 
       const spend = quantity * price;
 
