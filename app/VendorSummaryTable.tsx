@@ -61,7 +61,18 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         const sku = row[opt.sku];
         const styleUsed = row[opt.origin];
 
-        if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0 || !styleUsed || styleUsed === "?" || styleUsed === "Not Reqd") continue;
+        const isValid =
+          supplier &&
+          supplier !== "Not Reqd" &&
+          qty &&
+          price &&
+          qty > 0 &&
+          price > 0 &&
+          styleUsed &&
+          styleUsed !== "?" &&
+          styleUsed !== "Not Reqd";
+
+        if (!isValid) continue;
 
         const extBuy = qty * price;
         const equipment = row["Manufacturer"] || "Unknown";
