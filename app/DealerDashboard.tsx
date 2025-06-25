@@ -19,7 +19,7 @@ export default function DealerDashboard() {
   const {
     loading,
     filtered,
-    filteredForVendor, // ✅ Added for vendor view
+    filteredForVendor,
     data,
     customers,
     selectedCustomer,
@@ -30,6 +30,8 @@ export default function DealerDashboard() {
 
   const [viewMode, setViewMode] = useState<"" | "risk" | "vendor">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
 
   useEffect(() => {
     if (viewMode === "risk") {
@@ -160,6 +162,36 @@ export default function DealerDashboard() {
             <option value="vendor">Show Vendor Summary</option>
           </select>
         </div>
+
+        {viewMode === "vendor" && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Color:</label>
+              <select
+                value={selectedColor}
+                onChange={(e) => setSelectedColor(e.target.value)}
+                className="p-2 border border-gray-300 rounded w-64"
+              >
+                <option value="">All Colors</option>
+                <option value="Black">Black</option>
+                <option value="Cyan">Cyan</option>
+                <option value="Magenta">Magenta</option>
+                <option value="Yellow">Yellow</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Manufacturer:</label>
+              <input
+                type="text"
+                value={selectedManufacturer}
+                onChange={(e) => setSelectedManufacturer(e.target.value)}
+                placeholder="e.g. Brother"
+                className="p-2 border border-gray-300 rounded w-64"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {viewMode === "risk" && (
@@ -172,7 +204,7 @@ export default function DealerDashboard() {
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
-          <VendorSummaryTable filtered={filteredForVendor} bias={selectedBias} />
+          <VendorSummaryTable filtered={filteredForVendor} bias={selectedBias} colorFilter={selectedColor} manufacturerFilter={selectedManufacturer} />
         </div>
       )}
 
