@@ -32,20 +32,20 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
     const base = color.charAt(0).toUpperCase() + color.slice(1);
     return bias === "O"
       ? [
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
         ]
       : bias === "R"
       ? [
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
         ]
       : [
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
         ];
   };
 
@@ -64,7 +64,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
         const extBuy = qty * price;
         const equipment = row["Manufacturer"] || "Unknown";
-        const styleUsed = opt.style;
+        const styleUsed = row[opt.origin] ?? "?";
 
         if (!vendorMap.has(supplier)) {
           vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: new Map() });
