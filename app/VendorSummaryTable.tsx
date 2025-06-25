@@ -26,8 +26,6 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
     });
   };
 
-  const colors = ["Black", "Cyan", "Magenta", "Yellow"];
-
   const getPriorityFields = (color: string) => {
     const base = color.charAt(0).toUpperCase() + color.slice(1);
     return bias === "O"
@@ -52,6 +50,9 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
   const vendorMap = new Map<string, { totalCartridges: number; projectedSpend: number; items: Map<string, any> }>();
 
   for (const row of filtered) {
+    let added = false;
+    const colors = row.Device_Type === "Mono" ? ["Black"] : ["Black", "Cyan", "Magenta", "Yellow"];
+
     for (const color of colors) {
       const options = getPriorityFields(color);
 
@@ -62,16 +63,12 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         const sku = row[opt.sku];
         const styleUsed = row[opt.origin];
 
-        const isValid =
-          !!supplier &&
-          supplier !== "Not Reqd" &&
-          typeof qty === "number" && qty > 0 &&
-          typeof price === "number" && price > 0 &&
-          styleUsed &&
-          styleUsed !== "?" &&
-          styleUsed !== "Not Reqd";
+        const qtyValid = typeof qty === "number" && qty > 0;
+        const priceValid = typeof price === "number" && price > 0;
+        const supplierValid = supplier && supplier !== "Not Reqd";
+        const styleValid = styleUsed && styleUsed !== "Not Reqd";
 
-        if (!isValid) continue;
+        if (!(qtyValid && priceValid && supplierValid && styleValid)) continue;
 
         const extBuy = qty * price;
         const equipment = row["Manufacturer"] || "Unknown";
@@ -101,17 +98,23 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
           existing.extBuy += extBuy;
         }
 
-        break; // use the first valid match only
+        added = true;
+        break;
       }
     }
+
+    // You may log excluded rows for debugging if needed
+    // if (!added) console.log("Excluded device:", row.Serial_Number);
   }
 
-  const vendorList = Array.from(vendorMap.entries()).map(([supplier, data]) => ({
-    supplier,
-    totalCartridges: data.totalCartridges,
-    projectedSpend: data.projectedSpend,
-    items: Array.from(data.items.values()).sort((a, b) => b.extBuy - a.extBuy),
-  })).sort((a, b) => b.projectedSpend - a.projectedSpend);
+  const vendorList = Array.from(vendorMap.entries())
+    .map(([supplier, data]) => ({
+      supplier,
+      totalCartridges: data.totalCartridges,
+      projectedSpend: data.projectedSpend,
+      items: Array.from(data.items.values()).sort((a, b) => b.extBuy - a.extBuy),
+    }))
+    .sort((a, b) => b.projectedSpend - a.projectedSpend);
 
   return (
     <div className="overflow-x-auto">
