@@ -59,12 +59,12 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         const price = row[opt.price];
         const supplier = row[opt.supplier];
         const sku = row[opt.sku];
+        const styleUsed = row[opt.origin];
 
-        if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0) continue;
+        if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0 || !styleUsed || styleUsed === "?" || styleUsed === "Not Reqd") continue;
 
         const extBuy = qty * price;
         const equipment = row["Manufacturer"] || "Unknown";
-        const styleUsed = row[opt.origin] ?? "?";
 
         if (!vendorMap.has(supplier)) {
           vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: new Map() });
