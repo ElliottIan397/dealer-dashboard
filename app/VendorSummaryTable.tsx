@@ -49,7 +49,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         ];
   };
 
-  const vendorMap = new Map<string, { totalCartridges: number; projectedSpend: number; items: any[] }>();
+  const vendorMap = new Map<string, { totalCartridges: number; projectedSpend: number; items: Map<string, any> }>();
 
   for (const row of filtered) {
     for (const color of colors) {
@@ -63,23 +63,33 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0) continue;
 
         const extBuy = qty * price;
+        const equipment = row["Manufacturer"] || "Unknown";
 
         if (!vendorMap.has(supplier)) {
-          vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: [] });
+          vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: new Map() });
         }
 
         const vendorData = vendorMap.get(supplier)!;
         vendorData.totalCartridges += qty;
         vendorData.projectedSpend += extBuy;
-        vendorData.items.push({
-          equipment: "Manufacturer",
-          sku,
-          style: opt.style,
-          color,
-          qty,
-          price,
-          extBuy,
-        });
+
+        const key = `${sku}_${opt.style}_${color}`;
+        if (!vendorData.items.has(key)) {
+          vendorData.items.set(key, {
+            equipment,
+            sku,
+            style: opt.style,
+            color,
+            qty,
+            price,
+            extBuy,
+          });
+        } else {
+          const existing = vendorData.items.get(key);
+          existing.qty += qty;
+          existing.extBuy += extBuy;
+        }
+
         break; // Stop after the first valid fallback found
       }
     }
@@ -87,8 +97,9 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
   const vendorList = Array.from(vendorMap.entries()).map(([supplier, data]) => ({
     supplier,
-    ...data,
-    items: data.items.sort((a, b) => b.extBuy - a.extBuy),
+    totalCartridges: data.totalCartridges,
+    projectedSpend: data.projectedSpend,
+    items: Array.from(data.items.values()).sort((a, b) => b.extBuy - a.extBuy),
   })).sort((a, b) => b.projectedSpend - a.projectedSpend);
 
   return (
