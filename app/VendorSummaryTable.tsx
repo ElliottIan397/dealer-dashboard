@@ -28,22 +28,23 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
   const getPriorityFields = (color: string) => {
     const base = color.charAt(0).toUpperCase() + color.slice(1);
+    const originKey = color === "Black" ? "K" : base.charAt(0);
     return bias === "O"
       ? [
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
         ]
       : bias === "R"
       ? [
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
         ]
       : [
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${base.charAt(0)}_Origin` },
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${base.charAt(0)}_Origin` },
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${base.charAt(0)}_Origin` },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
         ];
   };
 
