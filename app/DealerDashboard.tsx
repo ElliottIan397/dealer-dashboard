@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
@@ -32,6 +33,12 @@ export default function DealerDashboard() {
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+
+  const manufacturerOptions = Array.from(
+    new Set(data.map((row) => row.Manufacturer).filter(Boolean))
+  )
+    .sort()
+    .map((mfr) => ({ value: mfr, label: mfr }));
 
   useEffect(() => {
     if (viewMode === "risk") {
@@ -180,14 +187,13 @@ export default function DealerDashboard() {
               </select>
             </div>
 
-            <div>
+            <div className="w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Manufacturer:</label>
-              <input
-                type="text"
-                value={selectedManufacturer}
-                onChange={(e) => setSelectedManufacturer(e.target.value)}
+              <Select
+                options={manufacturerOptions}
+                onChange={(opt) => setSelectedManufacturer(opt?.value || "")}
+                isClearable
                 placeholder="e.g. Brother"
-                className="p-2 border border-gray-300 rounded w-64"
               />
             </div>
           </>
@@ -195,16 +201,23 @@ export default function DealerDashboard() {
       </div>
 
       {viewMode === "risk" && (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
-          <RiskMarginTable filtered={filtered} bias={selectedBias} />
-        </div>
+        <>
+          <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
+          <Table1 data={table1Data} bias={selectedBias} />
+          <Table2 data={table2Data} />
+          <Table3 filtered={filtered} />
+        </>
       )}
 
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
-          <VendorSummaryTable filtered={filteredForVendor} bias={selectedBias} colorFilter={selectedColor} manufacturerFilter={selectedManufacturer} />
+          <VendorSummaryTable
+            filtered={filteredForVendor}
+            bias={selectedBias}
+            colorFilter={selectedColor}
+            manufacturerFilter={selectedManufacturer}
+          />
         </div>
       )}
 
