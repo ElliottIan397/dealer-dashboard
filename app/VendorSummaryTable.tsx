@@ -26,52 +26,62 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
     });
   };
 
-  const supplierMatrix = [
-    { style: "O", color: "Black", qty: "Black_Full_Cartridges_Required_365d", cost: "Buy_Price", sku: "Black_SKU", supplier: "Supplier_Black" },
-    { style: "O", color: "Cyan", qty: "Cyan_Full_Cartridges_Required_365d", cost: "Cyan_Cartridge_Cost", sku: "Cyan_SKU", supplier: "Supplier_Cyan" },
-    { style: "O", color: "Magenta", qty: "Magenta_Full_Cartridges_Required_365d", cost: "Magenta_Cartridge_Cost", sku: "Magenta_SKU", supplier: "Supplier_Magenta" },
-    { style: "O", color: "Yellow", qty: "Yellow_Full_Cartridges_Required_365d", cost: "Yellow_Cartridge_Cost", sku: "Yellow_SKU", supplier: "Supplier_Yellow" },
+  const colors = ["Black", "Cyan", "Magenta", "Yellow"];
 
-    { style: "R", color: "Black", qty: "R_Black_Full_Cartridges_Required_365d", cost: "R_Buy_Price", sku: "R_Black_SKU", supplier: "R_Supplier_Black" },
-    { style: "R", color: "Cyan", qty: "R-Cyan_Full_Cartridges_Required_365d", cost: "R_Cyan_Cartridge_Cost", sku: "R_Cyan_SKU", supplier: "R_Supplier_Cyan" },
-    { style: "R", color: "Magenta", qty: "R_Magenta_Full_Cartridges_Required_365d", cost: "R_Magenta_Cartridge_Cost", sku: "R_Magenta_SKU", supplier: "R_Supplier_Magenta" },
-    { style: "R", color: "Yellow", qty: "R_Yellow_Full_Cartridges_Required_365d", cost: "R_Yellow_Cartridge_Cost", sku: "R_Yellow_SKU", supplier: "R_Supplier_Yellow" },
-
-    { style: "N", color: "Black", qty: "N_Black_Full_Cartridges_Required_365d", cost: "N_Buy_Price", sku: "N_Black_SKU", supplier: "N_Supplier_Black" },
-    { style: "N", color: "Cyan", qty: "N_Cyan_Full_Cartridges_Required_365d", cost: "N_Cyan_Cartridge_Cost", sku: "N_Cyan_SKU", supplier: "N_Supplier_Cyan" },
-    { style: "N", color: "Magenta", qty: "N_Magenta_Full_Cartridges_Required_365d", cost: "N_Magenta_Cartridge_Cost", sku: "N_Magenta_SKU", supplier: "N_Supplier_Magenta" },
-    { style: "N", color: "Yellow", qty: "N_Yellow_Full_Cartridges_Required_365d", cost: "N_Yellow_Cartridge_Cost", sku: "N_Yellow_SKU", supplier: "N_Supplier_Yellow" },
-  ];
+  const getPriorityFields = (color: string): { sku: string; qty: string; price: string; supplier: string; style: string }[] => {
+    const base = color.charAt(0).toUpperCase() + color.slice(1);
+    return bias === "O"
+      ? [
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
+        ]
+      : bias === "R"
+      ? [
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
+        ]
+      : [
+          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, style: "N" },
+          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, style: "R" },
+          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, style: "O" },
+        ];
+  };
 
   const vendorMap = new Map<string, { totalCartridges: number; projectedSpend: number; items: any[] }>();
 
   for (const row of filtered) {
-    for (const entry of supplierMatrix) {
-      const qty = row[entry.qty];
-      const price = row[entry.cost];
-      const supplier = row[entry.supplier];
-      const sku = row[entry.sku];
+    for (const color of colors) {
+      const options = getPriorityFields(color);
+      for (const opt of options) {
+        const qty = row[opt.qty];
+        const price = row[opt.price];
+        const supplier = row[opt.supplier];
+        const sku = row[opt.sku];
 
-      if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0) continue;
+        if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0) continue;
 
-      const extBuy = qty * price;
+        const extBuy = qty * price;
 
-      if (!vendorMap.has(supplier)) {
-        vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: [] });
+        if (!vendorMap.has(supplier)) {
+          vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: [] });
+        }
+
+        const vendorData = vendorMap.get(supplier)!;
+        vendorData.totalCartridges += qty;
+        vendorData.projectedSpend += extBuy;
+        vendorData.items.push({
+          equipment: "Manufacturer",
+          sku,
+          style: opt.style,
+          color,
+          qty,
+          price,
+          extBuy,
+        });
+        break; // Stop after the first valid fallback found
       }
-
-      const vendorData = vendorMap.get(supplier)!;
-      vendorData.totalCartridges += qty;
-      vendorData.projectedSpend += extBuy;
-      vendorData.items.push({
-        equipment: "Manufacturer",
-        sku,
-        style: entry.style,
-        color: entry.color,
-        qty,
-        price,
-        extBuy,
-      });
     }
   }
 
