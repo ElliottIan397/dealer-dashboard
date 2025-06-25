@@ -12,9 +12,11 @@ type Row = {
 type Props = {
   filtered: Row[];
   bias: Bias;
+  colorFilter?: string;
+  manufacturerFilter?: string;
 };
 
-export default function VendorSummaryTable({ filtered, bias }: Props) {
+export default function VendorSummaryTable({ filtered, bias, colorFilter, manufacturerFilter }: Props) {
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
 
   const toggleVendor = (vendor: string) => {
@@ -55,6 +57,9 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
     const colors = row.Device_Type === "Mono" ? ["Black"] : ["Black", "Cyan", "Magenta", "Yellow"];
 
     for (const color of colors) {
+      if (colorFilter && color !== colorFilter) continue;
+      if (manufacturerFilter && row["Manufacturer"] !== manufacturerFilter) continue;
+
       const options = getPriorityFields(color);
 
       for (const opt of options) {
@@ -103,9 +108,6 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         break;
       }
     }
-
-    // You may log excluded rows for debugging if needed
-    // if (!added) console.log("Excluded device:", row.Serial_Number);
   }
 
   const vendorList = Array.from(vendorMap.entries())
