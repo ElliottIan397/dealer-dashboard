@@ -54,6 +54,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
   for (const row of filtered) {
     for (const color of colors) {
       const options = getPriorityFields(color);
+
       for (const opt of options) {
         const qty = row[opt.qty];
         const price = row[opt.price];
@@ -62,12 +63,10 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         const styleUsed = row[opt.origin];
 
         const isValid =
-          supplier &&
+          !!supplier &&
           supplier !== "Not Reqd" &&
-          qty &&
-          price &&
-          qty > 0 &&
-          price > 0 &&
+          typeof qty === "number" && qty > 0 &&
+          typeof price === "number" && price > 0 &&
           styleUsed &&
           styleUsed !== "?" &&
           styleUsed !== "Not Reqd";
@@ -102,7 +101,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
           existing.extBuy += extBuy;
         }
 
-        break; // Stop after first valid fallback used
+        break; // use the first valid match only
       }
     }
   }
