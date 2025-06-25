@@ -28,7 +28,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
   const colors = ["Black", "Cyan", "Magenta", "Yellow"];
 
-  const getPriorityFields = (color: string): { sku: string; qty: string; price: string; supplier: string; style: string }[] => {
+  const getPriorityFields = (color: string) => {
     const base = color.charAt(0).toUpperCase() + color.slice(1);
     return bias === "O"
       ? [
@@ -64,6 +64,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
 
         const extBuy = qty * price;
         const equipment = row["Manufacturer"] || "Unknown";
+        const styleUsed = opt.style;
 
         if (!vendorMap.has(supplier)) {
           vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: new Map() });
@@ -73,12 +74,12 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
         vendorData.totalCartridges += qty;
         vendorData.projectedSpend += extBuy;
 
-        const key = `${sku}_${opt.style}_${color}`;
+        const key = `${sku}_${styleUsed}_${color}`;
         if (!vendorData.items.has(key)) {
           vendorData.items.set(key, {
             equipment,
             sku,
-            style: opt.style,
+            style: styleUsed,
             color,
             qty,
             price,
@@ -90,7 +91,7 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
           existing.extBuy += extBuy;
         }
 
-        break; // Stop after the first valid fallback found
+        break; // Stop after first valid fallback used
       }
     }
   }
