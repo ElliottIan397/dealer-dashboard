@@ -19,6 +19,7 @@ export default function DealerDashboard() {
   const {
     loading,
     filtered,
+    filteredForVendor, // ✅ Added for vendor view
     data,
     customers,
     selectedCustomer,
@@ -171,42 +172,42 @@ export default function DealerDashboard() {
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
-          <VendorSummaryTable filtered={filtered} bias={selectedBias} />
+          <VendorSummaryTable filtered={filteredForVendor} bias={selectedBias} />
         </div>
       )}
 
-{!viewMode && (
-  <>
-    <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-      <ChartBlock
-        filtered={filtered}
-        contractOnly={contractOnly}
-        bias={selectedBias}
-        contractType={selectedContractType}
-      />
-    </div>
+      {!viewMode && (
+        <>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+            <ChartBlock
+              filtered={filtered}
+              contractOnly={contractOnly}
+              bias={selectedBias}
+              contractType={selectedContractType}
+            />
+          </div>
 
-    {selectedCustomer !== "All" && (
-      <>
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-          <Table1 data={table1Data} bias={selectedBias} />
-        </div>
+          {selectedCustomer !== "All" && (
+            <>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
+                <Table1 data={table1Data} bias={selectedBias} />
+              </div>
 
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
-          <Table2 data={table2Data} />
-        </div>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
+                <Table2 data={table2Data} />
+              </div>
 
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
-          <Table3 filtered={filtered} />
-        </div>
-      </>
-    )}
-  </>
-)}
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
+                <Table3 filtered={filtered} />
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

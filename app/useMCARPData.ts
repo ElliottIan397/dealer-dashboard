@@ -31,6 +31,14 @@ export function useMCARPData() {
     });
   }, [data, selectedCustomer, selectedContractType]);
 
+  const filteredForVendor = useMemo(() => {
+    return data.filter((row) => {
+      const customerMatch = selectedCustomer === "All" || row.Monitor === selectedCustomer;
+      const contractMatch = selectedContractType === "All" || row.Contract_Status === selectedContractType;
+      return customerMatch && contractMatch;
+    });
+  }, [data, selectedCustomer, selectedContractType]);
+
   const contractDevices = useMemo(() => {
     return data.filter((row) => {
       const customerMatch = selectedCustomer === "All" || row.Monitor === selectedCustomer;
@@ -49,6 +57,7 @@ export function useMCARPData() {
     loading,
     data,
     filtered,
+    filteredForVendor, // ✅ added for VendorSummaryTable filtering
     customers,
     selectedCustomer,
     setSelectedCustomer,
