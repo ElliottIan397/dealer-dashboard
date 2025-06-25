@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { safeCurrency as formatCurrency } from "./utils";
 
 type Bias = "O" | "R" | "N";
@@ -15,88 +15,71 @@ type Props = {
 };
 
 export default function VendorSummaryTable({ filtered, bias }: Props) {
-  // Fallback field logic for numeric values (quantities and prices)
-  const getBiasValue = (row: Row, baseField: string): number => {
-    const biasPriority =
-      bias === "O"
-        ? [baseField, `R_${baseField}`, `N_${baseField}`]
-        : bias === "R"
-        ? [`R_${baseField}`, `N_${baseField}`, baseField]
-        : [`N_${baseField}`, `R_${baseField}`, baseField];
+  const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
 
-    for (const field of biasPriority) {
-      const val = row[field];
-      if (typeof val === "number" && !isNaN(val)) return val;
-    }
-    return 0;
+  const toggleVendor = (vendor: string) => {
+    setExpandedVendors((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(vendor)) newSet.delete(vendor);
+      else newSet.add(vendor);
+      return newSet;
+    });
   };
 
-  // Fallback logic for supplier/vendor names
-  const getBiasSupplier = (row: Row, baseField: string): string | null => {
-    const biasPriority =
-      bias === "O"
-        ? [baseField, `R_${baseField}`, `N_${baseField}`]
-        : bias === "R"
-        ? [`R_${baseField}`, `N_${baseField}`, baseField]
-        : [`N_${baseField}`, `R_${baseField}`, baseField];
+  const supplierMatrix = [
+    { style: "O", color: "Black", qty: "Black_Full_Cartridges_Required_365d", cost: "Buy_Price", sku: "Black_SKU", supplier: "Supplier_Black" },
+    { style: "O", color: "Cyan", qty: "Cyan_Full_Cartridges_Required_365d", cost: "Cyan_Cartridge_Cost", sku: "Cyan_SKU", supplier: "Supplier_Cyan" },
+    { style: "O", color: "Magenta", qty: "Magenta_Full_Cartridges_Required_365d", cost: "Magenta_Cartridge_Cost", sku: "Magenta_SKU", supplier: "Supplier_Magenta" },
+    { style: "O", color: "Yellow", qty: "Yellow_Full_Cartridges_Required_365d", cost: "Yellow_Cartridge_Cost", sku: "Yellow_SKU", supplier: "Supplier_Yellow" },
 
-    for (const field of biasPriority) {
-      const val = row[field];
-      if (val && typeof val === "string" && val.trim() && val !== "Not Reqd") return val;
-    }
-    return null;
-  };
+    { style: "R", color: "Black", qty: "R_Black_Full_Cartridges_Required_365d", cost: "R_Buy_Price", sku: "R_Black_SKU", supplier: "R_Supplier_Black" },
+    { style: "R", color: "Cyan", qty: "R-Cyan_Full_Cartridges_Required_365d", cost: "R_Cyan_Cartridge_Cost", sku: "R_Cyan_SKU", supplier: "R_Supplier_Cyan" },
+    { style: "R", color: "Magenta", qty: "R_Magenta_Full_Cartridges_Required_365d", cost: "R_Magenta_Cartridge_Cost", sku: "R_Magenta_SKU", supplier: "R_Supplier_Magenta" },
+    { style: "R", color: "Yellow", qty: "R_Yellow_Full_Cartridges_Required_365d", cost: "R_Yellow_Cartridge_Cost", sku: "R_Yellow_SKU", supplier: "R_Supplier_Yellow" },
 
-  type VendorData = {
-    supplier: string;
-    totalCartridges: number;
-    projectedSpend: number;
-  };
+    { style: "N", color: "Black", qty: "N_Black_Full_Cartridges_Required_365d", cost: "N_Buy_Price", sku: "N_Black_SKU", supplier: "N_Supplier_Black" },
+    { style: "N", color: "Cyan", qty: "N_Cyan_Full_Cartridges_Required_365d", cost: "N_Cyan_Cartridge_Cost", sku: "N_Cyan_SKU", supplier: "N_Supplier_Cyan" },
+    { style: "N", color: "Magenta", qty: "N_Magenta_Full_Cartridges_Required_365d", cost: "N_Magenta_Cartridge_Cost", sku: "N_Magenta_SKU", supplier: "N_Supplier_Magenta" },
+    { style: "N", color: "Yellow", qty: "N_Yellow_Full_Cartridges_Required_365d", cost: "N_Yellow_Cartridge_Cost", sku: "N_Yellow_SKU", supplier: "N_Supplier_Yellow" },
+  ];
 
-  const vendorMap = new Map<string, VendorData>();
+  const vendorMap = new Map<string, { totalCartridges: number; projectedSpend: number; items: any[] }>();
 
   for (const row of filtered) {
-    const fields = [
-      { qty: "Black_Full_Cartridges_Required_365d", cost: "Buy_Price", vendor: "Supplier_Black" },
-      { qty: "Cyan_Full_Cartridges_Required_365d", cost: "Cyan_Cartridge_Cost", vendor: "Supplier_Cyan" },
-      { qty: "Magenta_Full_Cartridges_Required_365d", cost: "Magenta_Cartridge_Cost", vendor: "Supplier_Magenta" },
-      { qty: "Yellow_Full_Cartridges_Required_365d", cost: "Yellow_Cartridge_Cost", vendor: "Supplier_Yellow" },
-    ];
+    for (const entry of supplierMatrix) {
+      const qty = row[entry.qty];
+      const price = row[entry.cost];
+      const supplier = row[entry.supplier];
+      const sku = row[entry.sku];
 
-    for (const field of fields) {
-      const quantity = getBiasValue(row, field.qty);
-      const price = getBiasValue(row, field.cost);
-      const supplier = getBiasSupplier(row, field.vendor);
+      if (!supplier || supplier === "Not Reqd" || !qty || !price || qty <= 0 || price <= 0) continue;
 
-      if (!supplier || quantity <= 0 || price <= 0) continue;
+      const extBuy = qty * price;
 
-      const spend = quantity * price;
-
-      if (vendorMap.has(supplier)) {
-        const existing = vendorMap.get(supplier)!;
-        existing.totalCartridges += quantity;
-        existing.projectedSpend += spend;
-      } else {
-        vendorMap.set(supplier, {
-          supplier,
-          totalCartridges: quantity,
-          projectedSpend: spend,
-        });
+      if (!vendorMap.has(supplier)) {
+        vendorMap.set(supplier, { totalCartridges: 0, projectedSpend: 0, items: [] });
       }
+
+      const vendorData = vendorMap.get(supplier)!;
+      vendorData.totalCartridges += qty;
+      vendorData.projectedSpend += extBuy;
+      vendorData.items.push({
+        equipment: "Manufacturer",
+        sku,
+        style: entry.style,
+        color: entry.color,
+        qty,
+        price,
+        extBuy,
+      });
     }
   }
 
-  const vendorList = Array.from(vendorMap.values()).sort(
-    (a, b) => b.projectedSpend - a.projectedSpend
-  );
-
-  const grandTotal = vendorList.reduce(
-    (acc, v) => ({
-      cartridges: acc.cartridges + v.totalCartridges,
-      spend: acc.spend + v.projectedSpend,
-    }),
-    { cartridges: 0, spend: 0 }
-  );
+  const vendorList = Array.from(vendorMap.entries()).map(([supplier, data]) => ({
+    supplier,
+    ...data,
+    items: data.items.sort((a, b) => b.extBuy - a.extBuy),
+  })).sort((a, b) => b.projectedSpend - a.projectedSpend);
 
   return (
     <div className="overflow-x-auto">
@@ -109,18 +92,47 @@ export default function VendorSummaryTable({ filtered, bias }: Props) {
           </tr>
         </thead>
         <tbody>
-          {vendorList.map((v) => (
-            <tr key={v.supplier} className="border-t">
-              <td className="px-3 py-2">{v.supplier}</td>
-              <td className="px-3 py-2 text-right">{v.totalCartridges.toFixed(1)}</td>
-              <td className="px-3 py-2 text-right">{formatCurrency(v.projectedSpend)}</td>
-            </tr>
+          {vendorList.map((vendor) => (
+            <React.Fragment key={vendor.supplier}>
+              <tr className="border-t cursor-pointer hover:bg-gray-50" onClick={() => toggleVendor(vendor.supplier)}>
+                <td className="px-3 py-2">{expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}</td>
+                <td className="px-3 py-2 text-right">{vendor.totalCartridges.toFixed(1)}</td>
+                <td className="px-3 py-2 text-right">{formatCurrency(vendor.projectedSpend)}</td>
+              </tr>
+              {expandedVendors.has(vendor.supplier) && (
+                <tr className="border-t bg-gray-50">
+                  <td colSpan={3} className="px-3 py-2">
+                    <table className="min-w-full text-xs">
+                      <thead className="text-gray-700">
+                        <tr>
+                          <th className="text-left px-2 py-1">Equipment</th>
+                          <th className="text-left px-2 py-1">SKU</th>
+                          <th className="text-left px-2 py-1">Style</th>
+                          <th className="text-left px-2 py-1">Color</th>
+                          <th className="text-right px-2 py-1">Qty</th>
+                          <th className="text-right px-2 py-1">Buy Price</th>
+                          <th className="text-right px-2 py-1">Ext. Buy</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vendor.items.map((item, i) => (
+                          <tr key={i}>
+                            <td className="px-2 py-1">{item.equipment}</td>
+                            <td className="px-2 py-1">{item.sku}</td>
+                            <td className="px-2 py-1">{item.style}</td>
+                            <td className="px-2 py-1">{item.color}</td>
+                            <td className="px-2 py-1 text-right">{item.qty.toFixed(1)}</td>
+                            <td className="px-2 py-1 text-right">{formatCurrency(item.price)}</td>
+                            <td className="px-2 py-1 text-right">{formatCurrency(item.extBuy)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
-          <tr className="border-t bg-gray-100 font-semibold">
-            <td className="px-3 py-2">Total</td>
-            <td className="px-3 py-2 text-right">{grandTotal.cartridges.toFixed(1)}</td>
-            <td className="px-3 py-2 text-right">{formatCurrency(grandTotal.spend)}</td>
-          </tr>
         </tbody>
       </table>
     </div>
