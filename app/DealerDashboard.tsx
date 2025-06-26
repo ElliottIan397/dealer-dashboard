@@ -202,14 +202,23 @@ export default function DealerDashboard() {
         )}
       </div>
 
-      {viewMode === "risk" && (
-        <>
-          <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
-          <Table1 data={table1Data} bias={selectedBias} />
-          <Table2 data={table2Data} />
-          <Table3 filtered={filtered} />
-        </>
-      )}
+{viewMode === "risk" && (
+  <>
+    <ChartBlock
+      filtered={filtered}
+      contractOnly={contractOnly}
+      bias={selectedBias}
+      contractType={selectedContractType}
+    />
+
+    {selectedCustomer !== "All" && (
+      <Table1 data={table1Data} bias={selectedBias} />
+    )}
+
+    <Table2 data={table2Data} />
+    <Table3 filtered={filtered} />
+  </>
+)}
 
       {viewMode === "vendor" && (
         <div className="mt-10">
