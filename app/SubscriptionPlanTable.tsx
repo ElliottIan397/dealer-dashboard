@@ -45,9 +45,13 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
 
+  if (!transactionalDevices.length) return null;
+
   return (
     <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-4">Subscription Plan Projection</h2>
+      <h2 className="text-2xl font-bold mb-4">
+        Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
+      </h2>
 
       <div className="flex gap-4 mb-4">
         <label>
