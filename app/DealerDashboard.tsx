@@ -211,15 +211,11 @@ export default function DealerDashboard() {
       contractType={selectedContractType}
     />
 
-    {selectedCustomer !== "All" && (
+    {selectedCustomer && selectedCustomer !== "All" && (
       <Table1 data={table1Data} bias={selectedBias} />
     )}
-
-    <Table2 data={table2Data} />
-    <Table3 filtered={filtered} />
   </>
 )}
-
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
