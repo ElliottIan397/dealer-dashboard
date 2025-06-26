@@ -30,11 +30,6 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor;
-  const avgMonthlyVol = totalVolume / 12;
-  const lowerVolLimit = avgMonthlyVol * 0.8;
-  const upperVolLimit = avgMonthlyVol * 1.2;
-  const lowerDeviceLimit = Math.round(totalDevices * 0.8);
-  const upperDeviceLimit = Math.round(totalDevices * 1.2);
 
   const transactionalCost = transactionalDevices.reduce((sum, r) => sum + (r.Twelve_Month_Fulfillment_Cost ?? 0), 0);
   const subscriptionCost = totalMono * MONO_CPP + totalColor * COLOR_CPP;
@@ -51,24 +46,35 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   return (
     <div className="mt-10">
       <h2 className="text-2xl font-bold mb-4">Subscription Plan Projection</h2>
-      <div className="flex gap-4 mb-4">
-        <label><input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} /> DCA</label>
-        <label><input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} /> JIT-R</label>
-        <label><input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} /> Contract</label>
-        <label><input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} /> QR</label>
-        <label><input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} /> ESW</label>
-      </div>
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-100">
             <th className="px-4 py-2 border">Monitor</th>
             <th className="px-4 py-2 border">Annual Volume</th>
             <th className="px-4 py-2 border"># Devices</th>
-            <th className="px-4 py-2 border">Volume Guardrail</th>
-            <th className="px-4 py-2 border">Device Guardrail</th>
-            <th className="px-4 py-2 border">Transactional Cost</th>
+            <th className="px-4 py-2 border">
+              DCA<br />
+              <input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} />
+            </th>
+            <th className="px-4 py-2 border">
+              JIT-R<br />
+              <input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} />
+            </th>
+            <th className="px-4 py-2 border">
+              Contract<br />
+              <input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} />
+            </th>
+            <th className="px-4 py-2 border">
+              QR<br />
+              <input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} />
+            </th>
+            <th className="px-4 py-2 border">
+              ESW<br />
+              <input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} />
+            </th>
+            <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
             <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
-            <th className="px-4 py-2 border">Subscr. Cost</th>
+            <th className="px-4 py-2 border">Subscription/Yr</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
         </thead>
@@ -77,8 +83,11 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
             <td className="px-4 py-2 border">{selectedCustomer}</td>
             <td className="px-4 py-2 border">{totalVolume}</td>
             <td className="px-4 py-2 border">{totalDevices}</td>
-            <td className="px-4 py-2 border">{Math.round(lowerVolLimit)} - {Math.round(upperVolLimit)}</td>
-            <td className="px-4 py-2 border">{lowerDeviceLimit} - {upperDeviceLimit}</td>
+            <td className="px-4 py-2 border">{safeCurrency(dcaTotal)}</td>
+            <td className="px-4 py-2 border">{safeCurrency(jitrTotal)}</td>
+            <td className="px-4 py-2 border">{safeCurrency(contractTotal)}</td>
+            <td className="px-4 py-2 border">{safeCurrency(qrTotal)}</td>
+            <td className="px-4 py-2 border">{safeCurrency(eswTotal)}</td>
             <td className="px-4 py-2 border">{safeCurrency(transactionalCost)}</td>
             <td className="px-4 py-2 border">{safeCurrency(totalSaaSCost)}</td>
             <td className="px-4 py-2 border">{safeCurrency(subscriptionCost)}</td>
