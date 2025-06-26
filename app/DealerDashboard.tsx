@@ -8,6 +8,7 @@ import Table2 from "./Table2";
 import Table3 from "./Table3";
 import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
+import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
@@ -29,7 +30,7 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
 
-  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor">("");
+  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor" | "subscription">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
@@ -161,12 +162,13 @@ export default function DealerDashboard() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Other Options:</label>
           <select
             value={viewMode}
-            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor")}
+            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor" | "subscription")}
             className="p-2 border border-gray-300 rounded w-64"
           >
             <option value="">-- None --</option>
             <option value="risk">Show Margin & Risk Summary</option>
             <option value="vendor">Show Vendor Summary</option>
+            <option value="subscription">Show Subscription Plan</option>
           </select>
         </div>
 
@@ -218,6 +220,20 @@ export default function DealerDashboard() {
             colorFilter={selectedColor}
             manufacturerFilter={selectedManufacturer}
           />
+        </div>
+      )}
+
+      {viewMode === "subscription" && (
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
+          <ChartBlock
+            filtered={filtered}
+            contractOnly={contractOnly}
+            bias={selectedBias}
+            contractType={selectedContractType}
+          />
+          <Table1 data={table1Data} bias={selectedBias} />
+          <SubscriptionPlanTable filtered={filtered} bias={selectedBias} selectedCustomer={selectedCustomer} />
         </div>
       )}
 
