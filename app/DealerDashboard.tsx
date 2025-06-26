@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
@@ -19,6 +20,7 @@ export default function DealerDashboard() {
   const {
     loading,
     filtered,
+    filteredForVendor,
     data,
     customers,
     selectedCustomer,
@@ -29,6 +31,14 @@ export default function DealerDashboard() {
 
   const [viewMode, setViewMode] = useState<"" | "risk" | "vendor">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+
+  const manufacturerOptions = Array.from(
+    new Set(data.map((row) => row.Manufacturer).filter(Boolean))
+  )
+    .sort()
+    .map((mfr) => ({ value: mfr, label: mfr }));
 
   useEffect(() => {
     if (viewMode === "risk") {
@@ -159,54 +169,90 @@ export default function DealerDashboard() {
             <option value="vendor">Show Vendor Summary</option>
           </select>
         </div>
+
+        {viewMode === "vendor" && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Color:</label>
+              <select
+                value={selectedColor}
+                onChange={(e) => setSelectedColor(e.target.value)}
+                className="p-2 border border-gray-300 rounded w-64"
+              >
+                <option value="">All Colors</option>
+                <option value="Black">Black</option>
+                <option value="Cyan">Cyan</option>
+                <option value="Magenta">Magenta</option>
+                <option value="Yellow">Yellow</option>
+              </select>
+            </div>
+
+            <div className="w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Manufacturer:</label>
+              <Select
+                options={manufacturerOptions}
+                onChange={(opt) => setSelectedManufacturer(opt?.value || "")}
+                isClearable
+                placeholder="e.g. Brother"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {viewMode === "risk" && (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Margin & Risk Summary</h2>
-          <RiskMarginTable filtered={filtered} bias={selectedBias} />
-        </div>
+        <>
+          <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
+          <Table1 data={table1Data} bias={selectedBias} />
+          <Table2 data={table2Data} />
+          <Table3 filtered={filtered} />
+        </>
       )}
 
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
-          <VendorSummaryTable filtered={filtered} bias={selectedBias} />
+          <VendorSummaryTable
+            filtered={filteredForVendor}
+            bias={selectedBias}
+            colorFilter={selectedColor}
+            manufacturerFilter={selectedManufacturer}
+          />
         </div>
       )}
 
-{!viewMode && (
-  <>
-    <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
-      <ChartBlock
-        filtered={filtered}
-        contractOnly={contractOnly}
-        bias={selectedBias}
-        contractType={selectedContractType}
-      />
-    </div>
+      {!viewMode && (
+        <>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+            <ChartBlock
+              filtered={filtered}
+              contractOnly={contractOnly}
+              bias={selectedBias}
+              contractType={selectedContractType}
+            />
+          </div>
 
-    {selectedCustomer !== "All" && (
-      <>
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-          <Table1 data={table1Data} bias={selectedBias} />
-        </div>
+          {selectedCustomer !== "All" && (
+            <>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
+                <Table1 data={table1Data} bias={selectedBias} />
+              </div>
 
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
-          <Table2 data={table2Data} />
-        </div>
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
+                <Table2 data={table2Data} />
+              </div>
 
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
-          <Table3 filtered={filtered} />
-        </div>
-      </>
-    )}
-  </>
-)}
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">In-Device Cartridge Yields & Page Coverage</h2>
+                <Table3 filtered={filtered} />
+              </div>
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

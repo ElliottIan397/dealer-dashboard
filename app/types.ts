@@ -2,6 +2,7 @@ export type McarpRow = {
   // Shared fields (Tables 1, 2, 3)
   Monitor: string;
   Serial_Number: string;
+  Manufacturer: string;
   Printer_Model: string;
   Device_Type: string;
 
