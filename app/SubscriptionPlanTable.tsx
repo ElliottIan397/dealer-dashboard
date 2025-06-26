@@ -10,8 +10,6 @@ interface Props {
   selectedCustomer: string;
 }
 
-const MONO_CPP = 0.02;
-const COLOR_CPP = 0.06;
 const DCA_COST = 0.25;
 const JITR_COST = 0.42;
 const CONTRACT_COST = 0.55;
@@ -25,6 +23,9 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const [includeQR, setIncludeQR] = useState(true);
   const [includeESW, setIncludeESW] = useState(true);
 
+  const [monoCpp, setMonoCpp] = useState(0.02);
+  const [colorCpp, setColorCpp] = useState(0.06);
+
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
@@ -32,7 +33,7 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const totalVolume = totalMono + totalColor;
 
   const transactionalCost = transactionalDevices.reduce((sum, r) => sum + (r.Twelve_Month_Fulfillment_Cost ?? 0), 0);
-  const subscriptionBase = totalMono * MONO_CPP + totalColor * COLOR_CPP;
+  const subscriptionBase = totalMono * monoCpp + totalColor * colorCpp;
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
   const subscriptionCost = subscriptionBase + eswTotal;
 
@@ -47,6 +48,30 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   return (
     <div className="mt-10">
       <h2 className="text-2xl font-bold mb-4">Subscription Plan Projection</h2>
+
+      <div className="flex gap-4 mb-4">
+        <label>
+          Mono CPP ($):
+          <input
+            type="number"
+            step="0.001"
+            value={monoCpp}
+            onChange={(e) => setMonoCpp(parseFloat(e.target.value) || 0)}
+            className="ml-2 border rounded px-2 py-1 w-24"
+          />
+        </label>
+        <label>
+          Color CPP ($):
+          <input
+            type="number"
+            step="0.001"
+            value={colorCpp}
+            onChange={(e) => setColorCpp(parseFloat(e.target.value) || 0)}
+            className="ml-2 border rounded px-2 py-1 w-24"
+          />
+        </label>
+      </div>
+
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-100">
