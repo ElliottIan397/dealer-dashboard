@@ -27,6 +27,9 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const [colorCpp, setColorCpp] = useState(0.06);
 
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
+
+  if (!transactionalDevices.length) return null;
+
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
@@ -44,8 +47,6 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
 
   const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
-
-  if (!transactionalDevices.length) return null;
 
   return (
     <div className="mt-10">
