@@ -77,55 +77,57 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
         </label>
       </div>
 
-      <table className="min-w-full border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="px-4 py-2 border">Monitor</th>
-            <th className="px-4 py-2 border">Annual Volume</th>
-            <th className="px-4 py-2 border"># Devices</th>
-            <th className="px-4 py-2 border">
-              DCA<br />
-              <input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} />
-            </th>
-            <th className="px-4 py-2 border">
-              JIT-R<br />
-              <input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} />
-            </th>
-            <th className="px-4 py-2 border">
-              Contract<br />
-              <input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} />
-            </th>
-            <th className="px-4 py-2 border">
-              QR<br />
-              <input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} />
-            </th>
-            <th className="px-4 py-2 border">
-              ESW<br />
-              <input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} />
-            </th>
-            <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
-            <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
-            <th className="px-4 py-2 border">Subscription/Yr</th>
-            <th className="px-4 py-2 border">$/mo per Device</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="odd:bg-white even:bg-gray-50">
-            <td className="px-4 py-2 border">{selectedCustomer}</td>
-            <td className="px-4 py-2 border">{totalVolume}</td>
-            <td className="px-4 py-2 border">{totalDevices}</td>
-            <td className="px-4 py-2 border">{safeCurrency(dcaTotal)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(jitrTotal)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(contractTotal)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(qrTotal)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(eswTotal)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(transactionalCost)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(totalSaaSCost)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(subscriptionCost)}</td>
-            <td className="px-4 py-2 border">{safeCurrency(monthlySubscriptionPerDevice)}</td>
-          </tr>
-        </tbody>
-      </table>
+      {selectedCustomer === "All" && (
+        <table className="min-w-full border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="px-4 py-2 border">Monitor</th>
+              <th className="px-4 py-2 border">Annual Volume</th>
+              <th className="px-4 py-2 border"># Devices</th>
+              <th className="px-4 py-2 border">
+                DCA<br />
+                <input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} />
+              </th>
+              <th className="px-4 py-2 border">
+                JIT-R<br />
+                <input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} />
+              </th>
+              <th className="px-4 py-2 border">
+                Contract<br />
+                <input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} />
+              </th>
+              <th className="px-4 py-2 border">
+                QR<br />
+                <input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} />
+              </th>
+              <th className="px-4 py-2 border">
+                ESW<br />
+                <input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} />
+              </th>
+              <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
+              <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
+              <th className="px-4 py-2 border">Subscription/Yr</th>
+              <th className="px-4 py-2 border">$/mo per Device</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="odd:bg-white even:bg-gray-50">
+              <td className="px-4 py-2 border">{selectedCustomer}</td>
+              <td className="px-4 py-2 border">{totalVolume}</td>
+              <td className="px-4 py-2 border">{totalDevices}</td>
+              <td className="px-4 py-2 border">{safeCurrency(dcaTotal)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(jitrTotal)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(contractTotal)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(qrTotal)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(eswTotal)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(transactionalCost)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(totalSaaSCost)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(subscriptionCost)}</td>
+              <td className="px-4 py-2 border">{safeCurrency(monthlySubscriptionPerDevice)}</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
