@@ -224,18 +224,26 @@ export default function DealerDashboard() {
       )}
 
       {viewMode === "subscription" && (
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
-          <ChartBlock
-            filtered={filtered}
-            contractOnly={contractOnly}
-            bias={selectedBias}
-            contractType={selectedContractType}
-          />
-          <Table1 data={table1Data} bias={selectedBias} />
-          <SubscriptionPlanTable filtered={filtered} bias={selectedBias} selectedCustomer={selectedCustomer} />
-        </div>
-      )}
+  <div className="mt-10">
+    <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
+    <ChartBlock
+      filtered={filtered}
+      contractOnly={contractOnly}
+      bias={selectedBias}
+      contractType={selectedContractType}
+    />
+
+    {selectedCustomer !== "All" && (
+      <Table1 data={table1Data} bias={selectedBias} />
+    )}
+
+    <SubscriptionPlanTable
+      filtered={filtered}
+      bias={selectedBias}
+      selectedCustomer={selectedCustomer}
+    />
+  </div>
+)}
 
       {!viewMode && (
         <>
