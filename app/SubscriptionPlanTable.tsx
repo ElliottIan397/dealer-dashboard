@@ -32,13 +32,14 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const totalVolume = totalMono + totalColor;
 
   const transactionalCost = transactionalDevices.reduce((sum, r) => sum + (r.Twelve_Month_Fulfillment_Cost ?? 0), 0);
-  const subscriptionCost = totalMono * MONO_CPP + totalColor * COLOR_CPP;
+  const subscriptionBase = totalMono * MONO_CPP + totalColor * COLOR_CPP;
+  const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
+  const subscriptionCost = subscriptionBase + eswTotal;
 
   const dcaTotal = includeDCA ? totalDevices * DCA_COST * 12 : 0;
   const jitrTotal = includeJITR ? totalDevices * JITR_COST * 12 : 0;
   const contractTotal = includeContract ? totalDevices * CONTRACT_COST * 12 : 0;
   const qrTotal = includeQR ? totalDevices * QR_COST * 12 : 0;
-  const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
 
   const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
