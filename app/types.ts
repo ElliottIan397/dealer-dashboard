@@ -51,10 +51,12 @@ export type McarpRow = {
 
 export interface ChartBlockProps {
   filtered: McarpRow[];
+  contractOnly: McarpRow[];
   bias: "O" | "R" | "N";
-  contractOnly?: McarpRow[];
-  viewMode?: string;
-  monoCpp: number;
-  colorCpp: number;
-  contractType: string; // Add this line to support conditional logic in ChartBlock
+  contractType: string;
+  viewMode?: "" | "risk" | "vendor" | "subscription";
+  monoCpp?: number;
+  colorCpp?: number;
 }
+
+

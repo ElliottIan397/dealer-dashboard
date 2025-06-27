@@ -52,6 +52,14 @@ export default function DealerDashboard() {
     }
   }, [viewMode]);
 
+  useEffect(() => {
+  if (selectedContractType === "T") {
+    setViewMode("subscription");
+  } else if (viewMode === "subscription") {
+    setViewMode("");
+  }
+}, [selectedContractType]);
+
   const customerOptions = ["All", ...customers];
 
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
