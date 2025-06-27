@@ -31,7 +31,13 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   (selectedCustomer === "All" || row.Monitor === selectedCustomer)
 );
 
-  if (!transactionalDevices.length) return null;
+  if (!transactionalDevices.length) {
+  return (
+    <div className="text-gray-500 mt-4">
+      No transactional devices found for selected customer.
+    </div>
+  );
+}
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
