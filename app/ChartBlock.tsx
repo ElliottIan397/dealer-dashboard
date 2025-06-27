@@ -92,7 +92,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
       GM: parseFloat(transactionalGM.toFixed(0)),
     },
   ];
-
+  console.log("Chart3 Revenue Debug:", {
+    isSubscriptionView,
+    subscriptionRevenue,
+    subscriptionCost,
+    subscriptionGM,
+  });
   const chart3Data = [
     {
       label: isSubscriptionView ? "Subscription" : "Contract",
@@ -188,12 +193,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") {
-                  const gmDollar = isSubscriptionView ? 0 : contractGMdollar;
+                  const gmDollar = isSubscriptionView ? subscriptionRevenue - subscriptionCost : contractGMdollar;
                   return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
                 }
                 const label = name === "SP"
                   ? (isSubscriptionView
-                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${totalDevices})`
+                    ? `Revenue$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${totalDevices})`
                     : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
                   : name === "Cost"
                     ? "Cost$"
