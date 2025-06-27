@@ -235,6 +235,7 @@ useEffect(() => {
     contractOnly={contractOnly}
     bias={selectedBias}
     contractType={selectedContractType}
+    viewMode={viewMode} // 👈 new prop
   />
 </div>
 

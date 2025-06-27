@@ -16,7 +16,7 @@ import {
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered, contractOnly, bias, contractType }: ChartBlockProps) {
+export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -70,12 +70,25 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
     },
   ];
 
+  const isSubscriptionView = viewMode === "subscription";
+
+  const subscriptionCost = total(
+    filtered.filter((r) => r.Contract_Status === "T").map((r) =>
+      getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)
+    )
+  );
+  const subscriptionGM = 50; // placeholder or calculated later if needed
+  const subscriptionDevices = filtered.filter((r) => r.Contract_Status === "T").length;
+  const avgSubscriptionMonthly = subscriptionDevices > 0
+    ? subscriptionCost / subscriptionDevices / 12
+    : 0;
+
   const chart3Data = [
     {
-      label: "Contract",
-      SP: contractRevenue,
-      Cost: contractCost,
-      GM: parseFloat(contractGM.toFixed(0)),
+      label: isSubscriptionView ? "Subscription" : "Contract",
+      SP: isSubscriptionView ? subscriptionCost : contractRevenue,
+      Cost: isSubscriptionView ? 0 : contractCost,
+      GM: isSubscriptionView ? subscriptionGM : parseFloat(contractGM.toFixed(0)),
     },
   ];
 
@@ -130,8 +143,8 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
                 const label = name === "SP"
                   ? `SP$\n(Avg/Device: $${avgTransactionalMonthlyRevenue.toFixed(2)}/mo, Devices: ${transactionalDevices.length})`
                   : name === "Cost"
-                  ? "Cost$"
-                  : name;
+                    ? "Cost$"
+                    : name;
                 return [currencyFormatter(value), label];
               }}
             />
@@ -154,7 +167,9 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
       </div>
 
       <div className="flex-1 min-w-[300px] max-w-[33%] h-80 flex flex-col items-center">
-        <h3 className="text-lg font-semibold mb-2 text-center">Current Contracts</h3>
+        <h3 className="text-lg font-semibold mb-2 text-center">
+          {isSubscriptionView ? "Subscription Plan Projection" : "Current Contracts"}
+        </h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chart3Data}>
             <XAxis dataKey="label" />
@@ -162,12 +177,18 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType 
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
             <Tooltip
               formatter={(value: number, name: string) => {
-                if (name === "GM") return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(contractGMdollar)})`, "GM"];
+                if (name === "GM") {
+                  const gmDollar = isSubscriptionView ? 0 : contractGMdollar;
+                  return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
+                }
+
                 const label = name === "SP"
-                  ? `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`
+                  ? (isSubscriptionView
+                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
+                    : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
                   : name === "Cost"
-                  ? "Cost$"
-                  : name;
+                    ? "Cost$"
+                    : name;
                 return [currencyFormatter(value), label];
               }}
             />

@@ -5,6 +5,7 @@ export type McarpRow = {
   Manufacturer: string;
   Printer_Model: string;
   Device_Type: string;
+  viewMode?: string;
 
   // Table 1 fields
   Black_Annual_Volume: number;
@@ -52,5 +53,6 @@ export interface ChartBlockProps {
   filtered: McarpRow[];
   bias: "O" | "R" | "N";
   contractOnly?: McarpRow[];
+  viewMode?: string;
   contractType: string; // Add this line to support conditional logic in ChartBlock
 }
