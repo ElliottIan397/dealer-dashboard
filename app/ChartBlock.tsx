@@ -57,6 +57,10 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     ? contractRevenue / contractDevices.length / 12
     : 0;
 
+  const subRows = filtered.filter(r => r.Contract_Status === "T");
+  console.log("Subscription Rows Sample:", subRows.slice(0, 3));
+  console.log("Twelve_Month_Cartridge_Cost of first row:", getBiasField(subRows[0], "Twelve_Month_Cartridge_Cost", bias));
+
   const subscriptionCost = total(
     filtered.filter(r => r.Contract_Status === "T").map(r =>
       (getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias) ?? 0) +
