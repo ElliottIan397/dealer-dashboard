@@ -36,6 +36,11 @@ export default function DealerDashboard() {
   const [colorCpp, setColorCpp] = useState(0.06);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+  const [includeDCA, setIncludeDCA] = useState(true);
+  const [includeJITR, setIncludeJITR] = useState(true);
+  const [includeContract, setIncludeContract] = useState(true);
+  const [includeQR, setIncludeQR] = useState(true);
+  const [includeESW, setIncludeESW] = useState(true);
 
   const manufacturerOptions = Array.from(
     new Set(data.map((row) => row.Manufacturer).filter(Boolean))
@@ -240,6 +245,11 @@ export default function DealerDashboard() {
               viewMode={viewMode} // 👈 new prop
               monoCpp={monoCpp}
               colorCpp={colorCpp}
+              includeDCA={includeDCA}
+              includeJITR={includeJITR}
+              includeContract={includeContract}
+              includeQR={includeQR}
+              includeESW={includeESW}
             />
           </div>
 
@@ -259,6 +269,16 @@ export default function DealerDashboard() {
             colorCpp={colorCpp}
             setMonoCpp={setMonoCpp}
             setColorCpp={setColorCpp}
+            includeDCA={includeDCA}
+            includeJITR={includeJITR}
+            includeContract={includeContract}
+            includeQR={includeQR}
+            includeESW={includeESW}
+            setIncludeDCA={setIncludeDCA}
+            setIncludeJITR={setIncludeJITR}
+            setIncludeContract={setIncludeContract}
+            setIncludeQR={setIncludeQR}
+            setIncludeESW={setIncludeESW}
           />
         </div>
       )}
@@ -275,6 +295,11 @@ export default function DealerDashboard() {
               viewMode={viewMode}      // ✅ ADD THIS LINE
               monoCpp={monoCpp}
               colorCpp={colorCpp}
+              includeDCA={includeDCA}
+              includeJITR={includeJITR}
+              includeContract={includeContract}
+              includeQR={includeQR}
+              includeESW={includeESW}
             />
           </div>
 

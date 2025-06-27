@@ -57,6 +57,11 @@ export interface ChartBlockProps {
   viewMode?: "" | "risk" | "vendor" | "subscription";
   monoCpp?: number;
   colorCpp?: number;
+  includeDCA: boolean;
+  includeJITR: boolean;
+  includeContract: boolean;
+  includeQR: boolean;
+  includeESW: boolean;
 }
 
 

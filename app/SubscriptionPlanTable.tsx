@@ -12,6 +12,17 @@ interface Props {
   colorCpp: number;
   setMonoCpp: React.Dispatch<React.SetStateAction<number>>;
   setColorCpp: React.Dispatch<React.SetStateAction<number>>;
+   includeDCA: boolean;
+  includeJITR: boolean;
+  includeContract: boolean;
+  includeQR: boolean;
+  includeESW: boolean;
+
+  setIncludeDCA: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeJITR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeESW: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DCA_COST = 0.25;
@@ -24,15 +35,25 @@ const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 };
 
-export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer }: Props) {
-  const [includeDCA, setIncludeDCA] = useState(true);
-  const [includeJITR, setIncludeJITR] = useState(true);
-  const [includeContract, setIncludeContract] = useState(true);
-  const [includeQR, setIncludeQR] = useState(true);
-  const [includeESW, setIncludeESW] = useState(true);
-
-  const [monoCpp, setMonoCpp] = useState(0.02);
-  const [colorCpp, setColorCpp] = useState(0.06);
+export default function SubscriptionPlanTable({
+  filtered,
+  bias,
+  selectedCustomer,
+  monoCpp,
+  colorCpp,
+  setMonoCpp,
+  setColorCpp,
+  includeDCA,
+  includeJITR,
+  includeContract,
+  includeQR,
+  includeESW,
+  setIncludeDCA,
+  setIncludeJITR,
+  setIncludeContract,
+  setIncludeQR,
+  setIncludeESW,
+}: Props) {
 
 const transactionalDevices = filtered.filter(row =>
   row.Contract_Status === "T"
@@ -104,23 +125,23 @@ const transactionalDevices = filtered.filter(row =>
               <th className="px-4 py-2 border"># Devices</th>
               <th className="px-4 py-2 border text-sm">
                 DCA<br />
-                <input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} />
+                <input type="checkbox" checked={includeDCA} onChange={(e) => setIncludeDCA(e.target.checked)} />
               </th>
               <th className="px-4 py-2 border text-sm">
                 JIT-R<br />
-                <input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} />
+                <input type="checkbox" checked={includeJITR} onChange={(e) => setIncludeJITR(e.target.checked)} />
               </th>
               <th className="px-4 py-2 border text-sm">
                 Contract<br />
-                <input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} />
+                <input type="checkbox" checked={includeContract} onChange={(e) => setIncludeContract(e.target.checked)} />
               </th>
               <th className="px-4 py-2 border text-sm">
                 QR<br />
-                <input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} />
+                <input type="checkbox" checked={includeQR} onChange={(e) => setIncludeQR(e.target.checked)} />
               </th>
               <th className="px-4 py-2 border text-sm">
                 ESW<br />
-                <input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} />
+                <input type="checkbox" checked={includeESW} onChange={(e) => setIncludeESW(e.target.checked)} />
               </th>
               <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
               <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
