@@ -229,12 +229,14 @@ useEffect(() => {
       {viewMode === "subscription" && (
   <div className="mt-10">
     <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
-    <ChartBlock
-      filtered={filtered}
-      contractOnly={contractOnly}
-      bias={selectedBias}
-      contractType={selectedContractType}
-    />
+    <div className="mb-6">
+  <ChartBlock
+    filtered={filtered}
+    contractOnly={contractOnly}
+    bias={selectedBias}
+    contractType={selectedContractType}
+  />
+</div>
 
     {selectedCustomer !== "All" && (
       <Table1 data={table1Data} bias={selectedBias} />

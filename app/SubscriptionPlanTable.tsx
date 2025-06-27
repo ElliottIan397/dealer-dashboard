@@ -98,23 +98,23 @@ const transactionalDevices = filtered.filter(row =>
               <th className="px-4 py-2 border">Monitor</th>
               <th className="px-4 py-2 border">Annual Volume</th>
               <th className="px-4 py-2 border"># Devices</th>
-              <th className="px-4 py-2 border">
+              <th className="px-4 py-2 border text-sm">
                 DCA<br />
                 <input type="checkbox" checked={includeDCA} onChange={() => setIncludeDCA(!includeDCA)} />
               </th>
-              <th className="px-4 py-2 border">
+              <th className="px-4 py-2 border text-sm">
                 JIT-R<br />
                 <input type="checkbox" checked={includeJITR} onChange={() => setIncludeJITR(!includeJITR)} />
               </th>
-              <th className="px-4 py-2 border">
+              <th className="px-4 py-2 border text-sm">
                 Contract<br />
                 <input type="checkbox" checked={includeContract} onChange={() => setIncludeContract(!includeContract)} />
               </th>
-              <th className="px-4 py-2 border">
+              <th className="px-4 py-2 border text-sm">
                 QR<br />
                 <input type="checkbox" checked={includeQR} onChange={() => setIncludeQR(!includeQR)} />
               </th>
-              <th className="px-4 py-2 border">
+              <th className="px-4 py-2 border text-sm">
                 ESW<br />
                 <input type="checkbox" checked={includeESW} onChange={() => setIncludeESW(!includeESW)} />
               </th>
