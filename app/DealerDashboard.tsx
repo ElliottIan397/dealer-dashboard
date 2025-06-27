@@ -250,6 +250,11 @@ export default function DealerDashboard() {
               includeContract={includeContract}
               includeQR={includeQR}
               includeESW={includeESW}
+              setIncludeDCA={setIncludeDCA}
+              setIncludeJITR={setIncludeJITR}
+              setIncludeContract={setIncludeContract}
+              setIncludeQR={setIncludeQR}
+              setIncludeESW={setIncludeESW}
             />
           </div>
 
@@ -288,11 +293,15 @@ export default function DealerDashboard() {
           <div className="mt-10">
             <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
             <ChartBlock
-              filtered={filtered}
+              filtered={
+                selectedCustomer === "All"
+                  ? filtered
+                  : filtered.filter(row => row.Monitor === selectedCustomer)
+              }
               contractOnly={contractOnly}
               bias={selectedBias}
               contractType={selectedContractType}
-              viewMode={viewMode}      // ✅ ADD THIS LINE
+              viewMode={viewMode}
               monoCpp={monoCpp}
               colorCpp={colorCpp}
               includeDCA={includeDCA}
@@ -300,6 +309,11 @@ export default function DealerDashboard() {
               includeContract={includeContract}
               includeQR={includeQR}
               includeESW={includeESW}
+              setIncludeDCA={setIncludeDCA}
+              setIncludeJITR={setIncludeJITR}
+              setIncludeContract={setIncludeContract}
+              setIncludeQR={setIncludeQR}
+              setIncludeESW={setIncludeESW}
             />
           </div>
 

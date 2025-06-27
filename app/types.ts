@@ -62,6 +62,11 @@ export interface ChartBlockProps {
   includeContract: boolean;
   includeQR: boolean;
   includeESW: boolean;
+  setIncludeDCA: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeJITR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeESW:  React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 
