@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   LabelList,
   Cell,
@@ -30,9 +29,8 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   };
 
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
-  const subscriptionMono = total(filtered.filter(r => r.Contract_Status === "T").map(r => r.Black_Annual_Volume ?? 0));
-  const subscriptionColor = total(filtered.filter(r => r.Contract_Status === "T").map(r => r.Color_Annual_Volume ?? 0));
-  
+  const isSubscriptionView = viewMode === "subscription";
+
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
@@ -58,6 +56,33 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     ? contractRevenue / contractDevices.length / 12
     : 0;
 
+  const subscriptionCost = total(
+    filtered.filter(r => r.Contract_Status === "T").map(r =>
+      (getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias) ?? 0) +
+      (getBiasField(r, "Twelve_Month_SaaS", bias) ?? 0)
+    )
+  );
+
+  const subscriptionRevenue = total(
+    filtered.filter(r => r.Contract_Status === "T").map(r =>
+      (getBiasField(r, "Twelve_Month_Cartridge_Cost", bias) ?? 0) +
+      (getBiasField(r, "Twelve_Month_SaaS", bias) ?? 0) +
+      (getBiasField(r, "Twelve_Month_DCA", bias) ?? 0) +
+      (getBiasField(r, "JIT_R_12_Month_Cost", bias) ?? 0) +
+      (getBiasField(r, "Contracts_QRs_12_Month_Cost", bias) ?? 0) +
+      (getBiasField(r, "EWS_12_Month_Cost", bias) ?? 0)
+    )
+  );
+
+  const subscriptionGM = subscriptionRevenue > 0
+    ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
+    : 0;
+
+  const subscriptionDevices = filtered.filter((r) => r.Contract_Status === "T").length;
+  const avgSubscriptionMonthly = subscriptionDevices > 0
+    ? subscriptionRevenue / subscriptionDevices / 12
+    : 0;
+
   const chart1Data = [
     { type: "Black Volume", value: blackVol, color: "#8884d8" },
     { type: "Color Volume", value: colorVol, color: "#82ca9d" },
@@ -72,31 +97,14 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     },
   ];
 
-  const isSubscriptionView = viewMode === "subscription";
-
-  const subscriptionCost = total(
-    filtered.filter((r) => r.Contract_Status === "T").map((r) =>
-      getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)
-    )
-  );
-  const subscriptionGM = 50; // placeholder or calculated later if needed
-  const subscriptionDevices = filtered.filter((r) => r.Contract_Status === "T").length;
-  const avgSubscriptionMonthly = subscriptionDevices > 0
-    ? subscriptionCost / subscriptionDevices / 12
-    : 0;
-
-const chart3Data = [
-  {
-    label: isSubscriptionView ? "Subscription" : "Contract",
-    SP: isSubscriptionView ? subscriptionCost : contractRevenue,
-    Cost: isSubscriptionView ? subscriptionCost : contractCost,
-    GM: isSubscriptionView
-      ? 0
-      : contractRevenue > 0
-        ? parseFloat(contractGM.toFixed(0))
-        : 0,
-  },
-];
+  const chart3Data = [
+    {
+      label: isSubscriptionView ? "Subscription" : "Contract",
+      SP: isSubscriptionView ? subscriptionRevenue : contractRevenue,
+      Cost: isSubscriptionView ? subscriptionCost : contractCost,
+      GM: isSubscriptionView ? parseFloat(subscriptionGM.toFixed(0)) : parseFloat(contractGM.toFixed(0)),
+    },
+  ];
 
   const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost);
 
@@ -184,13 +192,12 @@ const chart3Data = [
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") {
-                  const gmDollar = isSubscriptionView ? 0 : contractGMdollar;
+                  const gmDollar = isSubscriptionView ? subscriptionRevenue - subscriptionCost : contractGMdollar;
                   return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
                 }
-
                 const label = name === "SP"
                   ? (isSubscriptionView
-                    ? `Subscription/Yr\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
+                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
                     : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
                   : name === "Cost"
                     ? "Cost$"
