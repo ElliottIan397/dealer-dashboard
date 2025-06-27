@@ -205,7 +205,10 @@ export default function DealerDashboard() {
 {viewMode === "risk" && (
   <>
     {selectedCustomer === "All" ? (
-      <RiskMarginTable filtered={filtered} bias={selectedBias} />
+      <RiskMarginTable
+  filtered={filtered.filter(row => selectedCustomer === "All" || row.Monitor === selectedCustomer)}
+  bias={selectedBias}
+/>
     ) : (
       <>
         <ChartBlock
