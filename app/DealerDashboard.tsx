@@ -41,12 +41,14 @@ export default function DealerDashboard() {
     .sort()
     .map((mfr) => ({ value: mfr, label: mfr }));
 
-  useEffect(() => {
-    if (viewMode === "risk") {
-      setSelectedCustomer("All");
-      setSelectedContractType("All");
-    }
-  }, [viewMode]);
+useEffect(() => {
+  if (viewMode === "risk") {
+    setSelectedCustomer("All");
+    setSelectedContractType("All");
+  } else if (viewMode === "subscription") {
+    setSelectedContractType("T");
+  }
+}, [viewMode]);
 
   const customerOptions = ["All", ...customers];
 
