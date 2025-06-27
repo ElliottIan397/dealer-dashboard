@@ -16,7 +16,7 @@ import {
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 
-export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode }: ChartBlockProps) {
+export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, monoCpp, colorCpp }: ChartBlockProps) {
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -30,7 +30,9 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   };
 
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
-
+  const subscriptionMono = total(filtered.filter(r => r.Contract_Status === "T").map(r => r.Black_Annual_Volume ?? 0));
+  const subscriptionColor = total(filtered.filter(r => r.Contract_Status === "T").map(r => r.Color_Annual_Volume ?? 0));
+  
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
@@ -88,7 +90,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
       label: isSubscriptionView ? "Subscription" : "Contract",
       SP: isSubscriptionView ? subscriptionCost : contractRevenue,
       Cost: isSubscriptionView ? 0 : contractCost,
-      GM: isSubscriptionView ? subscriptionGM : parseFloat(contractGM.toFixed(0)),
+      GM: isSubscriptionView ? 0 : parseFloat(contractGM.toFixed(0)),
     },
   ];
 
@@ -184,7 +186,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
 
                 const label = name === "SP"
                   ? (isSubscriptionView
-                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
+                    ? `Subscription/Yr\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
                     : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
                   : name === "Cost"
                     ? "Cost$"

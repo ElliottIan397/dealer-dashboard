@@ -54,5 +54,7 @@ export interface ChartBlockProps {
   bias: "O" | "R" | "N";
   contractOnly?: McarpRow[];
   viewMode?: string;
+  monoCpp: number;
+  colorCpp: number;
   contractType: string; // Add this line to support conditional logic in ChartBlock
 }

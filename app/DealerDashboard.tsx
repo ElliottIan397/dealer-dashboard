@@ -32,6 +32,8 @@ export default function DealerDashboard() {
 
   const [viewMode, setViewMode] = useState<"" | "risk" | "vendor" | "subscription">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
+  const [monoCpp, setMonoCpp] = useState(0.02);
+  const [colorCpp, setColorCpp] = useState(0.06);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
 
@@ -41,14 +43,14 @@ export default function DealerDashboard() {
     .sort()
     .map((mfr) => ({ value: mfr, label: mfr }));
 
-useEffect(() => {
-  if (viewMode === "risk") {
-    setSelectedCustomer("All");
-    setSelectedContractType("All");
-  } else if (viewMode === "subscription") {
-    setSelectedContractType("T");
-  }
-}, [viewMode]);
+  useEffect(() => {
+    if (viewMode === "risk") {
+      setSelectedCustomer("All");
+      setSelectedContractType("All");
+    } else if (viewMode === "subscription") {
+      setSelectedContractType("T");
+    }
+  }, [viewMode]);
 
   const customerOptions = ["All", ...customers];
 
@@ -204,16 +206,16 @@ useEffect(() => {
         )}
       </div>
 
-{viewMode === "risk" && (
-  <RiskMarginTable
-    filtered={
-      selectedCustomer === "All"
-        ? filtered                       // all rows
-        : filtered.filter(r => r.Monitor === selectedCustomer)  // chosen customer only
-    }
-    bias={selectedBias}
-  />
-)}
+      {viewMode === "risk" && (
+        <RiskMarginTable
+          filtered={
+            selectedCustomer === "All"
+              ? filtered                       // all rows
+              : filtered.filter(r => r.Monitor === selectedCustomer)  // chosen customer only
+          }
+          bias={selectedBias}
+        />
+      )}
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
@@ -227,33 +229,39 @@ useEffect(() => {
       )}
 
       {viewMode === "subscription" && (
-  <div className="mt-10">
-    <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
-    <div className="mb-6">
-  <ChartBlock
-    filtered={filtered}
-    contractOnly={contractOnly}
-    bias={selectedBias}
-    contractType={selectedContractType}
-    viewMode={viewMode} // 👈 new prop
-  />
-</div>
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
+          <div className="mb-6">
+            <ChartBlock
+              filtered={filtered}
+              contractOnly={contractOnly}
+              bias={selectedBias}
+              contractType={selectedContractType}
+              viewMode={viewMode} // 👈 new prop
+              monoCpp={monoCpp}
+              colorCpp={colorCpp}
+            />
+          </div>
 
-    {selectedCustomer !== "All" && (
-      <Table1 data={table1Data} bias={selectedBias} />
-    )}
+          {selectedCustomer !== "All" && (
+            <Table1 data={table1Data} bias={selectedBias} />
+          )}
 
-<SubscriptionPlanTable
-  filtered={
-    selectedCustomer === "All"
-      ? filtered
-      : filtered.filter(row => row.Monitor === selectedCustomer)
-  }
-  bias={selectedBias}
-  selectedCustomer={selectedCustomer}
-/>
-  </div>
-)}
+          <SubscriptionPlanTable
+            filtered={
+              selectedCustomer === "All"
+                ? filtered
+                : filtered.filter(row => row.Monitor === selectedCustomer)
+            }
+            bias={selectedBias}
+            selectedCustomer={selectedCustomer}
+            monoCpp={monoCpp}
+            colorCpp={colorCpp}
+            setMonoCpp={setMonoCpp}
+            setColorCpp={setColorCpp}
+          />
+        </div>
+      )}
 
       {!viewMode && (
         <>
@@ -264,6 +272,8 @@ useEffect(() => {
               contractOnly={contractOnly}
               bias={selectedBias}
               contractType={selectedContractType}
+              monoCpp={monoCpp}
+              colorCpp={colorCpp}
             />
           </div>
 

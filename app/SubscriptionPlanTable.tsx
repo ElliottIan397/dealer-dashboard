@@ -8,6 +8,10 @@ interface Props {
   filtered: McarpRow[];
   bias: "O" | "R" | "N";
   selectedCustomer: string;
+  monoCpp: number;
+  colorCpp: number;
+  setMonoCpp: React.Dispatch<React.SetStateAction<number>>;
+  setColorCpp: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const DCA_COST = 0.25;
