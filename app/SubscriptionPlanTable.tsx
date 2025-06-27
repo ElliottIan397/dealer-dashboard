@@ -92,7 +92,7 @@ const transactionalDevices = filtered.filter(row =>
         </label>
       </div>
 
-              <table className="min-w-full border">
+              <table className="min-w-full border text-sm">
           <thead>
             <tr className="bg-gray-100">
               <th className="px-4 py-2 border">Monitor</th>
