@@ -94,6 +94,12 @@ export function calculateSubscriptionRevenue(
     const monoPages = getBiasField(r, "Mono_Projected_Annual_Pages", bias) ?? 0;
     const colorPages = getBiasField(r, "Color_Projected_Annual_Pages", bias) ?? 0;
     const revenue = monoPages * monoCpp + colorPages * colorCpp;
+    console.log("Device Pages Debug:", {
+      monoPages,
+      colorPages,
+      monoCpp,
+      colorCpp,
+    });
     totalRevenue += revenue;
     sample.push(revenue);
   }
