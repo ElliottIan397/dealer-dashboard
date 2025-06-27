@@ -202,9 +202,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
               }}
             />
             <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
-            {contractType !== "T" && (
-              <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
-            )}
+            <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
         </ResponsiveContainer>
@@ -212,11 +210,9 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
           <span className="inline-block mr-4">
             <span className="inline-block w-3 h-3 bg-[#82ca9d] mr-1" />SP$
           </span>
-          {contractType !== "T" && (
-            <span className="inline-block mr-4">
-              <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
-            </span>
-          )}
+          <span className="inline-block mr-4">
+            <span className="inline-block w-3 h-3 bg-[#8884d8] mr-1" />Cost $
+          </span>
           <span>
             <span className="inline-block w-3 h-3 bg-[#ffc658] mr-1" />GM%
           </span>
