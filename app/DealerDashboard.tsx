@@ -238,11 +238,15 @@ export default function DealerDashboard() {
       <Table1 data={table1Data} bias={selectedBias} />
     )}
 
-    <SubscriptionPlanTable
-      filtered={filtered}
-      bias={selectedBias}
-      selectedCustomer={selectedCustomer}
-    />
+<SubscriptionPlanTable
+  filtered={
+    selectedCustomer === "All"
+      ? filtered
+      : filtered.filter(row => row.Monitor === selectedCustomer)
+  }
+  bias={selectedBias}
+  selectedCustomer={selectedCustomer}
+/>
   </div>
 )}
 
