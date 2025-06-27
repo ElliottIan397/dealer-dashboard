@@ -70,6 +70,8 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     colorCpp ?? 0.06,
     bias
   );
+  console.log("DEBUG subscriptionDevices", subscriptionDevices.length, subscriptionDevices);
+  console.log("DEBUG calculated revenue", subscriptionRevenue);
   const subscriptionGM =
     subscriptionRevenue > 0
       ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
