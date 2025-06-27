@@ -80,3 +80,27 @@ export function calculateSubscriptionCost(
     totalDevices,
   };
 }
+
+export function calculateSubscriptionRevenue(
+  devices: any[],
+  monoCpp: number,
+  colorCpp: number,
+  bias: "O" | "R" | "N"
+) {
+  let totalRevenue = 0;
+  const sample: number[] = [];
+
+  for (const r of devices) {
+    const monoPages = getBiasField(r, "Mono_Projected_Annual_Pages", bias) ?? 0;
+    const colorPages = getBiasField(r, "Color_Projected_Annual_Pages", bias) ?? 0;
+    const revenue = monoPages * monoCpp + colorPages * colorCpp;
+    totalRevenue += revenue;
+    sample.push(revenue);
+  }
+
+  return {
+    totalRevenue,
+    totalDevices: devices.length,
+    sample,
+  };
+}

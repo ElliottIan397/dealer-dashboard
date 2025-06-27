@@ -16,7 +16,7 @@ import {
 
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
-import { calculateSubscriptionCost, getBiasField } from "./utils";
+import { calculateSubscriptionCost, calculateSubscriptionRevenue, getBiasField } from "./utils";
 
 export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, monoCpp, colorCpp, includeDCA, includeJITR, includeContract, includeQR, includeESW, }: ChartBlockProps) {
   console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode);
@@ -64,8 +64,16 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     includeQR,
     includeESW,
   });
-  const subscriptionRevenue = subscriptionCost;
-  const subscriptionGM = 0; // placeholder for now
+  const { totalRevenue: subscriptionRevenue } = calculateSubscriptionRevenue(
+    subscriptionDevices,
+    monoCpp ?? 0.02,
+    colorCpp ?? 0.06,
+    bias
+  );
+  const subscriptionGM =
+    subscriptionRevenue > 0
+      ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
+      : 0;
 
   const avgSubscriptionMonthly = totalDevices > 0
     ? subscriptionRevenue / totalDevices / 12
