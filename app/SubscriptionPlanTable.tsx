@@ -16,6 +16,10 @@ const CONTRACT_COST = 0.55;
 const QR_COST = 0.14;
 const ESW_COST = 5.31;
 
+const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+};
+
 export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer }: Props) {
   const [includeDCA, setIncludeDCA] = useState(true);
   const [includeJITR, setIncludeJITR] = useState(true);
@@ -43,7 +47,10 @@ const transactionalDevices = filtered.filter(row =>
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor;
 
-  const transactionalCost = transactionalDevices.reduce((sum, r) => sum + (r.Twelve_Month_Fulfillment_Cost ?? 0), 0);
+  const transactionalCost = transactionalDevices.reduce(
+  (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
+  0
+);
   const subscriptionBase = totalMono * monoCpp + totalColor * colorCpp;
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
   const subscriptionCost = subscriptionBase + eswTotal;
