@@ -85,8 +85,7 @@ const transactionalDevices = filtered.filter(row =>
         </label>
       </div>
 
-      {selectedCustomer === "All" && (
-        <table className="min-w-full border">
+              <table className="min-w-full border">
           <thead>
             <tr className="bg-gray-100">
               <th className="px-4 py-2 border">Monitor</th>
@@ -135,7 +134,6 @@ const transactionalDevices = filtered.filter(row =>
             </tr>
           </tbody>
         </table>
-      )}
     </div>
   );
 }
