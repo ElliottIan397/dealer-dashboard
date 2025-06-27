@@ -204,19 +204,21 @@ export default function DealerDashboard() {
 
 {viewMode === "risk" && (
   <>
-    <ChartBlock
-      filtered={filtered}
-      contractOnly={contractOnly}
-      bias={selectedBias}
-      contractType={selectedContractType}
-    />
-
-    {selectedCustomer && selectedCustomer !== "All" && (
-      <Table1 data={table1Data} bias={selectedBias} />
+    {selectedCustomer === "All" ? (
+      <RiskMarginTable filtered={filtered} bias={selectedBias} />
+    ) : (
+      <>
+        <ChartBlock
+          filtered={filtered}
+          contractOnly={contractOnly}
+          bias={selectedBias}
+          contractType={selectedContractType}
+        />
+        <Table1 data={table1Data} bias={selectedBias} />
+        <Table2 data={table2Data} />
+        <Table3 filtered={filtered} />
+      </>
     )}
-
-    <Table2 data={table2Data} />
-    <Table3 filtered={filtered} />
   </>
 )}
       {viewMode === "vendor" && (
