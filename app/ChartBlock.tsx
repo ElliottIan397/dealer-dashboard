@@ -16,6 +16,7 @@ import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 
 export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, monoCpp, colorCpp }: ChartBlockProps) {
+  console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode); // 👈 ADD THIS LINE
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
