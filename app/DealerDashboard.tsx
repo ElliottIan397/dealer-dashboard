@@ -214,6 +214,9 @@ export default function DealerDashboard() {
     {selectedCustomer && selectedCustomer !== "All" && (
       <Table1 data={table1Data} bias={selectedBias} />
     )}
+
+    <Table2 data={table2Data} />
+    <Table3 filtered={filtered} />
   </>
 )}
       {viewMode === "vendor" && (
