@@ -85,14 +85,18 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     ? subscriptionCost / subscriptionDevices / 12
     : 0;
 
-  const chart3Data = [
-    {
-      label: isSubscriptionView ? "Subscription" : "Contract",
-      SP: isSubscriptionView ? subscriptionCost : contractRevenue,
-      Cost: isSubscriptionView ? 0 : contractCost,
-      GM: isSubscriptionView ? 0 : parseFloat(contractGM.toFixed(0)),
-    },
-  ];
+const chart3Data = [
+  {
+    label: isSubscriptionView ? "Subscription" : "Contract",
+    SP: isSubscriptionView ? subscriptionCost : contractRevenue,
+    Cost: isSubscriptionView ? subscriptionCost : contractCost,
+    GM: isSubscriptionView
+      ? 0
+      : contractRevenue > 0
+        ? parseFloat(contractGM.toFixed(0))
+        : 0,
+  },
+];
 
   const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost);
 
