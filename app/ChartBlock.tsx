@@ -1,3 +1,5 @@
+// ChartBlock.tsx
+
 "use client";
 
 import React from "react";
@@ -14,9 +16,10 @@ import {
 
 import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
+import { calculateSubscriptionCost, getBiasField } from "./utils";
 
 export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, monoCpp, colorCpp }: ChartBlockProps) {
-  console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode); // 👈 ADD THIS LINE
+  console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode);
   if (!filtered || filtered.length === 0) {
     return (
       <div className="mt-6 text-center text-gray-500">
@@ -24,10 +27,6 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
       </div>
     );
   }
-
-  const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
-    return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
-  };
 
   const total = (arr: number[]) => arr.reduce((sum, v) => sum + (v || 0), 0);
   const isSubscriptionView = viewMode === "subscription";
@@ -57,41 +56,13 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     ? contractRevenue / contractDevices.length / 12
     : 0;
 
-  const subRows = filtered.filter(r => r.Contract_Status === "T");
-  console.log("Subscription Rows Sample:", subRows.slice(0, 3));
-  console.log("Twelve_Month_Cartridge_Cost of first row:", getBiasField(subRows[0], "Twelve_Month_Cartridge_Cost", bias));
+  const subscriptionDevices = filtered.filter((r) => r.Contract_Status === "T");
+  const { totalCost: subscriptionCost, totalDevices, breakdown } = calculateSubscriptionCost(subscriptionDevices, bias);
+  const subscriptionRevenue = subscriptionCost;
+  const subscriptionGM = 0; // placeholder for now
 
-  const subscriptionCost = total(
-    filtered.filter(r => r.Contract_Status === "T").map(r =>
-      (getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias) ?? 0) +
-      (getBiasField(r, "Twelve_Month_SaaS", bias) ?? 0)
-    )
-  );
-
-  const subscriptionRevenue = total(
-    filtered.filter(r => r.Contract_Status === "T").map(r =>
-      (getBiasField(r, "Twelve_Month_Cartridge_Cost", bias) ?? 0) +
-      (getBiasField(r, "Twelve_Month_SaaS", bias) ?? 0) +
-      (getBiasField(r, "Twelve_Month_DCA", bias) ?? 0) +
-      (getBiasField(r, "JIT_R_12_Month_Cost", bias) ?? 0) +
-      (getBiasField(r, "Contracts_QRs_12_Month_Cost", bias) ?? 0) +
-      (getBiasField(r, "EWS_12_Month_Cost", bias) ?? 0)
-    )
-  );
-  console.log("Subscription revenue/cost check:", {
-    subscriptionRevenue,
-    subscriptionCost,
-    filteredLength: filtered.length,
-    sample: filtered.slice(0, 3)
-  });
-
-  const subscriptionGM = subscriptionRevenue > 0
-    ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
-    : 0;
-
-  const subscriptionDevices = filtered.filter((r) => r.Contract_Status === "T").length;
-  const avgSubscriptionMonthly = subscriptionDevices > 0
-    ? subscriptionRevenue / subscriptionDevices / 12
+  const avgSubscriptionMonthly = totalDevices > 0
+    ? subscriptionRevenue / totalDevices / 12
     : 0;
 
   const chart1Data = [
@@ -203,12 +174,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") {
-                  const gmDollar = isSubscriptionView ? subscriptionRevenue - subscriptionCost : contractGMdollar;
+                  const gmDollar = isSubscriptionView ? 0 : contractGMdollar;
                   return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
                 }
                 const label = name === "SP"
                   ? (isSubscriptionView
-                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${subscriptionDevices})`
+                    ? `Projected Cost$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${totalDevices})`
                     : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
                   : name === "Cost"
                     ? "Cost$"
