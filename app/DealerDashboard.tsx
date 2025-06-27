@@ -272,6 +272,7 @@ export default function DealerDashboard() {
               contractOnly={contractOnly}
               bias={selectedBias}
               contractType={selectedContractType}
+              viewMode={viewMode}      // ✅ ADD THIS LINE
               monoCpp={monoCpp}
               colorCpp={colorCpp}
             />
