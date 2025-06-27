@@ -73,6 +73,12 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
       (getBiasField(r, "EWS_12_Month_Cost", bias) ?? 0)
     )
   );
+  console.log("Subscription revenue/cost check:", {
+    subscriptionRevenue,
+    subscriptionCost,
+    filteredLength: filtered.length,
+    sample: filtered.slice(0, 3)
+  });
 
   const subscriptionGM = subscriptionRevenue > 0
     ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
