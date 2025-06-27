@@ -26,7 +26,10 @@ export default function SubscriptionPlanTable({ filtered, bias, selectedCustomer
   const [monoCpp, setMonoCpp] = useState(0.02);
   const [colorCpp, setColorCpp] = useState(0.06);
 
-  const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
+  const transactionalDevices = filtered.filter(row =>
+  row.Contract_Status === "T" &&
+  (selectedCustomer === "All" || row.Monitor === selectedCustomer)
+);
 
   if (!transactionalDevices.length) return null;
 
