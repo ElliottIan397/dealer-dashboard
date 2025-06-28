@@ -91,8 +91,8 @@ export function calculateSubscriptionRevenue(
   const sample: number[] = [];
 
   for (const r of devices) {
-    const monoPages = getBiasField(r, "Mono_Projected_Annual_Pages", bias) ?? 0;
-    const colorPages = getBiasField(r, "Color_Projected_Annual_Pages", bias) ?? 0;
+    const monoPages = getBiasField(r, "Black_Annual_Volume", bias) ?? 0;
+    const colorPages = getBiasField(r, "Color_Annual_Volume", bias) ?? 0;
     const revenue = monoPages * monoCpp + colorPages * colorCpp;
     console.log("Device Pages Debug:", {
       monoPages,
