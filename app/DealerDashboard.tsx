@@ -8,6 +8,7 @@ import Table2 from "./Table2";
 import Table3 from "./Table3";
 import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
+import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
@@ -29,10 +30,17 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
 
-  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor">("");
+  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor" | "subscription">("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
+  const [monoCpp, setMonoCpp] = useState(0.02);
+  const [colorCpp, setColorCpp] = useState(0.06);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+  const [includeDCA, setIncludeDCA] = useState(true);
+  const [includeJITR, setIncludeJITR] = useState(true);
+  const [includeContract, setIncludeContract] = useState(true);
+  const [includeQR, setIncludeQR] = useState(true);
+  const [includeESW, setIncludeESW] = useState(true);
 
   const manufacturerOptions = Array.from(
     new Set(data.map((row) => row.Manufacturer).filter(Boolean))
@@ -44,6 +52,8 @@ export default function DealerDashboard() {
     if (viewMode === "risk") {
       setSelectedCustomer("All");
       setSelectedContractType("All");
+    } else if (viewMode === "subscription") {
+      setSelectedContractType("T");
     }
   }, [viewMode]);
 
@@ -161,12 +171,13 @@ export default function DealerDashboard() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Other Options:</label>
           <select
             value={viewMode}
-            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor")}
+            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor" | "subscription")}
             className="p-2 border border-gray-300 rounded w-64"
           >
             <option value="">-- None --</option>
             <option value="risk">Show Margin & Risk Summary</option>
             <option value="vendor">Show Vendor Summary</option>
+            <option value="subscription">Show Subscription Plan</option>
           </select>
         </div>
 
@@ -201,14 +212,15 @@ export default function DealerDashboard() {
       </div>
 
       {viewMode === "risk" && (
-        <>
-          <ChartBlock filtered={filtered} contractOnly={contractOnly} bias={selectedBias} contractType={selectedContractType} />
-          <Table1 data={table1Data} bias={selectedBias} />
-          <Table2 data={table2Data} />
-          <Table3 filtered={filtered} />
-        </>
+        <RiskMarginTable
+          filtered={
+            selectedCustomer === "All"
+              ? filtered                       // all rows
+              : filtered.filter(r => r.Monitor === selectedCustomer)  // chosen customer only
+          }
+          bias={selectedBias}
+        />
       )}
-
       {viewMode === "vendor" && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
@@ -221,15 +233,87 @@ export default function DealerDashboard() {
         </div>
       )}
 
-      {!viewMode && (
-        <>
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+      {viewMode === "subscription" && (
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
+          <div className="mb-6">
             <ChartBlock
               filtered={filtered}
               contractOnly={contractOnly}
               bias={selectedBias}
               contractType={selectedContractType}
+              viewMode={viewMode} // 👈 new prop
+              monoCpp={monoCpp}
+              colorCpp={colorCpp}
+              includeDCA={includeDCA}
+              includeJITR={includeJITR}
+              includeContract={includeContract}
+              includeQR={includeQR}
+              includeESW={includeESW}
+              setIncludeDCA={setIncludeDCA}
+              setIncludeJITR={setIncludeJITR}
+              setIncludeContract={setIncludeContract}
+              setIncludeQR={setIncludeQR}
+              setIncludeESW={setIncludeESW}
+            />
+          </div>
+
+          {selectedCustomer !== "All" && (
+            <Table1 data={table1Data} bias={selectedBias} />
+          )}
+
+          <SubscriptionPlanTable
+            filtered={
+              selectedCustomer === "All"
+                ? filtered
+                : filtered.filter(row => row.Monitor === selectedCustomer)
+            }
+            bias={selectedBias}
+            selectedCustomer={selectedCustomer}
+            monoCpp={monoCpp}
+            colorCpp={colorCpp}
+            setMonoCpp={setMonoCpp}
+            setColorCpp={setColorCpp}
+            includeDCA={includeDCA}
+            includeJITR={includeJITR}
+            includeContract={includeContract}
+            includeQR={includeQR}
+            includeESW={includeESW}
+            setIncludeDCA={setIncludeDCA}
+            setIncludeJITR={setIncludeJITR}
+            setIncludeContract={setIncludeContract}
+            setIncludeQR={setIncludeQR}
+            setIncludeESW={setIncludeESW}
+          />
+        </div>
+      )}
+
+      {!viewMode && (
+        <>
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-4">Device Hierarchy: Summary Charts</h2>
+            <ChartBlock
+              filtered={
+                selectedCustomer === "All"
+                  ? filtered
+                  : filtered.filter(row => row.Monitor === selectedCustomer)
+              }
+              contractOnly={contractOnly}
+              bias={selectedBias}
+              contractType={selectedContractType}
+              viewMode={viewMode}
+              monoCpp={monoCpp}
+              colorCpp={colorCpp}
+              includeDCA={includeDCA}
+              includeJITR={includeJITR}
+              includeContract={includeContract}
+              includeQR={includeQR}
+              includeESW={includeESW}
+              setIncludeDCA={setIncludeDCA}
+              setIncludeJITR={setIncludeJITR}
+              setIncludeContract={setIncludeContract}
+              setIncludeQR={setIncludeQR}
+              setIncludeESW={setIncludeESW}
             />
           </div>
 

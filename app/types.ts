@@ -5,6 +5,7 @@ export type McarpRow = {
   Manufacturer: string;
   Printer_Model: string;
   Device_Type: string;
+  viewMode?: string;
 
   // Table 1 fields
   Black_Annual_Volume: number;
@@ -50,7 +51,22 @@ export type McarpRow = {
 
 export interface ChartBlockProps {
   filtered: McarpRow[];
+  contractOnly: McarpRow[];
   bias: "O" | "R" | "N";
-  contractOnly?: McarpRow[];
-  contractType: string; // Add this line to support conditional logic in ChartBlock
+  contractType: string;
+  viewMode?: "" | "risk" | "vendor" | "subscription";
+  monoCpp?: number;
+  colorCpp?: number;
+  includeDCA: boolean;
+  includeJITR: boolean;
+  includeContract: boolean;
+  includeQR: boolean;
+  includeESW: boolean;
+  setIncludeDCA: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeJITR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeESW:  React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+
