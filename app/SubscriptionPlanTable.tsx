@@ -54,6 +54,12 @@ export default function SubscriptionPlanTable({
   setIncludeQR,
   setIncludeESW,
 }: Props) {
+   console.log("DEBUG SubscriptionPlanTable props", {
+    filtered,
+    monoCpp,
+    colorCpp,
+    bias,
+  });
 
 const transactionalDevices = filtered.filter(row =>
   row.Contract_Status === "T"
