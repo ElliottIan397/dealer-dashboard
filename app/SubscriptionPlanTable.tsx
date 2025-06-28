@@ -157,18 +157,18 @@ const transactionalDevices = filtered.filter(row =>
           </thead>
           <tbody>
             <tr className="odd:bg-white even:bg-gray-50">
-              <td className="px-4 py-2 border">{selectedCustomer}</td>
-              <td className="px-4 py-2 border">{totalVolume}</td>
-              <td className="px-4 py-2 border">{totalDevices}</td>
-              <td className="px-4 py-2 border">{safeCurrency(dcaTotal)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(jitrTotal)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(contractTotal)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(qrTotal)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(eswTotal)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(transactionalCost)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(totalSaaSCost)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(subscriptionCost)}</td>
-              <td className="px-4 py-2 border">{safeCurrency(monthlySubscriptionPerDevice)}</td>
+              <td className="px-4 py-2 border text-center">{selectedCustomer}</td>
+              <td className="px-4 py-2 border text-center">{totalVolume.toLocaleString()}</td>
+              <td className="px-4 py-2 border text-center">{totalDevices}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(dcaTotal)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(jitrTotal)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(transactionalCost)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(totalSaaSCost)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
+              <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
             </tr>
           </tbody>
         </table>
