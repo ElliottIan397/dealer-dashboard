@@ -166,9 +166,9 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
                           <th className="text-right px-2 py-1">Ext. Buy</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="text-gray-800">
                         {vendor.items.map((item, i) => (
-                          <tr key={i}>
+                          <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                             <td className="px-2 py-1">{item.equipment}</td>
                             <td className="px-2 py-1">{item.sku}</td>
                             <td className="px-2 py-1">{item.cartridge}</td>
