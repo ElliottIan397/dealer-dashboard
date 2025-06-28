@@ -70,16 +70,20 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     colorCpp ?? 0.06,
     bias
   );
+
+  const eswRevenue = includeESW ? totalDevices * 5.31 * 12 : 0;
+  const totalSubscriptionRevenue = subscriptionRevenue + eswRevenue;
+
   console.log("ChartBlock Subscription Devices Sample", subscriptionDevices.slice(0, 3));
   console.log("DEBUG subscriptionDevices", subscriptionDevices.length, subscriptionDevices);
   console.log("DEBUG calculated revenue", subscriptionRevenue);
   const subscriptionGM =
-    subscriptionRevenue > 0
-      ? ((subscriptionRevenue - subscriptionCost) / subscriptionRevenue) * 100
+    totalSubscriptionRevenue > 0
+      ? ((totalSubscriptionRevenue - subscriptionCost) / totalSubscriptionRevenue) * 100
       : 0;
 
   const avgSubscriptionMonthly = totalDevices > 0
-    ? subscriptionRevenue / totalDevices / 12
+    ? totalSubscriptionRevenue / totalDevices / 12
     : 0;
 
   const chart1Data = [
@@ -97,20 +101,20 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   ];
   console.log("Chart3 Revenue Debug:", {
     isSubscriptionView,
-    subscriptionRevenue,
+    totalSubscriptionRevenue,
     subscriptionCost,
     subscriptionGM,
   });
   const chart3Data = [
     {
       label: isSubscriptionView ? "Subscription" : "Contract",
-      Revenue: isSubscriptionView ? subscriptionRevenue : contractRevenue,
+      Revenue: isSubscriptionView ? totalSubscriptionRevenue : contractRevenue,
       Cost: isSubscriptionView ? subscriptionCost : contractCost,
       GM: isSubscriptionView ? parseFloat(subscriptionGM.toFixed(0)) : parseFloat(contractGM.toFixed(0)),
     },
   ];
 
-  const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost);
+  const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost, subscriptionRevenue, subscriptionCost);
 
   const formatYAxisTicks = (value: number) => {
     if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -196,7 +200,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
             <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === "GM") {
-                  const gmDollar = isSubscriptionView ? subscriptionRevenue - subscriptionCost : contractGMdollar;
+                  const gmDollar = isSubscriptionView ? totalSubscriptionRevenue - subscriptionCost : contractGMdollar;
                   return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
                 }
                 const label = name === "Revenue"
