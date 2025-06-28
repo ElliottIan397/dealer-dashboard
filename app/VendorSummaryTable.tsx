@@ -174,7 +174,7 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
                             <td className="px-2 py-1">{item.cartridge}</td>
                             <td className="px-2 py-1">{item.style}</td>
                             <td className="px-2 py-1">{item.color}</td>
-                            <td className="px-2 py-1 text-right">{item.qty.toFixed(1)}</td>
+                            <td className="px-2 py-1 text-right">{item.qty.toLocaleString()}</td>
                             <td className="px-2 py-1 text-right">{formatCurrency(item.price)}</td>
                             <td className="px-2 py-1 text-right">{formatCurrency(item.extBuy)}</td>
                           </tr>
