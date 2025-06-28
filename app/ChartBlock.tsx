@@ -70,6 +70,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     colorCpp ?? 0.06,
     bias
   );
+  console.log("ChartBlock Subscription Devices Sample", subscriptionDevices.slice(0, 3));
   console.log("DEBUG subscriptionDevices", subscriptionDevices.length, subscriptionDevices);
   console.log("DEBUG calculated revenue", subscriptionRevenue);
   const subscriptionGM =
@@ -103,7 +104,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   const chart3Data = [
     {
       label: isSubscriptionView ? "Subscription" : "Contract",
-      SP: isSubscriptionView ? subscriptionRevenue : contractRevenue,
+      Revenue: isSubscriptionView ? subscriptionRevenue : contractRevenue,
       Cost: isSubscriptionView ? subscriptionCost : contractCost,
       GM: isSubscriptionView ? parseFloat(subscriptionGM.toFixed(0)) : parseFloat(contractGM.toFixed(0)),
     },
@@ -198,7 +199,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
                   const gmDollar = isSubscriptionView ? subscriptionRevenue - subscriptionCost : contractGMdollar;
                   return [`${percentFormatter(value)}\n(GM$: ${currencyFormatter(gmDollar)})`, "GM"];
                 }
-                const label = name === "SP"
+                const label = name === "Revenue"
                   ? (isSubscriptionView
                     ? `Revenue$\n(Avg/Device: $${avgSubscriptionMonthly.toFixed(2)}/mo, Devices: ${totalDevices})`
                     : `SP$\n(Avg/Device: $${avgContractMonthlyRevenue.toFixed(2)}/mo, Devices: ${contractDevices.length})`)
@@ -208,7 +209,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
                 return [currencyFormatter(value), label];
               }}
             />
-            <Bar yAxisId="left" dataKey="SP" fill="#82ca9d" />
+            <Bar yAxisId="left" dataKey="Revenue" fill="#82ca9d" />
             <Bar yAxisId="left" dataKey="Cost" fill="#8884d8" />
             <Bar yAxisId="right" dataKey="GM" fill="#ffc658" />
           </BarChart>
