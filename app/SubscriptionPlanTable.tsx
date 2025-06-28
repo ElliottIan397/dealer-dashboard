@@ -159,7 +159,7 @@ const transactionalDevices = filtered.filter(row =>
             <tr className="odd:bg-white even:bg-gray-50">
               <td className="px-4 py-2 border text-center">{selectedCustomer}</td>
               <td className="px-4 py-2 border text-center">{totalVolume.toLocaleString()}</td>
-              <td className="px-4 py-2 border text-center">{totalDevices}</td>
+              <td className="px-4 py-2 border text-center">{totalDevices.toLocaleString()}</td>
               <td className="px-4 py-2 border text-center">{safeCurrency(dcaTotal)}</td>
               <td className="px-4 py-2 border text-center">{safeCurrency(jitrTotal)}</td>
               <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
