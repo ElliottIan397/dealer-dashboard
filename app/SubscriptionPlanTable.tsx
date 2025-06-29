@@ -5,6 +5,12 @@ import { McarpRow } from "./types";
 import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 
+// ✅ Central logic helper
+const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+};
+
+// ✅ Define props
 interface Props {
   filtered: McarpRow[];
   bias: "O" | "R" | "N";
@@ -18,7 +24,6 @@ interface Props {
   includeContract: boolean;
   includeQR: boolean;
   includeESW: boolean;
-
   setIncludeDCA: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeJITR: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,10 +36,6 @@ const JITR_COST = 0.42;
 const CONTRACT_COST = 0.55;
 const QR_COST = 0.14;
 const ESW_COST = 5.31;
-
-const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
-  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
-};
 
 export default function SubscriptionPlanTable({
   filtered,
@@ -55,16 +56,9 @@ export default function SubscriptionPlanTable({
   setIncludeQR,
   setIncludeESW,
 }: Props) {
-  console.log("DEBUG SubscriptionPlanTable props", {
-    filtered,
-    monoCpp,
-    colorCpp,
-    bias,
-  });
+  const [markupOverride, setMarkupOverride] = useState<number | null>(null);
 
-  const transactionalDevices = filtered.filter(row =>
-    row.Contract_Status === "T"
-  );
+  const transactionalDevices = filtered.filter((row) => row.Contract_Status === "T");
 
   if (!transactionalDevices.length) {
     return (
@@ -74,16 +68,28 @@ export default function SubscriptionPlanTable({
     );
   }
 
+  const transactionalCost = transactionalDevices.reduce(
+    (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
+    0
+  );
+
+  const getDefaultMarkup = (total: number): number => {
+    if (total < 1000) return 0.25;
+    if (total < 2000) return 0.2;
+    if (total < 3000) return 0.15;
+    if (total < 4000) return 0.1;
+    return 0.075;
+  };
+
+  const defaultMarkup = getDefaultMarkup(transactionalCost);
+  const appliedMarkup = markupOverride ?? defaultMarkup;
+
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor;
 
-  const transactionalCost = transactionalDevices.reduce(
-    (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
-    0
-  );
-  const subscriptionBase = totalMono * monoCpp + totalColor * colorCpp;
+  const subscriptionBase = transactionalCost * (1 + appliedMarkup);
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
   const subscriptionCost = subscriptionBase + eswTotal;
 
@@ -94,6 +100,8 @@ export default function SubscriptionPlanTable({
 
   const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
+  const calculatedMonoCpp = totalMono > 0 ? subscriptionCost * (totalMono / totalVolume) / totalMono : 0;
+  const calculatedColorCpp = totalColor > 0 ? subscriptionCost * (totalColor / totalVolume) / totalColor : 0;
 
   const handleGenerateContract = () => {
     generateContract({
@@ -102,29 +110,22 @@ export default function SubscriptionPlanTable({
       Dealer_Address: "123 Dealer St.",
       Dealer_Phone: "(555) 123-4567",
       Dealer_SalesRep_Name: "Sales Rep Name",
-
       Customer_Address: "123 Customer Ave.",
       Customer_Contact: "Jane Doe",
-
       Contract_Effective_Date: new Date().toLocaleDateString(),
-
       Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
       Fee_DCA: "included",
       Fee_JIT: includeJITR ? "$XX" : "Not Included",
       Fee_QR: includeQR ? "$XX" : "Not Included",
       Fee_SubMgmt: "included",
       Fee_ESW: includeESW ? "$XX" : "Not Included",
-
       SKU_Bias_Option: bias,
       List_of_Devices: transactionalDevices.map((d: any) => d.Model).join(", "),
-
       Customer_Rep_Name: "Customer Rep Name",
-      // ✅ Add these lines to power conditional blocks in the contract template
-      includeDCA: includeDCA,
-      includeJITR: includeJITR,
-      includeQR: includeQR,
-      includeESW: includeESW,
-
+      includeDCA,
+      includeJITR,
+      includeQR,
+      includeESW,
       isO: bias === "O",
       isR: bias === "R",
       isN: bias === "N",
@@ -137,27 +138,41 @@ export default function SubscriptionPlanTable({
         Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
       </h2>
 
-      <div className="flex gap-4 mb-4">
-        <label>
-          Mono CPP ($):
+      <div className="flex gap-4 mb-4 items-end">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Default Markup (%)
+          </label>
           <input
             type="number"
-            step="0.001"
-            value={monoCpp}
-            onChange={(e) => setMonoCpp(parseFloat(e.target.value) || 0)}
-            className="ml-2 border rounded px-2 py-1 w-24"
+            step="1"
+            value={defaultMarkup * 100}
+            readOnly
+            className="border rounded px-2 py-1 w-24 bg-gray-100 text-gray-500"
           />
-        </label>
-        <label>
-          Color CPP ($):
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Override Markup (%)
+          </label>
           <input
             type="number"
-            step="0.001"
-            value={colorCpp}
-            onChange={(e) => setColorCpp(parseFloat(e.target.value) || 0)}
-            className="ml-2 border rounded px-2 py-1 w-24"
+            step="1"
+            value={markupOverride ?? ""}
+            onChange={(e) => setMarkupOverride(parseFloat(e.target.value) || 0)}
+            className="border rounded px-2 py-1 w-24"
           />
-        </label>
+        </div>
+      </div>
+      
+      <div className="flex gap-6 mb-4 text-sm text-gray-700">
+        <div>
+          <strong>Mono CPP:</strong> ${calculatedMonoCpp.toFixed(3)}
+        </div>
+        <div>
+          <strong>Color CPP:</strong> ${calculatedColorCpp.toFixed(3)}
+        </div>
       </div>
 
       {selectedCustomer !== "All" && (
