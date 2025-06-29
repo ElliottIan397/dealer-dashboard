@@ -165,9 +165,12 @@ export default function SubscriptionPlanTable({
           </label>
           <input
             type="number"
-            step="0.01"  // ← CHANGE THIS LINE
-            value={(markupOverride ?? 0) * 100}  // show as percentage
-            onChange={(e) => setMarkupOverride((parseFloat(e.target.value) || 0) / 100)}
+            step="1"
+            value={(markupOverride ?? 0) * 100} // show as %
+            onChange={(e) => {
+              const overridePct = parseFloat(e.target.value);
+              setMarkupOverride(isNaN(overridePct) ? null : overridePct / 100); // convert to fraction
+            }}
             className="border rounded px-2 py-1 w-24"
           />
         </div>
