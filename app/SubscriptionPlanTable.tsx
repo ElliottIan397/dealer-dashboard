@@ -89,7 +89,7 @@ export default function SubscriptionPlanTable({
   };
 
   const defaultMarkup = getDefaultMarkup(transactionalRevenue);
-  const appliedMarkup = markupOverride ?? defaultMarkup;
+  const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
