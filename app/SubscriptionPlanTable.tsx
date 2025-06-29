@@ -151,14 +151,16 @@ export default function SubscriptionPlanTable({
         </label>
       </div>
 
-      <div className="flex justify-end mb-4">
-        <button
-          className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
-          onClick={handleGenerateContract}
-        >
-          Generate Subscription Agreement
-        </button>
-      </div>
+      {selectedCustomer !== "All" && (
+        <div className="flex justify-end mb-4">
+          <button
+            className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
+            onClick={handleGenerateContract}
+          >
+            Generate Subscription Agreement
+          </button>
+        </div>
+      )}
 
       <table className="min-w-full border text-sm">
         <thead>
