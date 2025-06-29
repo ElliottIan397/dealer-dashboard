@@ -6,7 +6,7 @@ import { saveAs } from "file-saver";
 // Fetch, populate, and download the contract
 export async function generateContract(data: Record<string, any>) {
   try {
-    const response = await fetch("/templates/subscription_agreement_template.docx");
+    const response = await fetch("/Templates/subscription_agreement_template.docx");
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
 
