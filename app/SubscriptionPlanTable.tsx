@@ -167,7 +167,7 @@ export default function SubscriptionPlanTable({
             type="number"
             step="1"
             value={markupOverride ?? ""}
-            onChange={(e) => setMarkupOverride(parseFloat(e.target.value) || 0)}
+            onChange={(e) => setMarkupOverride(parseFloat(e.target.value) || 0 / 100)}
             className="border rounded px-2 py-1 w-24"
           />
         </div>
