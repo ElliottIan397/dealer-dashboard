@@ -165,8 +165,8 @@ export default function SubscriptionPlanTable({
           </label>
           <input
             type="number"
-            step="1"
-            value={markupOverride ?? ""}
+            step="0.01"  // ← CHANGE THIS LINE
+            value={(markupOverride ?? 0) * 100}  // show as percentage
             onChange={(e) => setMarkupOverride((parseFloat(e.target.value) || 0) / 100)}
             className="border rounded px-2 py-1 w-24"
           />
