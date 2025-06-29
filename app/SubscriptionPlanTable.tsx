@@ -105,7 +105,7 @@ const transactionalCost = transactionalDevices.reduce(
   const contractTotal = includeContract ? totalDevices * CONTRACT_COST * 12 : 0;
   const qrTotal = includeQR ? totalDevices * QR_COST * 12 : 0;
 
-  const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
+  const totalSaaSCost = subscriptionCost;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
   const calculatedMonoCpp = totalMono > 0 ? subscriptionCost * (totalMono / totalVolume) / totalMono : 0;
   const calculatedColorCpp = totalColor > 0 ? subscriptionCost * (totalColor / totalVolume) / totalColor : 0;
@@ -219,8 +219,8 @@ const transactionalCost = transactionalDevices.reduce(
               ESW<br />
               <input type="checkbox" checked={includeESW} onChange={(e) => setIncludeESW(e.target.checked)} />
             </th>
-            <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
-            <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
+            <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
+            <th className="px-4 py-2 border">Total Subscription/Yr</th>
             <th className="px-4 py-2 border">Subscription/Yr</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
@@ -235,7 +235,7 @@ const transactionalCost = transactionalDevices.reduce(
             <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
-            <td className="px-4 py-2 border text-center">{safeCurrency(transactionalCost)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(transactionalRevenue)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(totalSaaSCost)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
