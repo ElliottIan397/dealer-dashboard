@@ -122,6 +122,8 @@ export default function SubscriptionPlanTable({
       // ✅ Add these lines to power conditional blocks in the contract template
       includeDCA: includeDCA,
       includeJITR: includeJITR,
+      includeQR: includeQR,
+      includeESW: includeESW,
     });
   };
 
