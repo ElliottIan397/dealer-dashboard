@@ -119,6 +119,8 @@ export default function SubscriptionPlanTable({
       List_of_Devices: transactionalDevices.map((d: any) => d.Model).join(", "),
 
       Customer_Rep_Name: "Customer Rep Name",
+      // ✅ Add this line to power the conditional block
+      includeDCA: includeDCA,
     });
   };
 
