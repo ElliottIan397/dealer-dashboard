@@ -68,10 +68,17 @@ export default function SubscriptionPlanTable({
     );
   }
 
-  const transactionalCost = transactionalDevices.reduce(
-    (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
-    0
-  );
+// 💰 Use revenue instead of fulfillment cost
+const transactionalRevenue = transactionalDevices.reduce(
+  (sum, r) => sum + getBiasField(r, "Twelve_Month_Sell_Price", bias),
+  0
+);
+
+// 📦 Keep cost too for SaaS totals
+const transactionalCost = transactionalDevices.reduce(
+  (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
+  0
+);
 
   const getDefaultMarkup = (total: number): number => {
     if (total < 1000) return 0.25;
@@ -81,7 +88,7 @@ export default function SubscriptionPlanTable({
     return 0.075;
   };
 
-  const defaultMarkup = getDefaultMarkup(transactionalCost);
+  const defaultMarkup = getDefaultMarkup(transactionalRevenue);
   const appliedMarkup = markupOverride ?? defaultMarkup;
 
   const totalDevices = transactionalDevices.length;
@@ -89,7 +96,7 @@ export default function SubscriptionPlanTable({
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor;
 
-  const subscriptionBase = transactionalCost * (1 + appliedMarkup);
+  const subscriptionBase = transactionalRevenue * (1 + appliedMarkup);
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
   const subscriptionCost = subscriptionBase + eswTotal;
 
