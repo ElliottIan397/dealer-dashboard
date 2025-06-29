@@ -68,17 +68,17 @@ export default function SubscriptionPlanTable({
     );
   }
 
-// 💰 Use revenue instead of fulfillment cost
-const transactionalRevenue = transactionalDevices.reduce(
-  (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
-  0
-);
+  // 💰 Use revenue instead of fulfillment cost
+  const transactionalRevenue = transactionalDevices.reduce(
+    (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+    0
+  );
 
-// 📦 Keep cost too for SaaS totals
-const transactionalCost = transactionalDevices.reduce(
-  (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
-  0
-);
+  // 📦 Keep cost too for SaaS totals
+  const transactionalCost = transactionalDevices.reduce(
+    (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
+    0
+  );
 
   const getDefaultMarkup = (total: number): number => {
     if (total < 1000) return 0.25;
@@ -96,9 +96,9 @@ const transactionalCost = transactionalDevices.reduce(
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor;
 
-  const subscriptionBase = transactionalRevenue * (1 + appliedMarkup);
+  const markupAmount = transactionalRevenue * appliedMarkup;
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
-  const subscriptionCost = subscriptionBase + eswTotal;
+  const subscriptionCost = transactionalRevenue + markupAmount + eswTotal;
 
   const dcaTotal = includeDCA ? totalDevices * DCA_COST * 12 : 0;
   const jitrTotal = includeJITR ? totalDevices * JITR_COST * 12 : 0;
@@ -172,7 +172,7 @@ const transactionalCost = transactionalDevices.reduce(
           />
         </div>
       </div>
-      
+
       <div className="flex gap-6 mb-4 text-sm text-gray-700">
         <div>
           <strong>Mono CPP:</strong> ${calculatedMonoCpp.toFixed(3)}
