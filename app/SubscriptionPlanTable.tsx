@@ -70,7 +70,7 @@ export default function SubscriptionPlanTable({
 
 // 💰 Use revenue instead of fulfillment cost
 const transactionalRevenue = transactionalDevices.reduce(
-  (sum, r) => sum + getBiasField(r, "Twelve_Month_Sell_Price", bias),
+  (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
   0
 );
 
