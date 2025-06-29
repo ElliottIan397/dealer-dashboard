@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { McarpRow } from "./types";
 import { safeCurrency } from "./utils";
+import { generateContract } from "./generateContract";
 
 interface Props {
   filtered: McarpRow[];
@@ -12,7 +13,7 @@ interface Props {
   colorCpp: number;
   setMonoCpp: React.Dispatch<React.SetStateAction<number>>;
   setColorCpp: React.Dispatch<React.SetStateAction<number>>;
-   includeDCA: boolean;
+  includeDCA: boolean;
   includeJITR: boolean;
   includeContract: boolean;
   includeQR: boolean;
@@ -54,24 +55,24 @@ export default function SubscriptionPlanTable({
   setIncludeQR,
   setIncludeESW,
 }: Props) {
-   console.log("DEBUG SubscriptionPlanTable props", {
+  console.log("DEBUG SubscriptionPlanTable props", {
     filtered,
     monoCpp,
     colorCpp,
     bias,
   });
 
-const transactionalDevices = filtered.filter(row =>
-  row.Contract_Status === "T"
-);
+  const transactionalDevices = filtered.filter(row =>
+    row.Contract_Status === "T"
+  );
 
   if (!transactionalDevices.length) {
-  return (
-    <div className="text-gray-500 mt-4">
-      No transactional devices found for selected customer.
-    </div>
-  );
-}
+    return (
+      <div className="text-gray-500 mt-4">
+        No transactional devices found for selected customer.
+      </div>
+    );
+  }
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
@@ -79,9 +80,9 @@ const transactionalDevices = filtered.filter(row =>
   const totalVolume = totalMono + totalColor;
 
   const transactionalCost = transactionalDevices.reduce(
-  (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
-  0
-);
+    (sum, r) => sum + getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias),
+    0
+  );
   const subscriptionBase = totalMono * monoCpp + totalColor * colorCpp;
   const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
   const subscriptionCost = subscriptionBase + eswTotal;
@@ -93,6 +94,33 @@ const transactionalDevices = filtered.filter(row =>
 
   const totalSaaSCost = transactionalCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
+
+  const handleGenerateContract = () => {
+    generateContract({
+      Customer_Name: selectedCustomer,
+      Dealer_Name: "Your Dealer Name",
+      Dealer_Address: "123 Dealer St.",
+      Dealer_Phone: "(555) 123-4567",
+      Dealer_SalesRep_Name: "Sales Rep Name",
+
+      Customer_Address: "123 Customer Ave.",
+      Customer_Contact: "Jane Doe",
+
+      Contract_Effective_Date: new Date().toLocaleDateString(),
+
+      Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
+      Fee_DCA: "included",
+      Fee_JIT: includeJITR ? "$XX" : "Not Included",
+      Fee_QR: includeQR ? "$XX" : "Not Included",
+      Fee_SubMgmt: "included",
+      Fee_ESW: includeESW ? "$XX" : "Not Included",
+
+      SKU_Bias_Option: bias,
+      List_of_Devices: transactionalDevices.map((d: any) => d.Model).join(", "),
+
+      Customer_Rep_Name: "Customer Rep Name",
+    });
+  };
 
   return (
     <div className="mt-10">
@@ -123,55 +151,64 @@ const transactionalDevices = filtered.filter(row =>
         </label>
       </div>
 
-              <table className="min-w-full border text-sm">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-4 py-2 border">Monitor</th>
-              <th className="px-4 py-2 border">Annual Volume</th>
-              <th className="px-4 py-2 border"># Devices</th>
-              <th className="px-4 py-2 border text-sm">
-                DCA<br />
-                <input type="checkbox" checked={includeDCA} onChange={(e) => setIncludeDCA(e.target.checked)} />
-              </th>
-              <th className="px-4 py-2 border text-sm">
-                JIT-R<br />
-                <input type="checkbox" checked={includeJITR} onChange={(e) => setIncludeJITR(e.target.checked)} />
-              </th>
-              <th className="px-4 py-2 border text-sm">
-                Contract<br />
-                <input type="checkbox" checked={includeContract} onChange={(e) => setIncludeContract(e.target.checked)} />
-              </th>
-              <th className="px-4 py-2 border text-sm">
-                QR<br />
-                <input type="checkbox" checked={includeQR} onChange={(e) => setIncludeQR(e.target.checked)} />
-              </th>
-              <th className="px-4 py-2 border text-sm">
-                ESW<br />
-                <input type="checkbox" checked={includeESW} onChange={(e) => setIncludeESW(e.target.checked)} />
-              </th>
-              <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
-              <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
-              <th className="px-4 py-2 border">Subscription/Yr</th>
-              <th className="px-4 py-2 border">$/mo per Device</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="odd:bg-white even:bg-gray-50">
-              <td className="px-4 py-2 border text-center">{selectedCustomer}</td>
-              <td className="px-4 py-2 border text-center">{totalVolume.toLocaleString()}</td>
-              <td className="px-4 py-2 border text-center">{totalDevices.toLocaleString()}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(dcaTotal)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(jitrTotal)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(transactionalCost)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(totalSaaSCost)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
-              <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="flex justify-end mb-4">
+        <button
+          className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
+          onClick={handleGenerateContract}
+        >
+          Generate Subscription Agreement
+        </button>
+      </div>
+
+      <table className="min-w-full border text-sm">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="px-4 py-2 border">Monitor</th>
+            <th className="px-4 py-2 border">Annual Volume</th>
+            <th className="px-4 py-2 border"># Devices</th>
+            <th className="px-4 py-2 border text-sm">
+              DCA<br />
+              <input type="checkbox" checked={includeDCA} onChange={(e) => setIncludeDCA(e.target.checked)} />
+            </th>
+            <th className="px-4 py-2 border text-sm">
+              JIT-R<br />
+              <input type="checkbox" checked={includeJITR} onChange={(e) => setIncludeJITR(e.target.checked)} />
+            </th>
+            <th className="px-4 py-2 border text-sm">
+              Contract<br />
+              <input type="checkbox" checked={includeContract} onChange={(e) => setIncludeContract(e.target.checked)} />
+            </th>
+            <th className="px-4 py-2 border text-sm">
+              QR<br />
+              <input type="checkbox" checked={includeQR} onChange={(e) => setIncludeQR(e.target.checked)} />
+            </th>
+            <th className="px-4 py-2 border text-sm">
+              ESW<br />
+              <input type="checkbox" checked={includeESW} onChange={(e) => setIncludeESW(e.target.checked)} />
+            </th>
+            <th className="px-4 py-2 border">12 Mo Cartridge Cost</th>
+            <th className="px-4 py-2 border">Total SaaS + Fulfillment</th>
+            <th className="px-4 py-2 border">Subscription/Yr</th>
+            <th className="px-4 py-2 border">$/mo per Device</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="odd:bg-white even:bg-gray-50">
+            <td className="px-4 py-2 border text-center">{selectedCustomer}</td>
+            <td className="px-4 py-2 border text-center">{totalVolume.toLocaleString()}</td>
+            <td className="px-4 py-2 border text-center">{totalDevices.toLocaleString()}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(dcaTotal)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(jitrTotal)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(transactionalCost)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(totalSaaSCost)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
