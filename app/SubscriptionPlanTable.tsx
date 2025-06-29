@@ -124,6 +124,10 @@ export default function SubscriptionPlanTable({
       includeJITR: includeJITR,
       includeQR: includeQR,
       includeESW: includeESW,
+
+      isO: bias === "O",
+      isR: bias === "R",
+      isN: bias === "N",
     });
   };
 
