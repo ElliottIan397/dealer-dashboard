@@ -167,21 +167,39 @@ export default function SubscriptionPlanTable({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Device Guardrails</label>
+          <label className="block text-sm font-medium mb-1">Device Lower Limit</label>
           <input
             type="text"
-            value={`${deviceLowerBound} to ${deviceUpperBound}`}
+            value={deviceLowerBound}
+            readOnly
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Device Upper Limit</label>
+          <input
+            type="text"
+            value={deviceUpperBound}
+            readOnly
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Volume Lower Limit</label>
+          <input
+            type="text"
+            value={Math.round(volumeLowerBound).toLocaleString()}
             readOnly
             className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Monthly Volume Guardrails</label>
+          <label className="block text-sm font-medium mb-1">Volume Upper Limit</label>
           <input
             type="text"
-            value={`${Math.round(volumeLowerBound).toLocaleString()} to ${Math.round(volumeUpperBound).toLocaleString()}`}
+            value={Math.round(volumeUpperBound).toLocaleString()}
             readOnly
-            className="border rounded px-2 py-1 w-48 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700"
           />
         </div>
       </div>
