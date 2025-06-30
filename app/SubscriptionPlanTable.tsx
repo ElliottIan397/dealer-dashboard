@@ -88,7 +88,7 @@ export default function SubscriptionPlanTable({
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
-  const totalVolume = totalMono + totalColor || 1; // Prevent division by zero
+  const totalVolume = totalMono + totalColor || 1;
 
   const defaultMarkup =
     transactionalRevenue < 1000
@@ -114,6 +114,14 @@ export default function SubscriptionPlanTable({
 
   const calculatedMonoCpp = (subscriptionCost * (totalMono / totalVolume)) / (totalMono || 1);
   const calculatedColorCpp = (subscriptionCost * (totalColor / totalVolume)) / (totalColor || 1);
+
+  const toggles = [
+    { key: "DCA", value: includeDCA, setter: setIncludeDCA },
+    { key: "JITR", value: includeJITR, setter: setIncludeJITR },
+    { key: "CONTRACT", value: includeContract, setter: setIncludeContract },
+    { key: "QR", value: includeQR, setter: setIncludeQR },
+    { key: "ESW", value: includeESW, setter: setIncludeESW },
+  ];
 
   return (
     <div className="mt-10">
@@ -234,15 +242,11 @@ export default function SubscriptionPlanTable({
             <th className="px-4 py-2 border">Monitor</th>
             <th className="px-4 py-2 border">Annual Volume</th>
             <th className="px-4 py-2 border"># Devices</th>
-            {Object.entries(COSTS).map(([label, _]) => (
-              <th key={label} className="px-4 py-2 border text-sm">
-                {label}
+            {toggles.map(({ key, value, setter }) => (
+              <th key={key} className="px-4 py-2 border text-sm">
+                {key}
                 <br />
-                <input
-                  type="checkbox"
-                  checked={eval(`include${label}`)}
-                  onChange={e => eval(`setInclude${label}`)(e.target.checked)}
-                />
+                <input type="checkbox" checked={value} onChange={e => setter(e.target.checked)} />
               </th>
             ))}
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
