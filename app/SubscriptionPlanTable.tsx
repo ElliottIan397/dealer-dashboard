@@ -141,6 +141,17 @@ export default function SubscriptionPlanTable({
       isN: bias === "N",
     });
   };
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    zip: "",
+    contactName: "",
+    contactTitle: "",
+    dealerRep: ""
+  });
 
   return (
     <div className="mt-10">
@@ -188,17 +199,72 @@ export default function SubscriptionPlanTable({
         </div>
       </div>
 
-      {selectedCustomer !== "All" && (
-        <div className="flex justify-end mb-4">
-          <button
-            className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
-            onClick={handleGenerateContract}
-          >
-            Generate Subscription Agreement
-          </button>
-        </div>
-      )}
+{selectedCustomer !== "All" && (
+  <div className="flex flex-col items-end mb-4 space-y-4">
+    <button
+      className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
+      onClick={() => setShowForm(true)}
+    >
+      Generate Subscription Agreement
+    </button>
 
+    {showForm && (
+      <div className="p-4 border rounded bg-gray-50 space-y-3 w-full max-w-lg">
+        <h3 className="text-lg font-semibold mb-2">Enter Customer and Dealer Info</h3>
+
+        <input className="w-full p-2 border rounded" placeholder="Address Line 1" value={formData.address1} onChange={e => setFormData({ ...formData, address1: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="Address Line 2 (optional)" value={formData.address2} onChange={e => setFormData({ ...formData, address2: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="City" value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="State" value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="ZIP Code" value={formData.zip} onChange={e => setFormData({ ...formData, zip: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="Customer Contact Name" value={formData.contactName} onChange={e => setFormData({ ...formData, contactName: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="Customer Contact Title" value={formData.contactTitle} onChange={e => setFormData({ ...formData, contactTitle: e.target.value })} />
+        <input className="w-full p-2 border rounded" placeholder="Dealer Rep Name" value={formData.dealerRep} onChange={e => setFormData({ ...formData, dealerRep: e.target.value })} />
+
+        <button
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          onClick={() => {
+            generateContract({
+              Customer_Name: selectedCustomer,
+              Dealer_Name: "Your Dealer Name",
+              Dealer_Address: "123 Dealer St.",
+              Dealer_Phone: "(555) 123-4567",
+              Dealer_SalesRep_Name: formData.dealerRep,
+              Customer_Address_Line1: formData.address1,
+              Customer_Address_Line2: formData.address2,
+              Customer_City: formData.city,
+              Customer_State: formData.state,
+              Customer_Zip: formData.zip,
+              Customer_Contact: formData.contactName,
+              Customer_Contact_Title: formData.contactTitle,
+              Contract_Effective_Date: new Date().toLocaleDateString(),
+              Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
+              Fee_DCA: "included",
+              Fee_JIT: includeJITR ? "$XX" : "Not Included",
+              Fee_QR: includeQR ? "$XX" : "Not Included",
+              Fee_SubMgmt: "included",
+              Fee_ESW: includeESW ? "$XX" : "Not Included",
+              SKU_Bias_Option: bias,
+              List_of_Devices: transactionalDevices.map((d: any) => d.Model).join(", "),
+              Customer_Rep_Name: formData.contactName,
+              includeDCA,
+              includeJITR,
+              includeQR,
+              includeESW,
+              isO: bias === "O",
+              isR: bias === "R",
+              isN: bias === "N",
+            });
+
+            setShowForm(false);
+          }}
+        >
+          Submit and Generate Contract
+        </button>
+      </div>
+    )}
+  </div>
+)}
       <table className="min-w-full border text-sm">
         <thead>
           <tr className="bg-gray-100">
