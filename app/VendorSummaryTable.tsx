@@ -33,15 +33,9 @@ type Props = {
 };
 
 export default function VendorSummaryTable({ filtered, bias, colorFilter, manufacturerFilter }: Props) {
-  const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
-
-  const toggleVendor = (vendor: string) => {
-    setExpandedVendors((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(vendor)) newSet.delete(vendor);
-      else newSet.add(vendor);
-      return newSet;
-    });
+  const [expandedVendor, setExpandedVendor] = useState<string | null>(null);
+  const handleExpandVendor = (vendorName: string) => {
+    setExpandedVendor(prev => (prev === vendorName ? null : vendorName));
   };
 
   const getPriorityFields = (color: string) => {
@@ -161,11 +155,15 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
         <tbody>
           {vendorList.map((vendor) => (
             <React.Fragment key={vendor.supplier}>
-              <tr className="border-t cursor-pointer hover:bg-gray-50" onClick={() => toggleVendor(vendor.supplier)}>
+              <tr
+                className="border-t cursor-pointer hover:bg-gray-50"
+                onClick={() => handleExpandVendor(vendor.supplier)}  // ✅ this is right
+              >
                 <td className="px-3 py-2 flex items-center justify-between">
-                  <span onClick={() => toggleVendor(vendor.supplier)} className="cursor-pointer">
-                    {expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}
+                  <span className="cursor-pointer">
+                    {expandedVendor === vendor.supplier ? "▼" : "▶"} {vendor.supplier}
                   </span>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation(); // prevents row toggle
@@ -189,7 +187,7 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
                 <td className="px-3 py-2 text-right">{vendor.totalCartridges.toLocaleString()}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(vendor.projectedSpend)}</td>
               </tr>
-              {expandedVendors.has(vendor.supplier) && (
+              {expandedVendor === vendor.supplier && (
                 <tr className="border-t bg-gray-50">
                   <td colSpan={3} className="px-3 py-2">
                     <table className="min-w-full text-xs">
