@@ -79,7 +79,8 @@ const getDefaultMarkup = (total: number): number => {
 };
 
 const defaultMarkup = getDefaultMarkup(transactionalRevenue);
-const markupAmount = transactionalRevenue * defaultMarkup;
+const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
+const markupAmount = transactionalRevenue * appliedMarkup;
 
 const eswRevenue = includeESW ? subscriptionDevices.length * 5.31 * 12 : 0;
 
