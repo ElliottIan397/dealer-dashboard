@@ -141,17 +141,20 @@ export default function SubscriptionPlanTable({
       isN: bias === "N",
     });
   };
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    zip: "",
-    contactName: "",
-    contactTitle: "",
-    dealerRep: ""
-  });
+const [showForm, setShowForm] = useState(false);
+
+const [formData, setFormData] = useState({
+  contactName: "",
+  contactTitle: "",
+  address1: "",
+  address2: "",
+  city: "",
+  state: "",
+  zip: "",
+  dealerRep: "",
+});
+
+const [showSummaryTable, setShowSummaryTable] = useState(false);
 
   return (
     <div className="mt-10">
