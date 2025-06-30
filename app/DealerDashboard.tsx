@@ -260,10 +260,6 @@ export default function DealerDashboard() {
             />
           </div>
 
-          {selectedCustomer !== "All" && (
-            <Table1 data={table1Data} bias={selectedBias} />
-          )}
-
           <SubscriptionPlanTable
             filtered={
               selectedCustomer === "All"
@@ -289,6 +285,9 @@ export default function DealerDashboard() {
             markupOverride={markupOverride}
             setMarkupOverride={setMarkupOverride}
           />
+          {selectedCustomer !== "All" && (
+            <Table1 data={table1Data} bias={selectedBias} />
+          )}
         </div>
       )}
 
