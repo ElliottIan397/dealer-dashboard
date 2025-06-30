@@ -115,6 +115,12 @@ export default function SubscriptionPlanTable({
   const calculatedMonoCpp = (subscriptionCost * (totalMono / totalVolume)) / (totalMono || 1);
   const calculatedColorCpp = (subscriptionCost * (totalColor / totalVolume)) / (totalColor || 1);
 
+  const avgMonthlyVolume = totalVolume / 12;
+  const volumeLowerBound = avgMonthlyVolume * 0.8;
+  const volumeUpperBound = avgMonthlyVolume * 1.2;
+  const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.8));
+  const deviceUpperBound = Math.round(totalDevices * 1.2);
+
   const toggles = [
     { key: "DCA", value: includeDCA, setter: setIncludeDCA },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR },
@@ -129,28 +135,38 @@ export default function SubscriptionPlanTable({
         Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
       </h2>
 
-      <div className="flex gap-4 mb-4 items-end">
-        <div>
-          <label className="block text-sm font-medium mb-1">Default Markup (%)</label>
-          <input
-            type="number"
-            value={(defaultMarkup * 100).toFixed(1)}
-            readOnly
-            className="border rounded px-2 py-1 w-24 bg-gray-100 text-gray-500"
-          />
+      <div className="flex gap-8 mb-4 items-start">
+        <div className="flex gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-1">Default Markup (%)</label>
+            <input
+              type="number"
+              value={(defaultMarkup * 100).toFixed(1)}
+              readOnly
+              className="border rounded px-2 py-1 w-24 bg-gray-100 text-gray-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Override Markup (%)</label>
+            <input
+              type="number"
+              step="1"
+              value={(markupOverride ?? 0) * 100}
+              onChange={e => {
+                const val = parseFloat(e.target.value);
+                setMarkupOverride(isNaN(val) ? null : val / 100);
+              }}
+              className="border rounded px-2 py-1 w-24"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Override Markup (%)</label>
-          <input
-            type="number"
-            step="1"
-            value={(markupOverride ?? 0) * 100}
-            onChange={e => {
-              const val = parseFloat(e.target.value);
-              setMarkupOverride(isNaN(val) ? null : val / 100);
-            }}
-            className="border rounded px-2 py-1 w-24"
-          />
+
+        <div className="text-sm text-gray-700 space-y-1">
+          <div><strong>Mono CPP:</strong> ${calculatedMonoCpp.toFixed(3)}</div>
+          <div><strong>Color CPP:</strong> ${calculatedColorCpp.toFixed(3)}</div>
+          <div className="mt-2"><strong>Guardrails:</strong></div>
+          <div>- Devices: {deviceLowerBound} to {deviceUpperBound}</div>
+          <div>- Monthly Volume: {Math.round(volumeLowerBound).toLocaleString()} to {Math.round(volumeUpperBound).toLocaleString()} pages</div>
         </div>
       </div>
 
