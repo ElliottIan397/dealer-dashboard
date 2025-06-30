@@ -41,6 +41,7 @@ export default function DealerDashboard() {
   const [includeContract, setIncludeContract] = useState(true);
   const [includeQR, setIncludeQR] = useState(true);
   const [includeESW, setIncludeESW] = useState(true);
+  const [markupOverride, setMarkupOverride] = useState<number | null>(null);
 
   const manufacturerOptions = Array.from(
     new Set(data.map((row) => row.Manufacturer).filter(Boolean))
@@ -255,6 +256,7 @@ export default function DealerDashboard() {
               setIncludeContract={setIncludeContract}
               setIncludeQR={setIncludeQR}
               setIncludeESW={setIncludeESW}
+              markupOverride={markupOverride}
             />
           </div>
 
@@ -314,6 +316,7 @@ export default function DealerDashboard() {
               setIncludeContract={setIncludeContract}
               setIncludeQR={setIncludeQR}
               setIncludeESW={setIncludeESW}
+              markupOverride={markupOverride}
             />
           </div>
 

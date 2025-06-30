@@ -18,7 +18,9 @@ import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 import { calculateSubscriptionCost, calculateSubscriptionRevenue, getBiasField } from "./utils";
 
-export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, monoCpp, colorCpp, includeDCA, includeJITR, includeContract, includeQR, includeESW, }: ChartBlockProps) {
+export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, 
+  monoCpp, colorCpp, 
+  includeDCA, includeJITR, includeContract, includeQR, includeESW, markupOverride, }: ChartBlockProps) {
   console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode);
   if (!filtered || filtered.length === 0) {
     return (
