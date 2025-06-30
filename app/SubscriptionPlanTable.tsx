@@ -112,8 +112,7 @@ export default function SubscriptionPlanTable({
   const contractTotal = includeContract ? totalDevices * COSTS.CONTRACT * 12 : 0;
   const qrTotal = includeQR ? totalDevices * COSTS.QR * 12 : 0;
 
-  const calculatedMonoCpp = (subscriptionCost * (totalMono / totalVolume)) / (totalMono || 1);
-  const calculatedColorCpp = (subscriptionCost * (totalColor / totalVolume)) / (totalColor || 1);
+  const blendedCpp = subscriptionCost / totalVolume;
 
   const avgMonthlyVolume = totalVolume / 12;
   const volumeLowerBound = avgMonthlyVolume * 0.8;
@@ -135,44 +134,56 @@ export default function SubscriptionPlanTable({
         Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
       </h2>
 
-      <div className="flex gap-8 mb-4 items-start">
-        <div className="flex gap-4 items-end">
-          <div>
-            <label className="block text-sm font-medium mb-1">Default Markup (%)</label>
-            <input
-              type="number"
-              value={(defaultMarkup * 100).toFixed(1)}
-              readOnly
-              className="border rounded px-2 py-1 w-24 bg-gray-100 text-gray-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Override Markup (%)</label>
-            <input
-              type="number"
-              step="1"
-              value={(markupOverride ?? 0) * 100}
-              onChange={e => {
-                const val = parseFloat(e.target.value);
-                setMarkupOverride(isNaN(val) ? null : val / 100);
-              }}
-              className="border rounded px-2 py-1 w-24"
-            />
-          </div>
+      <div className="flex gap-6 mb-4 items-end">
+        <div>
+          <label className="block text-sm font-medium mb-1">Default Markup (%)</label>
+          <input
+            type="number"
+            value={(defaultMarkup * 100).toFixed(1)}
+            readOnly
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-500"
+          />
         </div>
-
-        <div className="text-sm text-gray-700 space-y-1">
-          <div><strong>Mono CPP:</strong> ${calculatedMonoCpp.toFixed(3)}</div>
-          <div><strong>Color CPP:</strong> ${calculatedColorCpp.toFixed(3)}</div>
-          <div className="mt-2"><strong>Guardrails:</strong></div>
-          <div>- Devices: {deviceLowerBound} to {deviceUpperBound}</div>
-          <div>- Monthly Volume: {Math.round(volumeLowerBound).toLocaleString()} to {Math.round(volumeUpperBound).toLocaleString()} pages</div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Override Markup (%)</label>
+          <input
+            type="number"
+            step="1"
+            value={(markupOverride ?? 0) * 100}
+            onChange={e => {
+              const val = parseFloat(e.target.value);
+              setMarkupOverride(isNaN(val) ? null : val / 100);
+            }}
+            className="border rounded px-2 py-1 w-28"
+          />
         </div>
-      </div>
-
-      <div className="flex gap-6 mb-4 text-sm text-gray-700">
-        <div><strong>Mono CPP:</strong> ${calculatedMonoCpp.toFixed(3)}</div>
-        <div><strong>Color CPP:</strong> ${calculatedColorCpp.toFixed(3)}</div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Blended CPP ($)</label>
+          <input
+            type="text"
+            value={blendedCpp.toFixed(3)}
+            readOnly
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Device Guardrails</label>
+          <input
+            type="text"
+            value={`${deviceLowerBound} to ${deviceUpperBound}`}
+            readOnly
+            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Monthly Volume Guardrails</label>
+          <input
+            type="text"
+            value={`${Math.round(volumeLowerBound).toLocaleString()} to ${Math.round(volumeUpperBound).toLocaleString()}`}
+            readOnly
+            className="border rounded px-2 py-1 w-48 bg-gray-100 text-gray-700"
+          />
+        </div>
       </div>
 
       {selectedCustomer !== "All" && (
