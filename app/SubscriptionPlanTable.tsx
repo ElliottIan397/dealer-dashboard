@@ -141,6 +141,7 @@ export default function SubscriptionPlanTable({
               checked={value}
               onChange={() => setter(!value)}
               disabled={disabled}
+              className={greyed ? 'accent-gray-400' : ''}
             />
             <span>{key}</span>
           </label>
