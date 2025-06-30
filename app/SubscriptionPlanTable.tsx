@@ -121,7 +121,7 @@ export default function SubscriptionPlanTable({
   const deviceUpperBound = Math.round(totalDevices * 1.2);
 
   const toggles = [
-    { key: "DCA", value: includeDCA, setter: setIncludeDCA, disabled: true, greyed: true },
+    { key: "DCA", value: true, setter: () => {}, disabled: true, greyed: true },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
     { key: "CONTRACT", value: includeContract, setter: setIncludeContract, disabled: true, greyed: true },
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
