@@ -231,8 +231,6 @@ export default function SubscriptionPlanTable({
             />
             Show Supplies Program Summary by Device (Table 1)
           </label>
-
-          {showSummaryTable && <Table1 data={filtered} bias={bias} />}
         </div>
       )}
 
@@ -272,6 +270,15 @@ export default function SubscriptionPlanTable({
           </tr>
         </tbody>
       </table>
+
+      {selectedCustomer !== "All" && showSummaryTable && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Supplies Program Summary by Device</h3>
+          <div className="overflow-x-auto">
+            <Table1 data={filtered} bias={bias} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
