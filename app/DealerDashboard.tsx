@@ -286,7 +286,10 @@ export default function DealerDashboard() {
             setMarkupOverride={setMarkupOverride}
           />
           {selectedCustomer !== "All" && (
-            <Table1 data={table1Data} bias={selectedBias} />
+            <div className="mt-10">
+              <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
+              <Table1 data={table1Data} bias={selectedBias} />
+            </div>
           )}
         </div>
       )}
