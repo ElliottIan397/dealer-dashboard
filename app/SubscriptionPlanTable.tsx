@@ -224,7 +224,7 @@ export default function SubscriptionPlanTable({
             </th>
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
             <th className="px-4 py-2 border">Total Subscription/Yr</th>
-            <th className="px-4 py-2 border">Subscription/Yr</th>
+            <th className="px-4 py-2 border">Subscription/Mo</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
         </thead>
@@ -239,7 +239,7 @@ export default function SubscriptionPlanTable({
             <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(transactionalRevenue)}</td>
-            <td className="px-4 py-2 border text-center">{safeCurrency(totalSaaSCost)}</td>
+            <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost / 12)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
           </tr>
