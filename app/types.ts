@@ -5,6 +5,7 @@ export type McarpRow = {
   Manufacturer: string;
   Printer_Model: string;
   Device_Type: string;
+  Subscription_Flag?: string;
   viewMode?: string;
 
   // Table 1 fields
@@ -62,6 +63,7 @@ export interface ChartBlockProps {
   includeContract: boolean;
   includeQR: boolean;
   includeESW: boolean;
+  markupOverride: number | null;
   setIncludeDCA: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeJITR: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;

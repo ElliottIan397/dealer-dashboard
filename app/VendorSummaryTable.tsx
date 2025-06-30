@@ -33,17 +33,17 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
     const originKey = color === "Black" ? "K" : base.charAt(0);
     return bias === "O"
       ? [
-          { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
-          { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
-          { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
-        ]
+        { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
+        { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
+        { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
+      ]
       : bias === "R"
-      ? [
+        ? [
           { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
           { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
           { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
         ]
-      : [
+        : [
           { sku: `N_${base}_SKU`, qty: `N_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "N_Buy_Price" : `N_${base}_Cartridge_Cost`, supplier: `N_Supplier_${base}`, origin: `N_${originKey}_Origin` },
           { sku: `R_${base}_SKU`, qty: `R_${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "R_Buy_Price" : `R_${base}_Cartridge_Cost`, supplier: `R_Supplier_${base}`, origin: `R_${originKey}_Origin` },
           { sku: `${base}_SKU`, qty: `${base}_Full_Cartridges_Required_365d`, price: base === "Black" ? "Buy_Price" : `${base}_Cartridge_Cost`, supplier: `Supplier_${base}`, origin: `O_${originKey}_Origin` },
@@ -88,10 +88,23 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
         vendorData.projectedSpend += extBuy;
 
         const key = `${sku}_${styleUsed}_${color}`;
+
         if (!vendorData.items.has(key)) {
+          const cartridgeFieldMap = {
+            Black: "K_CART",
+            Cyan: "C_CART",
+            Magenta: "M_CART",
+            Yellow: "Y_CART",
+          };
+
+          const rawCartridge = row[cartridgeFieldMap[color as keyof typeof cartridgeFieldMap]];
+          const cartridge =
+            rawCartridge && rawCartridge !== "Not Reqd" && rawCartridge !== 0 ? rawCartridge : "";
+
           vendorData.items.set(key, {
             equipment,
             sku,
+            cartridge,
             style: styleUsed,
             color,
             qty,
@@ -134,7 +147,7 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
             <React.Fragment key={vendor.supplier}>
               <tr className="border-t cursor-pointer hover:bg-gray-50" onClick={() => toggleVendor(vendor.supplier)}>
                 <td className="px-3 py-2">{expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}</td>
-                <td className="px-3 py-2 text-right">{vendor.totalCartridges.toFixed(1)}</td>
+                <td className="px-3 py-2 text-right">{vendor.totalCartridges.toLocaleString()}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(vendor.projectedSpend)}</td>
               </tr>
               {expandedVendors.has(vendor.supplier) && (
@@ -145,6 +158,7 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
                         <tr>
                           <th className="text-left px-2 py-1">Equipment</th>
                           <th className="text-left px-2 py-1">SKU</th>
+                          <th className="text-left px-2 py-1">Cartridge</th>
                           <th className="text-left px-2 py-1">Style</th>
                           <th className="text-left px-2 py-1">Color</th>
                           <th className="text-right px-2 py-1">Qty</th>
@@ -152,14 +166,15 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
                           <th className="text-right px-2 py-1">Ext. Buy</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="text-gray-800">
                         {vendor.items.map((item, i) => (
-                          <tr key={i}>
+                          <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                             <td className="px-2 py-1">{item.equipment}</td>
                             <td className="px-2 py-1">{item.sku}</td>
+                            <td className="px-2 py-1">{item.cartridge}</td>
                             <td className="px-2 py-1">{item.style}</td>
                             <td className="px-2 py-1">{item.color}</td>
-                            <td className="px-2 py-1 text-right">{item.qty.toFixed(1)}</td>
+                            <td className="px-2 py-1 text-right">{item.qty.toLocaleString()}</td>
                             <td className="px-2 py-1 text-right">{formatCurrency(item.price)}</td>
                             <td className="px-2 py-1 text-right">{formatCurrency(item.extBuy)}</td>
                           </tr>
