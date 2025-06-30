@@ -57,8 +57,9 @@ export default function SubscriptionPlanTable({
   setIncludeContract,
   setIncludeQR,
   setIncludeESW,
+  markupOverride,
+  setMarkupOverride,
 }: Props) {
-  const [markupOverride, setMarkupOverride] = useState<number | null>(null);
 
   const transactionalDevices = filtered.filter((row) => row.Contract_Status === "T");
 
