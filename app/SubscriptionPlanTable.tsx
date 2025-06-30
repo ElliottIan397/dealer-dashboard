@@ -121,11 +121,11 @@ export default function SubscriptionPlanTable({
   const deviceUpperBound = Math.round(totalDevices * 1.2);
 
   const toggles = [
-    { key: "DCA", value: includeDCA, setter: setIncludeDCA },
-    { key: "JITR", value: includeJITR, setter: setIncludeJITR },
-    { key: "CONTRACT", value: includeContract, setter: setIncludeContract },
-    { key: "QR", value: includeQR, setter: setIncludeQR },
-    { key: "ESW", value: includeESW, setter: setIncludeESW },
+    { key: "DCA", value: includeDCA, setter: setIncludeDCA, disabled: true, greyed: true },
+    { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
+    { key: "CONTRACT", value: includeContract, setter: setIncludeContract, disabled: true, greyed: true },
+    { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
+    { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: false, greyed: false },
   ];
 
   return (
@@ -141,7 +141,7 @@ export default function SubscriptionPlanTable({
             type="number"
             value={(defaultMarkup * 100).toFixed(1)}
             readOnly
-            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-500"
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-500 text-center"
           />
         </div>
         <div>
@@ -154,7 +154,7 @@ export default function SubscriptionPlanTable({
               const val = parseFloat(e.target.value);
               setMarkupOverride(isNaN(val) ? null : val / 100);
             }}
-            className="border rounded px-2 py-1 w-28"
+            className="border rounded px-2 py-1 w-28 text-center"
           />
         </div>
         <div>
@@ -163,7 +163,7 @@ export default function SubscriptionPlanTable({
             type="text"
             value={blendedCpp.toFixed(3)}
             readOnly
-            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700 text-center"
           />
         </div>
         <div>
@@ -172,7 +172,7 @@ export default function SubscriptionPlanTable({
             type="text"
             value={deviceLowerBound}
             readOnly
-            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700 text-center"
           />
         </div>
         <div>
@@ -181,7 +181,7 @@ export default function SubscriptionPlanTable({
             type="text"
             value={deviceUpperBound}
             readOnly
-            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-28 bg-gray-100 text-gray-700 text-center"
           />
         </div>
         <div>
@@ -190,7 +190,7 @@ export default function SubscriptionPlanTable({
             type="text"
             value={Math.round(volumeLowerBound).toLocaleString()}
             readOnly
-            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700 text-center"
           />
         </div>
         <div>
@@ -199,7 +199,7 @@ export default function SubscriptionPlanTable({
             type="text"
             value={Math.round(volumeUpperBound).toLocaleString()}
             readOnly
-            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700"
+            className="border rounded px-2 py-1 w-32 bg-gray-100 text-gray-700 text-center"
           />
         </div>
       </div>
