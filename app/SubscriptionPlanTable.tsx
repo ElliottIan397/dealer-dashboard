@@ -223,8 +223,8 @@ export default function SubscriptionPlanTable({
               <input type="checkbox" checked={includeESW} onChange={(e) => setIncludeESW(e.target.checked)} />
             </th>
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
-            <th className="px-4 py-2 border">Total Subscription/Yr</th>
             <th className="px-4 py-2 border">Subscription/Mo</th>
+            <th className="px-4 py-2 border">Subscription/Yr</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
         </thead>

@@ -64,19 +64,25 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     includeQR,
     includeESW,
   });
-  const { totalRevenue: subscriptionRevenue } = calculateSubscriptionRevenue(
-    subscriptionDevices,
-    monoCpp ?? 0.02,
-    colorCpp ?? 0.06,
-    bias
-  );
+const transactionalRevenue = total(
+  subscriptionDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias))
+);
 
-  const eswRevenue = includeESW ? totalDevices * 5.31 * 12 : 0;
-  const totalSubscriptionRevenue = subscriptionRevenue + eswRevenue;
+const getDefaultMarkup = (total: number): number => {
+  if (total < 1000) return 0.25;
+  if (total < 2000) return 0.2;
+  if (total < 3000) return 0.15;
+  if (total < 4000) return 0.1;
+  return 0.075;
+};
 
-  console.log("ChartBlock Subscription Devices Sample", subscriptionDevices.slice(0, 3));
-  console.log("DEBUG subscriptionDevices", subscriptionDevices.length, subscriptionDevices);
-  console.log("DEBUG calculated revenue", subscriptionRevenue);
+const defaultMarkup = getDefaultMarkup(transactionalRevenue);
+const markupAmount = transactionalRevenue * defaultMarkup;
+
+const eswRevenue = includeESW ? subscriptionDevices.length * 5.31 * 12 : 0;
+
+const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenue;
+
   const subscriptionGM =
     totalSubscriptionRevenue > 0
       ? ((totalSubscriptionRevenue - subscriptionCost) / totalSubscriptionRevenue) * 100
@@ -114,7 +120,7 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     },
   ];
 
-  const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost, subscriptionRevenue, subscriptionCost);
+  const maxDollar = Math.max(transactionalSP, transactionalCost, contractRevenue, contractCost, totalSubscriptionRevenue, subscriptionCost);
 
   const formatYAxisTicks = (value: number) => {
     if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
