@@ -3,6 +3,22 @@
 import React, { useState } from "react";
 import { safeCurrency as formatCurrency } from "./utils";
 
+const downloadCSV = (filename: string, rows: any[]) => {
+  const headers = Object.keys(rows[0]);
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => headers.map(h => JSON.stringify(row[h] ?? "")).join(","))
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 type Bias = "O" | "R" | "N";
 
 type Row = {
@@ -146,7 +162,30 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
           {vendorList.map((vendor) => (
             <React.Fragment key={vendor.supplier}>
               <tr className="border-t cursor-pointer hover:bg-gray-50" onClick={() => toggleVendor(vendor.supplier)}>
-                <td className="px-3 py-2">{expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}</td>
+                <td className="px-3 py-2 flex items-center justify-between">
+                  <span onClick={() => toggleVendor(vendor.supplier)} className="cursor-pointer">
+                    {expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents row toggle
+                      const items = vendor.items.map(item => ({
+                        Equipment: item.equipment,
+                        SKU: item.sku,
+                        Cartridge: item.cartridge,
+                        Style: item.style,
+                        Color: item.color,
+                        Quantity: item.qty,
+                        Price: item.price,
+                        Extended_Buy: item.extBuy
+                      }));
+                      downloadCSV(`${vendor.supplier}_Projected_Spend.csv`, items);
+                    }}
+                    className="text-blue-600 text-xs hover:underline ml-4"
+                  >
+                    Download CSV
+                  </button>
+                </td>
                 <td className="px-3 py-2 text-right">{vendor.totalCartridges.toLocaleString()}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(vendor.projectedSpend)}</td>
               </tr>
