@@ -286,6 +286,8 @@ export default function DealerDashboard() {
             setIncludeContract={setIncludeContract}
             setIncludeQR={setIncludeQR}
             setIncludeESW={setIncludeESW}
+            markupOverride={markupOverride}
+            setMarkupOverride={setMarkupOverride}
           />
         </div>
       )}

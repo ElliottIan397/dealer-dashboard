@@ -29,6 +29,8 @@ interface Props {
   setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeESW: React.Dispatch<React.SetStateAction<boolean>>;
+  markupOverride: number | null;
+  setMarkupOverride: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const DCA_COST = 0.25;
