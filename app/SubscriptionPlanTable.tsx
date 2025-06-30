@@ -123,13 +123,29 @@ export default function SubscriptionPlanTable({
   const toggles = [
     { key: "DCA", value: true, setter: () => {}, disabled: true, greyed: true },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
-    { key: "CONTRACT", value: includeContract, setter: setIncludeContract, disabled: true, greyed: true },
+    { key: "CONTRACT", value: true, setter: () => {}, disabled: true, greyed: true },
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: false, greyed: false },
   ];
 
   return (
     <div className="mt-10">
+      <div className="flex gap-6 mb-6 text-sm">
+        {toggles.map(({ key, value, setter, disabled, greyed }) => (
+          <label
+            key={key}
+            className={`flex items-center space-x-2 ${greyed ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700'}`}
+          >
+            <input
+              type="checkbox"
+              checked={value}
+              onChange={() => setter(!value)}
+              disabled={disabled}
+            />
+            <span>{key}</span>
+          </label>
+        ))}
+      </div>
       <h2 className="text-2xl font-bold mb-4">
         Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
       </h2>
