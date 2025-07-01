@@ -326,7 +326,7 @@ export default function SubscriptionPlanTable({
               checked={showSummaryTable}
               onChange={() => setShowSummaryTable(!showSummaryTable)}
             />
-            Show Supplies Program Summary by Device (Table 1)
+            Show Supplies Program Summary by Device
           </label>
         </div>
       )}
