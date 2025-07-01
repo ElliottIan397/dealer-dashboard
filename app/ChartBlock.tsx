@@ -154,7 +154,7 @@ const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenu
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
             <YAxis tickFormatter={formatYAxisTicks} />
-            <Tooltip formatter={(value: number) => value.toLocaleString()} />
+            <YAxis tickFormatter={formatYAxisTicks} domain={[0, 'dataMax + 10']} />
             <Bar dataKey="value">
               <LabelList dataKey="value" position="top" formatter={(value: number) => value.toLocaleString()} />
               {chart1Data.map((entry, index) => (
