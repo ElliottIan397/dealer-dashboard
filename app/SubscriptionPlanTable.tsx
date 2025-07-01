@@ -253,7 +253,10 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    List_of_Devices: transactionalDevices.map(d => d.Printer_Model).join(", "),
+                    Devices_Table: transactionalDevices.map(d => ({
+                      Model: d.Printer_Model,
+                      Serial: d.Serial_Number,
+                    })),
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
                     deviceUpperLimit: deviceUpperBound,
