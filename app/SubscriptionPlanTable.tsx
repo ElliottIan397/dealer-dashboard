@@ -337,7 +337,13 @@ export default function SubscriptionPlanTable({
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">Supplies Program Summary by Device</h3>
           <div className="overflow-x-auto">
-            <Table1 data={filtered} bias={bias} />
+            <Table1
+              data={filtered.map(row => ({
+                ...row,
+                Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", bias),
+              }))}
+              bias={bias}
+            />
           </div>
         </div>
       )}
