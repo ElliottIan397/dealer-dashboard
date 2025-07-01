@@ -94,12 +94,12 @@ export default function SubscriptionPlanTable({
     transactionalRevenue < 1000
       ? 0.25
       : transactionalRevenue < 2000
-      ? 0.2
-      : transactionalRevenue < 3000
-      ? 0.15
-      : transactionalRevenue < 4000
-      ? 0.1
-      : 0.075;
+        ? 0.2
+        : transactionalRevenue < 3000
+          ? 0.15
+          : transactionalRevenue < 4000
+            ? 0.1
+            : 0.075;
 
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
@@ -121,32 +121,16 @@ export default function SubscriptionPlanTable({
   const deviceUpperBound = Math.round(totalDevices * 1.2);
 
   const toggles = [
-    { key: "DCA", value: true, setter: () => {}, disabled: true, greyed: true },
+    { key: "DCA", value: true, setter: () => { }, disabled: true, greyed: true },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
-    { key: "CONTRACT", value: true, setter: () => {}, disabled: true, greyed: true },
+    { key: "CONTRACT", value: true, setter: () => { }, disabled: true, greyed: true },
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: false, greyed: false },
   ];
 
   return (
     <div className="mt-10">
-      <div className="flex gap-6 mb-6 text-sm">
-        {toggles.map(({ key, value, setter, disabled, greyed }) => (
-          <label
-            key={key}
-            className={`flex items-center space-x-2 ${greyed ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700'}`}
-          >
-            <input
-              type="checkbox"
-              checked={value}
-              onChange={() => setter(!value)}
-              disabled={disabled}
-              className={greyed ? 'accent-gray-400' : ''}
-            />
-            <span>{key}</span>
-          </label>
-        ))}
-      </div>
+
       <h2 className="text-2xl font-bold mb-4">
         Subscription Plan Projection{selectedCustomer === "All" ? " (All Customers)" : ""}
       </h2>
@@ -302,11 +286,17 @@ export default function SubscriptionPlanTable({
             <th className="px-4 py-2 border">Monitor</th>
             <th className="px-4 py-2 border">Annual Volume</th>
             <th className="px-4 py-2 border"># Devices</th>
-            {toggles.map(({ key, value, setter }) => (
+            {toggles.map(({ key, value, setter, disabled, greyed }) => (
               <th key={key} className="px-4 py-2 border text-sm">
                 {key}
                 <br />
-                <input type="checkbox" checked={value} onChange={e => setter(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={value}
+                  onChange={e => setter(e.target.checked)}
+                  disabled={disabled}
+                  className={greyed ? 'accent-gray-400' : ''}
+                />
               </th>
             ))}
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
