@@ -75,8 +75,8 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
             <th className="px-3 py-2 text-center">Magenta Ctgs</th>
             <th className="px-3 py-2 text-center">Yellow Ctgs</th>
             <th className="px-3 py-2 text-center">Contract Status</th>
+            <th className="px-3 py-2 text-center">Transact Rev</th>           
             <th className="px-3 py-2 text-center">Fulfillment Cost</th>
-            <th className="px-3 py-2 text-center">Transact Rev</th>
             <th className="px-3 py-2 text-center">Trans GM%</th>
             <th className="px-3 py-2 text-center">Contract Rev</th>
             <th className="px-3 py-2 text-center">Contract GM%</th>
@@ -137,8 +137,8 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                     <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Magenta_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>                    
                     <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>
                     <td className="px-3 py-2 text-center">
                       {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias)))}
                     </td>
@@ -159,8 +159,8 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                   <td className="px-3 py-2 text-right">{formatCell(totals.Magenta)}</td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Yellow)}</td>
                   <td className="px-3 py-2 text-center"></td>
+                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>                 
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
-                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(transactionalGM)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Revenue)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(contractGM)}</td>

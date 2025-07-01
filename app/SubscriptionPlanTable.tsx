@@ -103,7 +103,48 @@ export default function SubscriptionPlanTable({
 
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
-  const eswTotal = includeESW ? totalDevices * COSTS.ESW * 12 : 0;
+
+  const eswRateByRisk: Record<string, number> = {
+    Low: 6,
+    Moderate: 7,
+    High: 8.5,
+    Critical: 10,
+  };
+
+  const riskWeights: Record<string, number> = {
+    Low: 0,
+    Moderate: 1,
+    High: 2,
+    Critical: 3,
+  };
+
+  let totalRiskScore = 0;
+  let eswTotal = 0;
+
+  if (includeESW) {
+    transactionalDevices.forEach((r) => {
+      const riskLevel = r.Final_Risk_Level;
+      const rate = eswRateByRisk[riskLevel] ?? 7.5;
+      const weight = riskWeights[riskLevel] ?? 1;
+
+      eswTotal += rate * 12;
+      totalRiskScore += weight;
+    });
+  } else {
+    totalRiskScore = transactionalDevices.reduce((sum, r) => {
+      const weight = riskWeights[r.Final_Risk_Level] ?? 1;
+      return sum + weight;
+    }, 0);
+  }
+
+  const avgRiskScore =
+    transactionalDevices.length > 0 ? totalRiskScore / transactionalDevices.length : 0;
+
+  let fleetRiskLabel = "Low";
+  if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
+  else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
+  else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
+
   const subscriptionCost = transactionalRevenue + markupAmount + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
 
@@ -117,11 +158,11 @@ export default function SubscriptionPlanTable({
   const avgMonthlyVolume = totalVolume / 12;
   const roundToNearestThousand = (val: number) => Math.round(val / 1000) * 1000;
 
-  const volumeLowerBound = roundToNearestThousand(avgMonthlyVolume * 0.8);
-  const volumeUpperBound = roundToNearestThousand(avgMonthlyVolume * 1.2);
+  const volumeLowerBound = roundToNearestThousand(avgMonthlyVolume * 0.9);
+  const volumeUpperBound = roundToNearestThousand(avgMonthlyVolume * 1.1);
 
-  const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.8));
-  const deviceUpperBound = Math.round(totalDevices * 1.2);
+  const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.9));
+  const deviceUpperBound = Math.round(totalDevices * 1.1);
 
   const toggles = [
     { key: "DCA", value: true, setter: () => { }, disabled: true, greyed: true },
@@ -285,7 +326,7 @@ export default function SubscriptionPlanTable({
               checked={showSummaryTable}
               onChange={() => setShowSummaryTable(!showSummaryTable)}
             />
-            Show Supplies Program Summary by Device (Table 1)
+            Show Supplies Program Summary by Device
           </label>
         </div>
       )}
@@ -309,9 +350,10 @@ export default function SubscriptionPlanTable({
                 />
               </th>
             ))}
-            <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
-            <th className="px-4 py-2 border">Subscription/Mo</th>
-            <th className="px-4 py-2 border">Subscription/Yr</th>
+            <th className="px-4 py-2 border">Fleet Risk</th>
+            <th className="px-4 py-2 border">12 Mo Revenue</th>
+            <th className="px-4 py-2 border">Monthly</th>
+            <th className="px-4 py-2 border">Annual</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
         </thead>
@@ -325,7 +367,23 @@ export default function SubscriptionPlanTable({
             <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
-            <td className="px-4 py-2 border text-center">{safeCurrency(transactionalRevenue)}</td>
+            <td className="px-4 py-2 border text-center">
+              <span
+                className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${fleetRiskLabel === "Low"
+                  ? "bg-green-500"
+                  : fleetRiskLabel === "Moderate"
+                    ? "bg-yellow-500"
+                    : fleetRiskLabel === "High"
+                      ? "bg-orange-500"
+                      : "bg-red-600"
+                  }`}
+              >
+                {fleetRiskLabel}
+              </span>
+            </td>
+            <td className="px-4 py-2 border text-center">
+              {safeCurrency(transactionalRevenue + markupAmount)}
+            </td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost / 12)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
@@ -337,7 +395,13 @@ export default function SubscriptionPlanTable({
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">Supplies Program Summary by Device</h3>
           <div className="overflow-x-auto">
-            <Table1 data={filtered} bias={bias} />
+            <Table1
+              data={filtered.map(row => ({
+                ...row,
+                Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", bias),
+              }))}
+              bias={bias}
+            />
           </div>
         </div>
       )}

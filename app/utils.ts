@@ -59,7 +59,19 @@ export function calculateSubscriptionCost(
   const jitrTotal = includeJITR ? totalDevices * JITR_COST * 12 : 0;
   const contractTotal = includeContract ? totalDevices * CONTRACT_COST * 12 : 0;
   const qrTotal = includeQR ? totalDevices * QR_COST * 12 : 0;
-  const eswTotal = includeESW ? totalDevices * ESW_COST * 12 : 0;
+  const eswRateByRisk: Record<string, number> = {
+    Low: 6,
+    Moderate: 7,
+    High: 8.5,
+    Critical: 10,
+  };
+
+  const eswTotal = includeESW
+    ? devices.reduce((sum, r) => {
+      const risk = eswRateByRisk[r.Final_Risk_Level] ?? 7.5;
+      return sum + risk * 12;
+    }, 0)
+    : 0;
 
   const totalCost = fulfillmentCost + dcaTotal + jitrTotal + contractTotal + qrTotal + eswTotal;
 

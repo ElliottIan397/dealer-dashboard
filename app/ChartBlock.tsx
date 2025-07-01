@@ -37,8 +37,8 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
   const transactionalDevices = contractType === "C"
-    ? contractOnly ?? []
-    : filtered.filter((r: McarpRow) => r.Contract_Status === "T");
+  ? [...(contractOnly ?? [])]
+  : [...filtered.filter((r: McarpRow) => r.Contract_Status === "T")];
 
   const contractDevices = filtered.filter((r: McarpRow) => r.Contract_Status === "C");
 
@@ -82,7 +82,19 @@ const defaultMarkup = getDefaultMarkup(transactionalRevenue);
 const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
 const markupAmount = transactionalRevenue * appliedMarkup;
 
-const eswRevenue = includeESW ? subscriptionDevices.length * 5.31 * 12 : 0;
+const eswRateByRisk: Record<string, number> = {
+  Low: 6,
+  Moderate: 7,
+  High: 8.5,
+  Critical: 10,
+};
+
+const eswRevenue = includeESW
+  ? subscriptionDevices.reduce((sum, r) => {
+      const risk = eswRateByRisk[r.Final_Risk_Level] ?? 7.5;
+      return sum + risk * 12;
+    }, 0)
+  : 0;
 
 const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenue;
 
@@ -142,7 +154,7 @@ const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenu
           <BarChart data={chart1Data}>
             <XAxis dataKey="type" />
             <YAxis tickFormatter={formatYAxisTicks} />
-            <Tooltip formatter={(value: number) => value.toLocaleString()} />
+            <YAxis tickFormatter={formatYAxisTicks} domain={[0, 'dataMax + 10']} />
             <Bar dataKey="value">
               <LabelList dataKey="value" position="top" formatter={(value: number) => value.toLocaleString()} />
               {chart1Data.map((entry, index) => (
