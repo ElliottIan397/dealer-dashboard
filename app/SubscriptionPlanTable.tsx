@@ -352,8 +352,8 @@ export default function SubscriptionPlanTable({
             ))}
             <th className="px-4 py-2 border">Fleet Risk</th>
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
-            <th className="px-4 py-2 border">Subscription/Mo</th>
-            <th className="px-4 py-2 border">Subscription/Yr</th>
+            <th className="px-4 py-2 border">Monthly</th>
+            <th className="px-4 py-2 border">Annual</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
           </tr>
         </thead>
