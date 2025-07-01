@@ -82,7 +82,19 @@ const defaultMarkup = getDefaultMarkup(transactionalRevenue);
 const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
 const markupAmount = transactionalRevenue * appliedMarkup;
 
-const eswRevenue = includeESW ? subscriptionDevices.length * 5.31 * 12 : 0;
+const eswRateByRisk: Record<string, number> = {
+  Low: 6,
+  Moderate: 7,
+  High: 8.5,
+  Critical: 10,
+};
+
+const eswRevenue = includeESW
+  ? subscriptionDevices.reduce((sum, r) => {
+      const risk = eswRateByRisk[r.Final_Risk_Level] ?? 7.5;
+      return sum + risk;
+    }, 0)
+  : 0;
 
 const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenue;
 
