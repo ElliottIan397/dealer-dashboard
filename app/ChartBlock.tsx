@@ -37,8 +37,8 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
   const transactionalDevices = contractType === "C"
-    ? contractOnly ?? []
-    : filtered.filter((r: McarpRow) => r.Contract_Status === "T");
+  ? [...(contractOnly ?? [])]
+  : [...filtered.filter((r: McarpRow) => r.Contract_Status === "T")];
 
   const contractDevices = filtered.filter((r: McarpRow) => r.Contract_Status === "C");
 
