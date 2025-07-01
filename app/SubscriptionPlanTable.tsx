@@ -158,11 +158,11 @@ export default function SubscriptionPlanTable({
   const avgMonthlyVolume = totalVolume / 12;
   const roundToNearestThousand = (val: number) => Math.round(val / 1000) * 1000;
 
-  const volumeLowerBound = roundToNearestThousand(avgMonthlyVolume * 0.8);
-  const volumeUpperBound = roundToNearestThousand(avgMonthlyVolume * 1.2);
+  const volumeLowerBound = roundToNearestThousand(avgMonthlyVolume * 0.9);
+  const volumeUpperBound = roundToNearestThousand(avgMonthlyVolume * 1.1);
 
-  const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.8));
-  const deviceUpperBound = Math.round(totalDevices * 1.2);
+  const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.9));
+  const deviceUpperBound = Math.round(totalDevices * 1.1);
 
   const toggles = [
     { key: "DCA", value: true, setter: () => { }, disabled: true, greyed: true },
