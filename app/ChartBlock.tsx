@@ -92,7 +92,7 @@ const eswRateByRisk: Record<string, number> = {
 const eswRevenue = includeESW
   ? subscriptionDevices.reduce((sum, r) => {
       const risk = eswRateByRisk[r.Final_Risk_Level] ?? 7.5;
-      return sum + risk;
+      return sum + risk * 12;
     }, 0)
   : 0;
 
