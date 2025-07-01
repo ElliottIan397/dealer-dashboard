@@ -103,7 +103,19 @@ export default function SubscriptionPlanTable({
 
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
-  const eswTotal = includeESW ? totalDevices * COSTS.ESW * 12 : 0;
+  const eswRateByRisk: Record<string, number> = {
+    Low: 6,
+    Moderate: 7,
+    High: 8.5,
+    Critical: 10,
+  };
+
+  const eswTotal = includeESW
+    ? transactionalDevices.reduce((sum, r) => {
+      const rate = eswRateByRisk[r.Final_Risk_Level] ?? 7.5; // fallback rate
+      return sum + rate * 12;
+    }, 0)
+    : 0;
   const subscriptionCost = transactionalRevenue + markupAmount + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
 
