@@ -103,6 +103,7 @@ export default function SubscriptionPlanTable({
 
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
+
   const eswRateByRisk: Record<string, number> = {
     Low: 6,
     Moderate: 7,
@@ -110,12 +111,40 @@ export default function SubscriptionPlanTable({
     Critical: 10,
   };
 
-  const eswTotal = includeESW
-    ? transactionalDevices.reduce((sum, r) => {
-      const rate = eswRateByRisk[r.Final_Risk_Level] ?? 7.5; // fallback rate
-      return sum + rate * 12;
-    }, 0)
-    : 0;
+  const riskWeights: Record<string, number> = {
+    Low: 0,
+    Moderate: 1,
+    High: 2,
+    Critical: 3,
+  };
+
+  let totalRiskScore = 0;
+  let eswTotal = 0;
+
+  if (includeESW) {
+    transactionalDevices.forEach((r) => {
+      const riskLevel = r.Final_Risk_Level;
+      const rate = eswRateByRisk[riskLevel] ?? 7.5;
+      const weight = riskWeights[riskLevel] ?? 1;
+
+      eswTotal += rate * 12;
+      totalRiskScore += weight;
+    });
+  } else {
+    totalRiskScore = transactionalDevices.reduce((sum, r) => {
+      const weight = riskWeights[r.Final_Risk_Level] ?? 1;
+      return sum + weight;
+    }, 0);
+  }
+
+  const avgRiskScore =
+    transactionalDevices.length > 0 ? totalRiskScore / transactionalDevices.length : 0;
+
+  let fleetRiskLabel = "Low";
+  if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
+  else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
+  else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
+
   const subscriptionCost = transactionalRevenue + markupAmount + eswTotal;
   const monthlySubscriptionPerDevice = subscriptionCost / 12 / totalDevices;
 
@@ -321,6 +350,7 @@ export default function SubscriptionPlanTable({
                 />
               </th>
             ))}
+            <th className="px-4 py-2 border">Fleet Risk</th>
             <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
             <th className="px-4 py-2 border">Subscription/Mo</th>
             <th className="px-4 py-2 border">Subscription/Yr</th>
@@ -337,6 +367,20 @@ export default function SubscriptionPlanTable({
             <td className="px-4 py-2 border text-center">{safeCurrency(contractTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(qrTotal)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(eswTotal)}</td>
+            <td className="px-4 py-2 border text-center">
+              <span
+                className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${fleetRiskLabel === "Low"
+                    ? "bg-green-500"
+                    : fleetRiskLabel === "Moderate"
+                      ? "bg-yellow-500"
+                      : fleetRiskLabel === "High"
+                        ? "bg-orange-500"
+                        : "bg-red-600"
+                  }`}
+              >
+                {fleetRiskLabel}
+              </span>
+            </td>
             <td className="px-4 py-2 border text-center">{safeCurrency(transactionalRevenue)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost / 12)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
