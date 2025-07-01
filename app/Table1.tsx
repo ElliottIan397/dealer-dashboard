@@ -159,8 +159,8 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                   <td className="px-3 py-2 text-right">{formatCell(totals.Magenta)}</td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Yellow)}</td>
                   <td className="px-3 py-2 text-center"></td>
+                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>                 
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
-                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(transactionalGM)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Revenue)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(contractGM)}</td>
