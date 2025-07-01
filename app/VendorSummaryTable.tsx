@@ -3,6 +3,22 @@
 import React, { useState } from "react";
 import { safeCurrency as formatCurrency } from "./utils";
 
+const downloadCSV = (filename: string, rows: any[]) => {
+  const headers = Object.keys(rows[0]);
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => headers.map(h => JSON.stringify(row[h] ?? "")).join(","))
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 type Bias = "O" | "R" | "N";
 
 type Row = {
@@ -17,15 +33,9 @@ type Props = {
 };
 
 export default function VendorSummaryTable({ filtered, bias, colorFilter, manufacturerFilter }: Props) {
-  const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
-
-  const toggleVendor = (vendor: string) => {
-    setExpandedVendors((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(vendor)) newSet.delete(vendor);
-      else newSet.add(vendor);
-      return newSet;
-    });
+  const [expandedVendor, setExpandedVendor] = useState<string | null>(null);
+  const handleExpandVendor = (vendorName: string) => {
+    setExpandedVendor(prev => (prev === vendorName ? null : vendorName));
   };
 
   const getPriorityFields = (color: string) => {
@@ -145,12 +155,39 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
         <tbody>
           {vendorList.map((vendor) => (
             <React.Fragment key={vendor.supplier}>
-              <tr className="border-t cursor-pointer hover:bg-gray-50" onClick={() => toggleVendor(vendor.supplier)}>
-                <td className="px-3 py-2">{expandedVendors.has(vendor.supplier) ? "▼" : "▶"} {vendor.supplier}</td>
+              <tr
+                className="border-t cursor-pointer hover:bg-gray-50"
+                onClick={() => handleExpandVendor(vendor.supplier)}  // ✅ this is right
+              >
+                <td className="px-3 py-2 flex items-center justify-between">
+                  <span className="cursor-pointer">
+                    {expandedVendor === vendor.supplier ? "▼" : "▶"} {vendor.supplier}
+                  </span>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents row toggle
+                      const items = vendor.items.map(item => ({
+                        Equipment: item.equipment,
+                        SKU: item.sku,
+                        Cartridge: item.cartridge,
+                        Style: item.style,
+                        Color: item.color,
+                        Quantity: item.qty,
+                        Price: item.price,
+                        Extended_Buy: item.extBuy
+                      }));
+                      downloadCSV(`${vendor.supplier}_Projected_Spend.csv`, items);
+                    }}
+                    className="text-blue-600 text-xs hover:underline ml-4"
+                  >
+                    Download CSV
+                  </button>
+                </td>
                 <td className="px-3 py-2 text-right">{vendor.totalCartridges.toLocaleString()}</td>
                 <td className="px-3 py-2 text-right">{formatCurrency(vendor.projectedSpend)}</td>
               </tr>
-              {expandedVendors.has(vendor.supplier) && (
+              {expandedVendor === vendor.supplier && (
                 <tr className="border-t bg-gray-50">
                   <td colSpan={3} className="px-3 py-2">
                     <table className="min-w-full text-xs">

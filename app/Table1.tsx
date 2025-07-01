@@ -138,7 +138,7 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                     <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(row.Twelve_Month_Transactional_SP)}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>
                     <td className="px-3 py-2 text-center">
                       {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias)))}
                     </td>
