@@ -351,7 +351,7 @@ export default function SubscriptionPlanTable({
               </th>
             ))}
             <th className="px-4 py-2 border">Fleet Risk</th>
-            <th className="px-4 py-2 border">12 Mo Transaction Revenue</th>
+            <th className="px-4 py-2 border">12 Mo Revenue</th>
             <th className="px-4 py-2 border">Monthly</th>
             <th className="px-4 py-2 border">Annual</th>
             <th className="px-4 py-2 border">$/mo per Device</th>
@@ -370,18 +370,20 @@ export default function SubscriptionPlanTable({
             <td className="px-4 py-2 border text-center">
               <span
                 className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${fleetRiskLabel === "Low"
-                    ? "bg-green-500"
-                    : fleetRiskLabel === "Moderate"
-                      ? "bg-yellow-500"
-                      : fleetRiskLabel === "High"
-                        ? "bg-orange-500"
-                        : "bg-red-600"
+                  ? "bg-green-500"
+                  : fleetRiskLabel === "Moderate"
+                    ? "bg-yellow-500"
+                    : fleetRiskLabel === "High"
+                      ? "bg-orange-500"
+                      : "bg-red-600"
                   }`}
               >
                 {fleetRiskLabel}
               </span>
             </td>
-            <td className="px-4 py-2 border text-center">{safeCurrency(transactionalRevenue)}</td>
+            <td className="px-4 py-2 border text-center">
+              {safeCurrency(transactionalRevenue + markupAmount)}
+            </td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost / 12)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(subscriptionCost)}</td>
             <td className="px-4 py-2 border text-center">{safeCurrency(monthlySubscriptionPerDevice)}</td>
