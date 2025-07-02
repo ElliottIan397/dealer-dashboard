@@ -5,6 +5,7 @@ import { McarpRow } from "./types";
 import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
+import groupBy from "lodash/groupBy";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
@@ -28,6 +29,7 @@ interface Props {
   setIncludeContract: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeESW: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedCustomer: React.Dispatch<React.SetStateAction<string>>;
   markupOverride: number | null;
   setMarkupOverride: React.Dispatch<React.SetStateAction<number | null>>;
 }
@@ -52,15 +54,21 @@ export default function SubscriptionPlanTable({
   includeJITR,
   includeContract,
   includeQR,
-  includeESW,
+  includeESW,  
   setIncludeDCA,
   setIncludeJITR,
   setIncludeContract,
+  setSelectedCustomer,
   setIncludeQR,
   setIncludeESW,
   markupOverride,
   setMarkupOverride,
-}: Props) {
+
+}: Props): React.JSX.Element {
+  const [showOpportunities, setShowOpportunities] = useState(false);
+  const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
+  const [localBias, setBias] = useState<"O" | "R" | "N">("O");
+
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
@@ -403,6 +411,93 @@ export default function SubscriptionPlanTable({
               bias={bias}
             />
           </div>
+        </div>
+      )}
+
+      {selectedCustomer === "All" && (
+        <div className="mt-4">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={showOpportunities}
+              onChange={e => setShowOpportunities(e.target.checked)}
+              className="mr-2"
+            />
+            Show Customer Subscription Opportunities
+          </label>
+
+          {showOpportunities && (
+            <table className="min-w-full border text-sm mt-4">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-2 border">Customer</th>
+                  <th className="px-4 py-2 border">Devices</th>
+                  <th className="px-4 py-2 border">Total Page Volume</th>
+                  <th className="px-4 py-2 border">Fleet Risk</th>
+                  <th className="px-4 py-2 border">12 Mo Sub Revenue</th>
+                  <th className="px-4 py-2 border">Monthly Sub</th>
+                  <th className="px-4 py-2 border">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(groupBy(filtered, d => d.Monitor))
+                  .map(([customer, devices]: [string, McarpRow[]]) => {
+                    const totalVolume = devices.reduce(
+                      (sum, r) => sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
+                      0
+                    );
+                    const transactionalRevenue = devices.reduce(
+                      (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+                      0
+                    );
+                    const defaultMarkup = transactionalRevenue < 1000 ? 0.25 : transactionalRevenue < 5000 ? 0.2 : 0.15;
+                    const markupAmount = transactionalRevenue * defaultMarkup;
+                    const eswRateByRisk = { Low: 6, Moderate: 7, High: 8.5, Critical: 10 };
+                    const eswTotal = devices.reduce(
+                      (sum, r) => sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12, 0
+                    );
+                    const subscriptionRevenue = transactionalRevenue + markupAmount + eswTotal;
+                    const avgMonthly = subscriptionRevenue / 12;
+
+                    const riskWeights = { Low: 0, Moderate: 1, High: 2, Critical: 3 };
+                    const avgRiskScore =
+                    devices.reduce((sum, r) => sum + (riskWeights[r.Final_Risk_Level as keyof typeof riskWeights] ?? 1), 0) / devices.length;
+                    let fleetRiskLabel = "Low";
+                    if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
+                    else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
+                    else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
+
+                    return {
+                      customer,
+                      deviceCount: devices.length,
+                      totalVolume,
+                      fleetRiskLabel,
+                      subscriptionRevenue,
+                      avgMonthly,
+                    };
+                  })
+                  .sort((a, b) => b.subscriptionRevenue - a.subscriptionRevenue)
+                  .map(row => (
+                    <tr key={row.customer} className="odd:bg-white even:bg-gray-50">
+                      <td className="px-4 py-2 border">{row.customer}</td>
+                      <td className="px-4 py-2 border text-center">{row.deviceCount}</td>
+                      <td className="px-4 py-2 border text-center">{row.totalVolume.toLocaleString()}</td>
+                      <td className="px-4 py-2 border text-center">{row.fleetRiskLabel}</td>
+                      <td className="px-4 py-2 border text-center">{safeCurrency(row.subscriptionRevenue)}</td>
+                      <td className="px-4 py-2 border text-center">{safeCurrency(row.avgMonthly)}</td>
+                      <td className="px-4 py-2 border text-center">
+                        <button
+                          onClick={() => setSelectedCustomer(row.customer)}
+                          className="text-blue-600 underline hover:text-blue-800"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
