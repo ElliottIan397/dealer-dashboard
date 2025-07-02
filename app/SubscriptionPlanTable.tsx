@@ -431,7 +431,7 @@ export default function SubscriptionPlanTable({
           {showOpportunities && (
             <div className="mt-10">
               <div className="overflow-x-auto">
-                <table className="min-w-full w-full table-auto border text-sm">
+                <table className="min-w-full w-full table-fixed border text-sm">
                   <thead className="bg-gray-100 sticky top-0 z-10">
                     <tr>
                       <th className="px-4 py-2 border">Customer</th>
