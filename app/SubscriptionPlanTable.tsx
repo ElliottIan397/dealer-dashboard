@@ -54,7 +54,7 @@ export default function SubscriptionPlanTable({
   includeJITR,
   includeContract,
   includeQR,
-  includeESW,  
+  includeESW,
   setIncludeDCA,
   setIncludeJITR,
   setIncludeContract,
@@ -425,79 +425,85 @@ export default function SubscriptionPlanTable({
             />
             Show Customer Subscription Opportunities
           </label>
+        </div>
+      )}
 
-          {showOpportunities && (
-            <table className="min-w-full border text-sm mt-4">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border">Customer</th>
-                  <th className="px-4 py-2 border">Devices</th>
-                  <th className="px-4 py-2 border">Total Page Volume</th>
-                  <th className="px-4 py-2 border">Fleet Risk</th>
-                  <th className="px-4 py-2 border">12 Mo Sub Revenue</th>
-                  <th className="px-4 py-2 border">Monthly Sub</th>
-                  <th className="px-4 py-2 border">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(groupBy(filtered, d => d.Monitor))
-                  .map(([customer, devices]: [string, McarpRow[]]) => {
-                    const totalVolume = devices.reduce(
-                      (sum, r) => sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
-                      0
-                    );
-                    const transactionalRevenue = devices.reduce(
-                      (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
-                      0
-                    );
-                    const defaultMarkup = transactionalRevenue < 1000 ? 0.25 : transactionalRevenue < 5000 ? 0.2 : 0.15;
-                    const markupAmount = transactionalRevenue * defaultMarkup;
-                    const eswRateByRisk = { Low: 6, Moderate: 7, High: 8.5, Critical: 10 };
-                    const eswTotal = devices.reduce(
-                      (sum, r) => sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12, 0
-                    );
-                    const subscriptionRevenue = transactionalRevenue + markupAmount + eswTotal;
-                    const avgMonthly = subscriptionRevenue / 12;
+      {showOpportunities && (
+        <div className="max-h-[500px] overflow-y-auto border rounded">
+          <table className="w-full border text-sm">
 
-                    const riskWeights = { Low: 0, Moderate: 1, High: 2, Critical: 3 };
-                    const avgRiskScore =
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 border">Customer</th>
+                <th className="px-4 py-2 border">Devices</th>
+                <th className="px-4 py-2 border">Total Page Volume</th>
+                <th className="px-4 py-2 border">Fleet Risk</th>
+                <th className="px-4 py-2 border">12 Mo Sub Revenue</th>
+                <th className="px-4 py-2 border">Monthly Sub</th>
+                <th className="px-4 py-2 border">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(groupBy(filtered, d => d.Monitor))
+                .map(([customer, devices]: [string, McarpRow[]]) => {
+                  const totalVolume = devices.reduce(
+                    (sum, r) => sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
+                    0
+                  );
+                  const transactionalRevenue = devices.reduce(
+                    (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+                    0
+                  );
+                  const defaultMarkup = transactionalRevenue < 1000 ? 0.25 : transactionalRevenue < 5000 ? 0.2 : 0.15;
+                  const markupAmount = transactionalRevenue * defaultMarkup;
+                  const eswRateByRisk = { Low: 6, Moderate: 7, High: 8.5, Critical: 10 };
+                  const eswTotal = devices.reduce(
+                    (sum, r) => sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12, 0
+                  );
+                  const subscriptionRevenue = transactionalRevenue + markupAmount + eswTotal;
+                  const avgMonthly = subscriptionRevenue / 12;
+
+                  const riskWeights = { Low: 0, Moderate: 1, High: 2, Critical: 3 };
+                  const avgRiskScore =
                     devices.reduce((sum, r) => sum + (riskWeights[r.Final_Risk_Level as keyof typeof riskWeights] ?? 1), 0) / devices.length;
-                    let fleetRiskLabel = "Low";
-                    if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
-                    else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
-                    else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
+                  let fleetRiskLabel = "Low";
+                  if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
+                  else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
+                  else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
 
-                    return {
-                      customer,
-                      deviceCount: devices.length,
-                      totalVolume,
-                      fleetRiskLabel,
-                      subscriptionRevenue,
-                      avgMonthly,
-                    };
-                  })
-                  .sort((a, b) => b.subscriptionRevenue - a.subscriptionRevenue)
-                  .map(row => (
-                    <tr key={row.customer} className="odd:bg-white even:bg-gray-50">
-                      <td className="px-4 py-2 border">{row.customer}</td>
-                      <td className="px-4 py-2 border text-center">{row.deviceCount}</td>
-                      <td className="px-4 py-2 border text-center">{row.totalVolume.toLocaleString()}</td>
-                      <td className="px-4 py-2 border text-center">{row.fleetRiskLabel}</td>
-                      <td className="px-4 py-2 border text-center">{safeCurrency(row.subscriptionRevenue)}</td>
-                      <td className="px-4 py-2 border text-center">{safeCurrency(row.avgMonthly)}</td>
-                      <td className="px-4 py-2 border text-center">
-                        <button
-                          onClick={() => setSelectedCustomer(row.customer)}
-                          className="text-blue-600 underline hover:text-blue-800"
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          )}
+                  return {
+                    customer,
+                    deviceCount: devices.length,
+                    totalVolume,
+                    fleetRiskLabel,
+                    subscriptionRevenue,
+                    avgMonthly,
+                  };
+                })
+                .sort((a, b) => b.subscriptionRevenue - a.subscriptionRevenue)
+                .map(row => (
+                  <tr key={row.customer} className="odd:bg-white even:bg-gray-50">
+                    <td className="px-4 py-2 border">{row.customer}</td>
+                    <td className="px-4 py-2 border text-center">{row.deviceCount}</td>
+                    <td className="px-4 py-2 border text-center">{row.totalVolume.toLocaleString()}</td>
+                    <td className="px-4 py-2 border text-center">{row.fleetRiskLabel}</td>
+                    <td className="px-4 py-2 border text-center">{safeCurrency(row.subscriptionRevenue)}</td>
+                    <td className="px-4 py-2 border text-center">{safeCurrency(row.avgMonthly)}</td>
+                    <td className="px-4 py-2 border text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedCustomer(row.customer);
+                          setShowOpportunities(false);
+                        }}
+                        className="text-blue-600 underline hover:text-blue-800"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
