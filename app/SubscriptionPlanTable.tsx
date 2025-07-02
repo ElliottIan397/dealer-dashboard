@@ -429,11 +429,11 @@ export default function SubscriptionPlanTable({
       )}
 
       {showOpportunities && (
-        <div className="max-h-[500px] overflow-y-auto border rounded py-4 px-2 w-full">
-          <table className="min-w-full border text-sm">
-
-            <thead className="bg-gray-100 sticky top-0 z-10">
-              <tr>
+  <div className="py-6">
+    <div className="max-h-[500px] overflow-y-auto border rounded w-full">
+      <table className="min-w-full border text-sm">
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
                 <th className="px-4 py-2 border">Customer</th>
                 <th className="px-4 py-2 border">Devices</th>
                 <th className="px-4 py-2 border">Total Page Volume</th>
@@ -497,7 +497,7 @@ export default function SubscriptionPlanTable({
                         }}
                         className="text-blue-600 underline hover:text-blue-800"
                       >
-                        View
+                         View
                       </button>
                     </td>
                   </tr>
@@ -505,7 +505,8 @@ export default function SubscriptionPlanTable({
             </tbody>
           </table>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }
