@@ -268,6 +268,7 @@ export default function DealerDashboard() {
             }
             bias={selectedBias}
             selectedCustomer={selectedCustomer}
+            setSelectedCustomer={setSelectedCustomer}
             monoCpp={monoCpp}
             colorCpp={colorCpp}
             setMonoCpp={setMonoCpp}
