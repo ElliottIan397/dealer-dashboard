@@ -429,7 +429,8 @@ export default function SubscriptionPlanTable({
           </div>
 
           {showOpportunities && (
-            <div className="mt-10">              
+            <div className="mt-10">
+              <div className="overflow-x-auto">
                 <table className="min-w-full w-full table-auto border text-sm">
                   <thead className="bg-gray-100 sticky top-0 z-10">
                     <tr>
@@ -502,7 +503,8 @@ export default function SubscriptionPlanTable({
                         </tr>
                       ))}
                   </tbody>
-                </table>              
+                </table>
+              </div>
             </div>
           )}
         </>
