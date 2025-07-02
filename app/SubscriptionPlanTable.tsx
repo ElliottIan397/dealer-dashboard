@@ -322,6 +322,7 @@ export default function SubscriptionPlanTable({
                   setShowForm(false);
                 }}
               >
+                
                 Submit and Generate Contract
               </button>
             </div>
