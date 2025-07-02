@@ -339,7 +339,7 @@ export default function SubscriptionPlanTable({
         </div>
       )}
 
-      <table className="min-w-full w-full table-fixed border text-sm">
+      <table className="min-w-full w-full table-auto border text-sm">
         <thead>
           <tr className="bg-gray-100">
             <th className="px-4 py-2 border">Monitor</th>
