@@ -433,9 +433,9 @@ export default function SubscriptionPlanTable({
 
           {showOpportunities && (
             <div className="mt-10">
-              <div className="overflow-x-auto">
-                <div className="max-h-[700px] overflow-y-auto border rounded">
-                  <table className="min-w-full table-fixed border text-sm text-gray-900">
+              <div className="max-h-[700px] overflow-y-auto border rounded">
+                <div className="overflow-x-auto">
+                  <table className="min-w-max border text-sm text-gray-900">
                     <thead className="bg-gray-100 sticky top-0 z-10 text-xs font-semibold">
                       <tr>
                         <th className="px-4 py-2 border">Customer</th>
