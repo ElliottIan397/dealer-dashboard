@@ -40,10 +40,20 @@ export async function generateContract(data: Record<string, any>) {
       }),
     ].join("\n");
 
+    const guardrailsTable = [
+      ["Fleet Output Avg. Mth. Lower Limit:", data.volumeLowerLimit],
+      ["Fleet Output Avg. Mth. Upper Limit:", data.volumeUpperLimit],
+      ["Device Lower Limit:", data.deviceLowerLimit],
+      ["Device Upper Limit:", data.deviceUpperLimit],
+    ]
+      .map(([label, val]) => `${label.padEnd(35)}${val}`)
+      .join("\n");
+
     // ✅ Set all merge fields, including the rendered table
     doc.setData({
       ...data,
       List_of_Devices: tableAsText,
+      Guardrails_Table: guardrailsTable,
     });
 
     try {
