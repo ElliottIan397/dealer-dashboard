@@ -41,12 +41,13 @@ export async function generateContract(data: Record<string, any>) {
     ].join("\n");
 
     const guardrailsTable = [
+      ["Guardrail", "Limit"],
       ["Fleet Output Avg. Mth. Lower Limit:", data.volumeLowerLimit],
       ["Fleet Output Avg. Mth. Upper Limit:", data.volumeUpperLimit],
       ["Device Lower Limit:", data.deviceLowerLimit],
       ["Device Upper Limit:", data.deviceUpperLimit],
     ]
-      .map(([label, val]) => `${label.padEnd(35)}${val}`)
+      .map(([label, val]) => `${label.padEnd(40)}${val}`)
       .join("\n");
 
     // ✅ Set all merge fields, including the rendered table
