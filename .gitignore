@@ -1,1 +1,28 @@
+# Ignore dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Local environment variables
+.env
+.env.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# VSCode and IDE folders
+.vscode/
+.idea/
+
+# Temporary/demo files
+temp/
 temp/mcarp_demo.json
+
+# Auto-generated TypeScript declaration
+next-env.d.ts
