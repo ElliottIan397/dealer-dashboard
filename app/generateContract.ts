@@ -3,7 +3,6 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { saveAs } from "file-saver";
 
-// Fetch, populate, and download the contract
 export async function generateContract(data: Record<string, any>) {
   try {
     const response = await fetch("/Templates/subscription_agreement_template.docx");
@@ -16,7 +15,18 @@ export async function generateContract(data: Record<string, any>) {
       linebreaks: true,
     });
 
-    doc.setData(data);
+    // ✅ Format the device table as plain text
+    const devices = data.Devices_Table || [];
+    const tableAsText = [
+      "Model\t\tSerial Number",
+      ...devices.map(d => `${d.Model}\t\t${d.Serial}`)
+    ].join("\n");
+
+    // ✅ Set all merge fields, including the rendered table
+    doc.setData({
+      ...data,
+      List_of_Devices: tableAsText,
+    });
 
     try {
       doc.render();
