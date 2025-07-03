@@ -306,6 +306,8 @@ export default function SubscriptionPlanTable({
                     Devices_Table: transactionalDevices.map(d => ({
                       Model: d.Printer_Model,
                       Serial: d.Serial_Number,
+                      Black_Annual_Volume: d.Black_Annual_Volume,
+                      Color_Annual_Volume: d.Color_Annual_Volume,
                     })),
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,

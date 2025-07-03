@@ -19,17 +19,25 @@ export async function generateContract(data: Record<string, any>) {
     const devices = (data.Devices_Table || []) as {
       Model: string;
       Serial: string;
-      Annual_Volume: number;
+      Black_Annual_Volume?: number;
+      Color_Annual_Volume?: number;
     }[];
 
-    // ✅ Sort by volume descending
-    devices.sort((a, b) => b.Annual_Volume - a.Annual_Volume);
+    // ✅ Sort by total volume descending
+    devices.sort((a, b) => {
+      const aVol = (a.Black_Annual_Volume ?? 0) + (a.Color_Annual_Volume ?? 0);
+      const bVol = (b.Black_Annual_Volume ?? 0) + (b.Color_Annual_Volume ?? 0);
+      return bVol - aVol;
+    });
 
     const tableAsText = [
       "Model                         Serial Number           Annual Volume",
-      ...devices.map(d =>
-        `${d.Model.padEnd(30)}${d.Serial.padEnd(25)}${d.Annual_Volume.toLocaleString()}`
-      ),
+      ...devices.map(d => {
+        const mono = d.Black_Annual_Volume ?? 0;
+        const color = d.Color_Annual_Volume ?? 0;
+        const volume = mono + color;
+        return `${d.Model.padEnd(30)}${d.Serial.padEnd(25)}${volume.toLocaleString()}`;
+      }),
     ].join("\n");
 
     // ✅ Set all merge fields, including the rendered table
