@@ -16,10 +16,20 @@ export async function generateContract(data: Record<string, any>) {
     });
 
     // ✅ Format the device table as plain text
-    const devices = data.Devices_Table || [];
+    const devices = (data.Devices_Table || []) as {
+      Model: string;
+      Serial: string;
+      Annual_Volume: number;
+    }[];
+
+    // ✅ Sort by volume descending
+    devices.sort((a, b) => b.Annual_Volume - a.Annual_Volume);
+
     const tableAsText = [
-      "Model\t\tSerial Number",
-      ...devices.map((d: { Model: string; Serial: string }) => `${d.Model.padEnd(30)}${d.Serial}`)
+      "Model                         Serial Number           Annual Volume",
+      ...devices.map(d =>
+        `${d.Model.padEnd(30)}${d.Serial.padEnd(25)}${d.Annual_Volume.toLocaleString()}`
+      ),
     ].join("\n");
 
     // ✅ Set all merge fields, including the rendered table
