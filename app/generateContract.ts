@@ -19,7 +19,7 @@ export async function generateContract(data: Record<string, any>) {
     const devices = data.Devices_Table || [];
     const tableAsText = [
       "Model\t\tSerial Number",
-      ...devices.map(d => `${d.Model}\t\t${d.Serial}`)
+      ...devices.map((d: { Model: string; Serial: string }) => `${d.Model}\t\t${d.Serial}`)
     ].join("\n");
 
     // ✅ Set all merge fields, including the rendered table
