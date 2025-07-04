@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract Preview</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-900 font-sans p-10">
+  <div id="contract" class="max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Subscription Agreement</h1>
+
+    <p class="mb-2"><strong>Customer:</strong> {{Customer_Name}}</p>
+    <p class="mb-2"><strong>Dealer:</strong> {{Dealer_Name}}</p>
+    <p class="mb-2"><strong>Sales Rep:</strong> {{Rep_Name}}</p>
+    <p class="mb-6"><strong>Start Date:</strong> {{Start_Date}}</p>
+
+    <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
+    <table class="table-auto w-full border border-gray-400 text-sm mb-8">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border px-4 py-2 text-left">Model</th>
+          <th class="border px-4 py-2 text-left">Serial</th>
+          <th class="border px-4 py-2 text-left">Annual Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{Devices_Table}}
+      </tbody>
+    </table>
+
+    <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
+    <table class="table-auto w-full border border-gray-400 text-sm mb-8">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border px-4 py-2 text-left">Guardrail</th>
+          <th class="border px-4 py-2 text-left">Limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{Guardrails_Table}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-10">
+    <button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
+  </div>
+
+  <script>
+    const data = {
+      Customer_Name: "Acme Corp.",
+      Dealer_Name: "Tech Solutions LLC",
+      Rep_Name: "Jane Doe",
+      Start_Date: "2025-08-01",
+      Devices_Table: [
+        { Model: "Canon 4235", Serial: "SN123456", Volume: 34000 },
+        { Model: "HP LaserJet 5000", Serial: "SN987654", Volume: 18000 },
+      ],
+      Guardrails_Table: [
+        ["Fleet Output Avg. Mth. Lower Limit:", "25,000"],
+        ["Fleet Output Avg. Mth. Upper Limit:", "31,000"],
+        ["Device Lower Limit:", "8"],
+        ["Device Upper Limit:", "10"],
+      ],
+    };
+
+    const replace = (template, tag, value) => {
+      return template.replace(`{{${tag}}}`, value);
+    };
+
+    const formatDevicesTable = (rows) => {
+      return rows.map(r => `
+        <tr>
+          <td class="border px-4 py-2">${r.Model}</td>
+          <td class="border px-4 py-2">${r.Serial}</td>
+          <td class="border px-4 py-2">${r.Volume.toLocaleString()}</td>
+        </tr>`).join('');
+    };
+
+    const formatGuardrailsTable = (rows) => {
+      return rows.map(([label, value]) => `
+        <tr>
+          <td class="border px-4 py-2">${label}</td>
+          <td class="border px-4 py-2">${value}</td>
+        </tr>`).join('');
+    };
+
+    let html = document.body.innerHTML;
+    html = replace(html, "Customer_Name", data.Customer_Name);
+    html = replace(html, "Dealer_Name", data.Dealer_Name);
+    html = replace(html, "Rep_Name", data.Rep_Name);
+    html = replace(html, "Start_Date", data.Start_Date);
+    html = replace(html, "Devices_Table", formatDevicesTable(data.Devices_Table));
+    html = replace(html, "Guardrails_Table", formatGuardrailsTable(data.Guardrails_Table));
+
+    document.body.innerHTML = html;
+
+    function downloadPDF() {
+      const element = document.getElementById("contract");
+      html2pdf().from(element).save("Subscription_Contract.pdf");
+    }
+  </script>
+</body>
+</html>
