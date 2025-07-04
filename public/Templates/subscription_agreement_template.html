@@ -87,6 +87,12 @@
         ["Device Lower Limit:", "8"],
         ["Device Upper Limit:", "10"],
       ],
+      includeDCA: true,
+      includeJITR: true,
+      includeQR: true,
+      includeESW: true,
+      Contract_Effective_Date: "2025-08-01",
+      Monthly_Subscription_Fee: "399.00"
     };
 
     const replace = (template, tag, value) => {
@@ -117,6 +123,22 @@
     html = replace(html, "Start_Date", data.Start_Date);
     html = replace(html, "Devices_Table", formatDevicesTable(data.Devices_Table));
     html = replace(html, "Guardrails_Table", formatGuardrailsTable(data.Guardrails_Table));
+    html = replace(html, "Contract_Effective_Date", data.Contract_Effective_Date);
+    html = replace(html, "Monthly_Subscription_Fee", data.Monthly_Subscription_Fee);
+
+    // Conditional content rendering
+    html = data.includeDCA
+      ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1")
+      : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
+    html = data.includeJITR
+      ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1")
+      : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
+    html = data.includeQR
+      ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1")
+      : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
+    html = data.includeESW
+      ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1")
+      : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
 
     document.body.innerHTML = html;
 
