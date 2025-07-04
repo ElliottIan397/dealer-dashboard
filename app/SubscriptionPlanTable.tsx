@@ -306,6 +306,8 @@ export default function SubscriptionPlanTable({
                     Devices_Table: transactionalDevices.map(d => ({
                       Model: d.Printer_Model,
                       Serial: d.Serial_Number,
+                      Black_Annual_Volume: d.Black_Annual_Volume,
+                      Color_Annual_Volume: d.Color_Annual_Volume,
                     })),
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
@@ -477,70 +479,67 @@ export default function SubscriptionPlanTable({
                         )
                         .map(([customer, devices]: [string, McarpRow[]]) => {
                           const totalVolume = devices.reduce(
-                            (sum, r) =>
-                              sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
+                            (sum, r) => sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
                             0
                           );
                           const transactionalRevenue = devices.reduce(
                             (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
                             0
                           );
-                          const defaultMarkup =
-                            transactionalRevenue < 1000 ? 0.25 :
-                              transactionalRevenue < 5000 ? 0.2 : 0.15;
+                          const defaultMarkup = transactionalRevenue < 1000 ? 0.25 :
+                            transactionalRevenue < 5000 ? 0.2 : 0.15;
                           const markupAmount = transactionalRevenue * defaultMarkup;
 
                           const eswRateByRisk = { Low: 6, Moderate: 7, High: 8.5, Critical: 10 };
                           const eswTotal = devices.reduce(
-                            (sum, r) =>
-                              sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12,
+                            (sum, r) => sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12,
                             0
                           );
                           const subscriptionRevenue = transactionalRevenue + markupAmount + eswTotal;
                           const avgMonthly = subscriptionRevenue / 12;
 
                           const riskWeights = { Low: 0, Moderate: 1, High: 2, Critical: 3 };
-                          const avgRiskScore =
-                            devices.reduce(
-                              (sum, r) =>
-                                sum +
-                                (riskWeights[r.Final_Risk_Level as keyof typeof riskWeights] ?? 1),
-                              0
-                            ) / devices.length;
+                          const avgRiskScore = devices.reduce(
+                            (sum, r) => sum + (riskWeights[r.Final_Risk_Level as keyof typeof riskWeights] ?? 1),
+                            0
+                          ) / devices.length;
 
                           let fleetRiskLabel = "Low";
                           if (avgRiskScore >= 2.5) fleetRiskLabel = "Critical";
                           else if (avgRiskScore >= 1.5) fleetRiskLabel = "High";
                           else if (avgRiskScore >= 0.5) fleetRiskLabel = "Moderate";
 
-                          return (
-                            <tr key={customer} className="odd:bg-white even:bg-gray-50">
-                              <td className="px-4 py-2 border">{customer}</td>
-                              <td className="px-4 py-2 border text-center">{devices.length}</td>
-                              <td className="px-4 py-2 border text-center">
-                                {totalVolume.toLocaleString()}
-                              </td>
-                              <td className="px-4 py-2 border text-center">{fleetRiskLabel}</td>
-                              <td className="px-4 py-2 border text-right">
-                                {safeCurrency(subscriptionRevenue)}
-                              </td>
-                              <td className="px-4 py-2 border text-right">
-                                {safeCurrency(avgMonthly)}
-                              </td>
-                              <td className="px-4 py-2 border text-center">
-                                <button
-                                  onClick={() => {
-                                    setSelectedCustomer(customer);
-                                    setShowOpportunities(false);
-                                  }}
-                                  className="text-blue-600 underline hover:text-blue-800"
-                                >
-                                  View
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                          return {
+                            customer,
+                            devices,
+                            totalVolume,
+                            subscriptionRevenue,
+                            avgMonthly,
+                            fleetRiskLabel,
+                          };
+                        })
+                        .sort((a, b) => b.subscriptionRevenue - a.subscriptionRevenue) // <-- Sort here
+                        .map(({ customer, devices, totalVolume, subscriptionRevenue, avgMonthly, fleetRiskLabel }) => (
+                          <tr key={customer} className="odd:bg-white even:bg-gray-50">
+                            <td className="px-4 py-2 border">{customer}</td>
+                            <td className="px-4 py-2 border text-center">{devices.length}</td>
+                            <td className="px-4 py-2 border text-center">{totalVolume.toLocaleString()}</td>
+                            <td className="px-4 py-2 border text-center">{fleetRiskLabel}</td>
+                            <td className="px-4 py-2 border text-right">{safeCurrency(subscriptionRevenue)}</td>
+                            <td className="px-4 py-2 border text-right">{safeCurrency(avgMonthly)}</td>
+                            <td className="px-4 py-2 border text-center">
+                              <button
+                                onClick={() => {
+                                  setSelectedCustomer(customer);
+                                  setShowOpportunities(false);
+                                }}
+                                className="text-blue-600 underline hover:text-blue-800"
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>

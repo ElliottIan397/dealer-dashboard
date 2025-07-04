@@ -3,7 +3,6 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { saveAs } from "file-saver";
 
-// Fetch, populate, and download the contract
 export async function generateContract(data: Record<string, any>) {
   try {
     const response = await fetch("/Templates/subscription_agreement_template.docx");
@@ -16,7 +15,47 @@ export async function generateContract(data: Record<string, any>) {
       linebreaks: true,
     });
 
-    doc.setData(data);
+    // ✅ Format the device table as plain text
+    const devices = (data.Devices_Table || []) as {
+      Model: string;
+      Serial: string;
+      Black_Annual_Volume?: number;
+      Color_Annual_Volume?: number;
+    }[];
+
+    // ✅ Sort by total volume descending
+    devices.sort((a, b) => {
+      const aVol = (a.Black_Annual_Volume ?? 0) + (a.Color_Annual_Volume ?? 0);
+      const bVol = (b.Black_Annual_Volume ?? 0) + (b.Color_Annual_Volume ?? 0);
+      return bVol - aVol;
+    });
+
+    const tableAsText = [
+      "Model                         Serial Number           Annual Volume",
+      ...devices.map(d => {
+        const mono = d.Black_Annual_Volume ?? 0;
+        const color = d.Color_Annual_Volume ?? 0;
+        const volume = mono + color;
+        return `${d.Model.padEnd(30)}${d.Serial.padEnd(25)}${volume.toLocaleString()}`;
+      }),
+    ].join("\n");
+
+    const guardrailsTable = [
+      ["Guardrail", "Limit"],
+      ["Fleet Output Avg. Mth. Lower Limit:", data.volumeLowerLimit],
+      ["Fleet Output Avg. Mth. Upper Limit:", data.volumeUpperLimit],
+      ["Device Lower Limit:", data.deviceLowerLimit],
+      ["Device Upper Limit:", data.deviceUpperLimit],
+    ]
+      .map(([label, val]) => `${label.padEnd(40)}${val}`)
+      .join("\n");
+
+    // ✅ Set all merge fields, including the rendered table
+    doc.setData({
+      ...data,
+      List_of_Devices: tableAsText,
+      Guardrails_Table: guardrailsTable,
+    });
 
     try {
       doc.render();
