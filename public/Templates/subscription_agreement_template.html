@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,15 +12,18 @@
       body {
         margin: 1in;
       }
+
       .page-break {
         page-break-before: always;
       }
+
       .avoid-break {
         page-break-inside: avoid;
       }
     }
   </style>
 </head>
+
 <body class="bg-white text-gray-900 font-sans p-10">
   <div id="contract" class="max-w-3xl mx-auto">
     <h1 class="text-2xl font-bold mb-4">Subscription Agreement</h1>
@@ -31,28 +35,39 @@
 
     <div class="mb-6 text-sm space-y-2 avoid-break">
       <p><strong>Effective Date:</strong> {{Contract_Effective_Date}}</p>
-      <p><strong>Term:</strong> 12 months, automatically renews for successive one-year terms until terminated with notice.</p>
+      <p><strong>Term:</strong> 12 months, automatically renews for successive one-year terms until terminated with
+        notice.</p>
       <h3 class="font-semibold mt-4">1. Software & Automation Services Included</h3>
       <p>The following SaaS services will be provided under this Agreement:</p>
-      {{#includeDCA}}<p>&bull; <strong>Data Capture Agent (DCA)</strong><br />The customer agrees to maintain continuous device connectivity as required by the DCA platform. Provides real-time monitoring of device status, usage, and diagnostics.</p>{{/includeDCA}}
-      {{#includeJITR}}<p>&bull; <strong>Just-in-Time Replenishment (JIT‑R)</strong><br />Automates ink/toner shipment consolidation and oversees cartridge utilization and premature replacement. Also facilitates closed-loop recycling of spent cartridges.</p>{{/includeJITR}}
-      <p>&bull; <strong>Subscription Management</strong><br />Enables automatic billing, renewal alerts, and usage reporting.</p>
-      {{#includeQR}}<p>&bull; <strong>QR-Code Integration</strong><br />Adds scannable codes on devices/cartridges for simplified asset tracking and reordering.</p>{{/includeQR}}
+      {{#includeDCA}}<p>&bull; <strong>Data Capture Agent (DCA)</strong><br />The customer agrees to maintain continuous
+        device connectivity as required by the DCA platform. Provides real-time monitoring of device status, usage, and
+        diagnostics.</p>{{/includeDCA}}
+      {{#includeJITR}}<p>&bull; <strong>Just-in-Time Replenishment (JIT‑R)</strong><br />Automates ink/toner shipment
+        consolidation and oversees cartridge utilization and premature replacement. Also facilitates closed-loop
+        recycling of spent cartridges.</p>{{/includeJITR}}
+      <p>&bull; <strong>Subscription Management</strong><br />Enables automatic billing, renewal alerts, and usage
+        reporting.</p>
+      {{#includeQR}}<p>&bull; <strong>QR-Code Integration</strong><br />Adds scannable codes on devices/cartridges for
+        simplified asset tracking and reordering.</p>{{/includeQR}}
 
       <h3 class="font-semibold mt-4">2. Extended Service Warranties (ESW)</h3>
-      {{#includeESW}}<p>Service & Repair Scope and limitations of coverage - reference the ESW Addendum (see Addendum 3).</p>{{/includeESW}}
+      {{#includeESW}}<p>Service & Repair Scope and limitations of coverage - reference the ESW Addendum (see Addendum
+        3).</p>{{/includeESW}}
 
       <h3 class="font-semibold mt-4">3. Monthly Subscription Fee</h3>
       <p>Total Monthly Fee: ${{Monthly_Subscription_Fee}} (Excluding applicable sales tax)</p>
 
       <h3 class="font-semibold mt-4">4. Billing & Payment</h3>
-      <p>Invoiced monthly in advance.<br />Auto-charge to customer’s payment method on file.<br />Terms for late payment and service suspension included.</p>
+      <p>Invoiced monthly in advance.<br />Auto-charge to customer’s payment method on file.<br />Terms for late payment
+        and service suspension included.</p>
 
       <h3 class="font-semibold mt-4">5. Term and Termination</h3>
-      <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
+      <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive
+        12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong>
+        For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
     </div>
 
-    <div class="page-break"></div>
+    <div style="page-break-before: always;"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
@@ -68,9 +83,18 @@
       </tbody>
     </table>
 
-    <div class="page-break"></div>
+    <div style="page-break-before: always;"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
+    <p><strong>Guardrails Overview</strong>The subscription plan includes guardrails to ensure fairness and stability
+      for both the customer and the provider. These guardrails define upper and lower thresholds for the number of
+      devices and average monthly print volume based on the customer's original estimates. Typically, the limits are set
+      at ±10%, with device counts rounded to the nearest whole number and print volume rounded to the nearest thousand
+      pages. At the end of each quarter, actual usage is compared to these boundaries. As long as usage stays within the
+      guardrails, the subscription remains unchanged. If usage exceeds these limits, the plan will be reviewed and
+      recalculated for the next quarter. This system protects customers from unexpected cost increases due to minor
+      fluctuations, while also allowing the provider to respond appropriately if usage significantly deviates from the
+      agreed scope.</p>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
       <thead class="bg-gray-200">
         <tr>
@@ -160,4 +184,5 @@
     }
   </script>
 </body>
+
 </html>
