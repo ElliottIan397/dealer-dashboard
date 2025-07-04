@@ -26,7 +26,6 @@
 
 <body class="bg-white text-gray-900 font-sans p-10">
 
-  <!-- CONTRACT TEMPLATE MOVED HERE -->
   <script type="text/template" id="contract-template">
     <div id="contract" class="max-w-3xl mx-auto">
       <h1 class="text-2xl font-bold mb-4">Subscription Agreement</h1>
@@ -95,7 +94,7 @@
   </script>
 
   <div class="text-center mt-10">
-    <button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
+    <button id="download-btn" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
   </div>
 
   <script>
@@ -109,9 +108,9 @@
       function formatDevicesTable(rows) {
         return rows.map(r => `
           <tr>
-            <td class="border px-4 py-2">${r.Model}</td>
-            <td class="border px-4 py-2">${r.Serial}</td>
-            <td class="border px-4 py-2">${r.Volume.toLocaleString()}</td>
+            <td class="border px-4 py-2">\${r.Model}</td>
+            <td class="border px-4 py-2">\${r.Serial}</td>
+            <td class="border px-4 py-2">\${r.Volume.toLocaleString()}</td>
           </tr>
         `).join('');
       }
@@ -119,14 +118,13 @@
       function formatGuardrailsTable(rows) {
         return rows.map(([label, value]) => `
           <tr>
-            <td class="border px-4 py-2">${label}</td>
-            <td class="border px-4 py-2">${value}</td>
+            <td class="border px-4 py-2">\${label}</td>
+            <td class="border px-4 py-2">\${value}</td>
           </tr>
         `).join('');
       }
 
       let html = document.getElementById("contract-template").innerHTML;
-
       html = html.replace("{{Customer_Name}}", data.Customer_Name);
       html = html.replace("{{Dealer_Name}}", data.Dealer_Name);
       html = html.replace("{{Rep_Name}}", data.Rep_Name);
@@ -141,17 +139,24 @@
       html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "");
 
       document.body.insertAdjacentHTML('afterbegin', html);
-
-      window.downloadPDF = function () {
-        html2pdf().set({
-          margin: 1,
-          filename: 'Subscription_Contract.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, scrollY: 0, useCORS: true },
-          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        }).from(document.getElementById("contract")).save();
-      };
     }
+
+    window.downloadPDF = function () {
+      const contract = document.getElementById("contract");
+      if (!contract) {
+        console.error("❌ Contract element not found for PDF export.");
+        return;
+      }
+      html2pdf().set({
+        margin: 1,
+        filename: 'Subscription_Contract.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, scrollY: 0, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(contract).save();
+    };
+
+    document.getElementById("download-btn").addEventListener("click", () => downloadPDF());
 
     const waitForData = setInterval(() => {
       if (window.contractData) {
