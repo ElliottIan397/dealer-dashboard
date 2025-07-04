@@ -152,6 +152,7 @@
     html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
     html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
     html = data.includeDCA ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1") : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
+    console.log("includeJITR is:", data.includeJITR);
     html = data.includeJITR ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
     html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
     html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
