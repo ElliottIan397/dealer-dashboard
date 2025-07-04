@@ -95,7 +95,7 @@
       recalculated for the next quarter. This system protects customers from unexpected cost increases due to minor
       fluctuations, while also allowing the provider to respond appropriately if usage significantly deviates from the
       agreed scope.</p>
-      <br />
+    <br />
     <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
       <thead class="bg-gray-200">
         <tr>
@@ -114,28 +114,7 @@
   </div>
 
   <script>
-    const data = {
-      Customer_Name: "Acme Corp.",
-      Dealer_Name: "Tech Solutions LLC",
-      Rep_Name: "Jane Doe",
-      Start_Date: "2025-08-01",
-      Devices_Table: [
-        { Model: "Canon 4235", Serial: "SN123456", Volume: 34000 },
-        { Model: "HP LaserJet 5000", Serial: "SN987654", Volume: 18000 },
-      ],
-      Guardrails_Table: [
-        ["Fleet Output Avg. Mth. Lower Limit:", "25,000"],
-        ["Fleet Output Avg. Mth. Upper Limit:", "31,000"],
-        ["Device Lower Limit:", "8"],
-        ["Device Upper Limit:", "10"],
-      ],
-      includeDCA: true,
-      includeJITR: true,
-      includeQR: true,
-      includeESW: true,
-      Contract_Effective_Date: "2025-08-01",
-      Monthly_Subscription_Fee: "399.00"
-    };
+    const data = window.contractData;
 
     function formatDevicesTable(rows) {
       return rows.map(r => `
@@ -166,11 +145,16 @@
     html = html.replace("{{Monthly_Subscription_Fee}}", data.Monthly_Subscription_Fee);
     html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
     html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
-
     html = data.includeDCA ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1") : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
-    html = data.includeJITR ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
-    html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
-    html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
+    html = data.includeJITR ?
+      html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") :
+      html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
+    html = data.includeQR ?
+      html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") :
+      html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
+    html = data.includeESW ?
+      html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") :
+      html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
 
     document.body.innerHTML = html;
 
