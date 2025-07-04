@@ -6,6 +6,16 @@
   <title>Contract Preview</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body {
+        margin: 1in;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
 </head>
 <body class="bg-white text-gray-900 font-sans p-10">
   <div id="contract" class="max-w-3xl mx-auto">
@@ -39,6 +49,8 @@
       <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
     </div>
 
+    <div class="page-break"></div>
+
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8">
       <thead class="bg-gray-200">
@@ -52,6 +64,8 @@
         {{Devices_Table}}
       </tbody>
     </table>
+
+    <div class="page-break"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8">
@@ -95,56 +109,53 @@
       Monthly_Subscription_Fee: "399.00"
     };
 
-    const replace = (template, tag, value) => {
-      return template.replace(`{{${tag}}}`, value);
-    };
-
-    const formatDevicesTable = (rows) => {
+    function formatDevicesTable(rows) {
       return rows.map(r => `
         <tr>
           <td class="border px-4 py-2">${r.Model}</td>
           <td class="border px-4 py-2">${r.Serial}</td>
           <td class="border px-4 py-2">${r.Volume.toLocaleString()}</td>
-        </tr>`).join('');
-    };
+        </tr>
+      `).join('');
+    }
 
-    const formatGuardrailsTable = (rows) => {
+    function formatGuardrailsTable(rows) {
       return rows.map(([label, value]) => `
         <tr>
           <td class="border px-4 py-2">${label}</td>
           <td class="border px-4 py-2">${value}</td>
-        </tr>`).join('');
-    };
+        </tr>
+      `).join('');
+    }
 
     let html = document.body.innerHTML;
-    html = replace(html, "Customer_Name", data.Customer_Name);
-    html = replace(html, "Dealer_Name", data.Dealer_Name);
-    html = replace(html, "Rep_Name", data.Rep_Name);
-    html = replace(html, "Start_Date", data.Start_Date);
-    html = replace(html, "Devices_Table", formatDevicesTable(data.Devices_Table));
-    html = replace(html, "Guardrails_Table", formatGuardrailsTable(data.Guardrails_Table));
-    html = replace(html, "Contract_Effective_Date", data.Contract_Effective_Date);
-    html = replace(html, "Monthly_Subscription_Fee", data.Monthly_Subscription_Fee);
 
-    // Conditional content rendering
-    html = data.includeDCA
-      ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1")
-      : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
-    html = data.includeJITR
-      ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1")
-      : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
-    html = data.includeQR
-      ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1")
-      : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
-    html = data.includeESW
-      ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1")
-      : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
+    // Simple variable replacements
+    html = html.replace("{{Customer_Name}}", data.Customer_Name);
+    html = html.replace("{{Dealer_Name}}", data.Dealer_Name);
+    html = html.replace("{{Rep_Name}}", data.Rep_Name);
+    html = html.replace("{{Start_Date}}", data.Start_Date);
+    html = html.replace("{{Contract_Effective_Date}}", data.Contract_Effective_Date);
+    html = html.replace("{{Monthly_Subscription_Fee}}", data.Monthly_Subscription_Fee);
+    html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
+    html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
+
+    // Conditional content blocks
+    html = data.includeDCA ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1") : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
+    html = data.includeJITR ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
+    html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
+    html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
 
     document.body.innerHTML = html;
 
     function downloadPDF() {
-      const element = document.getElementById("contract");
-      html2pdf().from(element).save("Subscription_Contract.pdf");
+      html2pdf().set({
+        margin:       1,
+        filename:     'Subscription_Contract.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(document.getElementById("contract")).save();
     }
   </script>
 </body>
