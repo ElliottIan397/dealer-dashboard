@@ -148,15 +148,15 @@
 
     document.body.innerHTML = html;
 
-    function downloadPDF() {
-      html2pdf().set({
-        margin:       1,
-        filename:     'Subscription_Contract.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }).from(document.getElementById("contract")).save();
-    }
+function downloadPDF() {
+  html2pdf().set({
+    margin: 1,
+    filename: 'Subscription_Contract.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, scrollY: 0 }, // ✅ important fix
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  }).from(document.getElementById("contract")).save();
+}
   </script>
 </body>
 </html>
