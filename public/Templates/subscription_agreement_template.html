@@ -49,7 +49,7 @@
       <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
     </div>
 
-    <div class="page-break"></div>
+    <div style="page-break-before: always;"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8">
@@ -65,7 +65,7 @@
       </tbody>
     </table>
 
-    <div class="page-break"></div>
+    <div style="page-break-before: always;"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8">
@@ -153,7 +153,7 @@ function downloadPDF() {
     margin: 1,
     filename: 'Subscription_Contract.pdf',
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, scrollY: 0 }, // ✅ important fix
+    html2canvas: { scale: 2, scrollY: 0, useCORS: true },
     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
   }).from(document.getElementById("contract")).save();
 }
