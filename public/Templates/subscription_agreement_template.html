@@ -14,6 +14,9 @@
       .page-break {
         page-break-before: always;
       }
+      .avoid-break {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -26,7 +29,7 @@
     <p class="mb-2"><strong>Sales Rep:</strong> {{Rep_Name}}</p>
     <p class="mb-6"><strong>Start Date:</strong> {{Start_Date}}</p>
 
-    <div class="mb-6 text-sm space-y-2">
+    <div class="mb-6 text-sm space-y-2 avoid-break">
       <p><strong>Effective Date:</strong> {{Contract_Effective_Date}}</p>
       <p><strong>Term:</strong> 12 months, automatically renews for successive one-year terms until terminated with notice.</p>
       <h3 class="font-semibold mt-4">1. Software & Automation Services Included</h3>
@@ -49,10 +52,10 @@
       <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
     </div>
 
-    <div style="page-break-before: always;"></div>
+    <div class="page-break"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
-    <table class="table-auto w-full border border-gray-400 text-sm mb-8">
+    <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
       <thead class="bg-gray-200">
         <tr>
           <th class="border px-4 py-2 text-left">Model</th>
@@ -65,10 +68,10 @@
       </tbody>
     </table>
 
-    <div style="page-break-before: always;"></div>
+    <div class="page-break"></div>
 
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
-    <table class="table-auto w-full border border-gray-400 text-sm mb-8">
+    <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
       <thead class="bg-gray-200">
         <tr>
           <th class="border px-4 py-2 text-left">Guardrail</th>
@@ -130,7 +133,6 @@
 
     let html = document.body.innerHTML;
 
-    // Simple variable replacements
     html = html.replace("{{Customer_Name}}", data.Customer_Name);
     html = html.replace("{{Dealer_Name}}", data.Dealer_Name);
     html = html.replace("{{Rep_Name}}", data.Rep_Name);
@@ -140,7 +142,6 @@
     html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
     html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
 
-    // Conditional content blocks
     html = data.includeDCA ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1") : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
     html = data.includeJITR ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
     html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
@@ -148,15 +149,15 @@
 
     document.body.innerHTML = html;
 
-function downloadPDF() {
-  html2pdf().set({
-    margin: 1,
-    filename: 'Subscription_Contract.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, scrollY: 0, useCORS: true },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-  }).from(document.getElementById("contract")).save();
-}
+    function downloadPDF() {
+      html2pdf().set({
+        margin: 1,
+        filename: 'Subscription_Contract.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, scrollY: 0, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(document.getElementById("contract")).save();
+    }
   </script>
 </body>
 </html>
