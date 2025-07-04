@@ -113,11 +113,14 @@
     <button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
   </div>
 
-  <script>
+<script>
+  function initializeContract() {
     const data = window.contractData;
-    if (!window.contractData) {
-  console.error("⚠️ window.contractData is missing.");
-}
+
+    if (!data) {
+      console.error("⚠️ window.contractData is missing.");
+      return;
+    }
 
     function formatDevicesTable(rows) {
       return rows.map(r => `
@@ -149,19 +152,13 @@
     html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
     html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
     html = data.includeDCA ? html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "$1") : html.replace(/{{#includeDCA}}([\s\S]*?){{\/includeDCA}}/, "");
-    html = data.includeJITR ?
-      html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") :
-      html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
-    html = data.includeQR ?
-      html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") :
-      html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
-    html = data.includeESW ?
-      html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") :
-      html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
+    html = data.includeJITR ? html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "$1") : html.replace(/{{#includeJITR}}([\s\S]*?){{\/includeJITR}}/, "");
+    html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/, "");
+    html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/, "");
 
     document.body.innerHTML = html;
 
-    function downloadPDF() {
+    window.downloadPDF = function () {
       html2pdf().set({
         margin: 1,
         filename: 'Subscription_Contract.pdf',
@@ -169,8 +166,17 @@
         html2canvas: { scale: 2, scrollY: 0, useCORS: true },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       }).from(document.getElementById("contract")).save();
+    };
+  }
+
+  // Wait until contractData is injected before proceeding
+  const waitForData = setInterval(() => {
+    if (window.contractData) {
+      clearInterval(waitForData);
+      initializeContract();
     }
-  </script>
+  }, 50);
+</script>
 </body>
 
 </html>
