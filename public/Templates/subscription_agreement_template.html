@@ -115,6 +115,9 @@
 
   <script>
     const data = window.contractData;
+    if (!window.contractData) {
+  console.error("⚠️ window.contractData is missing.");
+}
 
     function formatDevicesTable(rows) {
       return rows.map(r => `
