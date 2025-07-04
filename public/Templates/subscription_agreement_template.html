@@ -140,7 +140,7 @@
       html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/g, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/g, "");
       html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "");
 
-      document.getElementById("contract").innerHTML = html;
+      document.body.insertAdjacentHTML('afterbegin', html);
 
       window.downloadPDF = function () {
         html2pdf().set({
