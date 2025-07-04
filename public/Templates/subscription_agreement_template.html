@@ -98,6 +98,29 @@
   </div>
 
   <script>
+    window.contractData = {
+      Customer_Name: "Acme Corp",
+      Dealer_Name: "Best Dealers Inc.",
+      Rep_Name: "Jane Doe",
+      Start_Date: "2025-07-01",
+      Contract_Effective_Date: "2025-07-01",
+      Monthly_Subscription_Fee: "299.99",
+      includeDCA: true,
+      includeJITR: true,
+      includeQR: true,
+      includeESW: true,
+      Devices_Table: [
+        { Model: "HP LaserJet Pro M404n", Serial: "SN123456", Volume: 25000 },
+        { Model: "Canon iR-ADV C3530i", Serial: "CN789012", Volume: 15000 }
+      ],
+      Guardrails_Table: [
+        ["Max Devices", "10"],
+        ["Min Devices", "2"],
+        ["Max Monthly Volume", "50,000 pages"],
+        ["Min Monthly Volume", "10,000 pages"]
+      ]
+    };
+
     function initializeContract() {
       const data = window.contractData;
       if (!data) {
@@ -108,9 +131,9 @@
       function formatDevicesTable(rows) {
         return rows.map(r => `
           <tr>
-            <td class="border px-4 py-2">\${r.Model}</td>
-            <td class="border px-4 py-2">\${r.Serial}</td>
-            <td class="border px-4 py-2">\${r.Volume.toLocaleString()}</td>
+            <td class="border px-4 py-2">${r.Model}</td>
+            <td class="border px-4 py-2">${r.Serial}</td>
+            <td class="border px-4 py-2">${r.Volume.toLocaleString()}</td>
           </tr>
         `).join('');
       }
@@ -118,8 +141,8 @@
       function formatGuardrailsTable(rows) {
         return rows.map(([label, value]) => `
           <tr>
-            <td class="border px-4 py-2">\${label}</td>
-            <td class="border px-4 py-2">\${value}</td>
+            <td class="border px-4 py-2">${label}</td>
+            <td class="border px-4 py-2">${value}</td>
           </tr>
         `).join('');
       }
@@ -156,14 +179,7 @@
       }).from(contract).save();
     };
 
-    document.getElementById("download-btn").addEventListener("click", () => downloadPDF());
-
-    const waitForData = setInterval(() => {
-      if (window.contractData) {
-        clearInterval(waitForData);
-        initializeContract();
-      }
-    }, 50);
+    initializeContract();
   </script>
 </body>
 
