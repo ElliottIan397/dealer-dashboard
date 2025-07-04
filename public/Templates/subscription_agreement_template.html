@@ -22,9 +22,6 @@
       }
     }
   </style>
-</head>
-
-<body class="bg-white text-gray-900 font-sans p-10">
 
   <script type="text/template" id="contract-template">
     <div id="contract" class="max-w-3xl mx-auto">
@@ -92,7 +89,10 @@
       </table>
     </div>
   </script>
+</head>
 
+<body class="bg-white text-gray-900 font-sans p-10">
+  <div id="contract-root"></div>
   <div class="text-center mt-10">
     <button id="download-btn" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
   </div>
@@ -138,7 +138,7 @@
       html = data.includeQR ? html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/g, "$1") : html.replace(/{{#includeQR}}([\s\S]*?){{\/includeQR}}/g, "");
       html = data.includeESW ? html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "$1") : html.replace(/{{#includeESW}}([\s\S]*?){{\/includeESW}}/g, "");
 
-      document.body.insertAdjacentHTML('afterbegin', html);
+      document.getElementById("contract-root").innerHTML = html;
     }
 
     window.downloadPDF = function () {
