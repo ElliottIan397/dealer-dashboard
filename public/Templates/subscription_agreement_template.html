@@ -16,6 +16,29 @@
     <p class="mb-2"><strong>Sales Rep:</strong> {{Rep_Name}}</p>
     <p class="mb-6"><strong>Start Date:</strong> {{Start_Date}}</p>
 
+    <div class="mb-6 text-sm space-y-2">
+      <p><strong>Effective Date:</strong> {{Contract_Effective_Date}}</p>
+      <p><strong>Term:</strong> 12 months, automatically renews for successive one-year terms until terminated with notice.</p>
+      <h3 class="font-semibold mt-4">1. Software & Automation Services Included</h3>
+      <p>The following SaaS services will be provided under this Agreement:</p>
+      {{#includeDCA}}<p>&bull; <strong>Data Capture Agent (DCA)</strong><br />The customer agrees to maintain continuous device connectivity as required by the DCA platform. Provides real-time monitoring of device status, usage, and diagnostics.</p>{{/includeDCA}}
+      {{#includeJITR}}<p>&bull; <strong>Just-in-Time Replenishment (JIT‑R)</strong><br />Automates ink/toner shipment consolidation and oversees cartridge utilization and premature replacement. Also facilitates closed-loop recycling of spent cartridges.</p>{{/includeJITR}}
+      <p>&bull; <strong>Subscription Management</strong><br />Enables automatic billing, renewal alerts, and usage reporting.</p>
+      {{#includeQR}}<p>&bull; <strong>QR-Code Integration</strong><br />Adds scannable codes on devices/cartridges for simplified asset tracking and reordering.</p>{{/includeQR}}
+
+      <h3 class="font-semibold mt-4">2. Extended Service Warranties (ESW)</h3>
+      {{#includeESW}}<p>Service & Repair Scope and limitations of coverage - reference the ESW Addendum (see Addendum 3).</p>{{/includeESW}}
+
+      <h3 class="font-semibold mt-4">3. Monthly Subscription Fee</h3>
+      <p>Total Monthly Fee: ${{Monthly_Subscription_Fee}} (Excluding applicable sales tax)</p>
+
+      <h3 class="font-semibold mt-4">4. Billing & Payment</h3>
+      <p>Invoiced monthly in advance.<br />Auto-charge to customer’s payment method on file.<br />Terms for late payment and service suspension included.</p>
+
+      <h3 class="font-semibold mt-4">5. Term and Termination</h3>
+      <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
+    </div>
+
     <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
     <table class="table-auto w-full border border-gray-400 text-sm mb-8">
       <thead class="bg-gray-200">
