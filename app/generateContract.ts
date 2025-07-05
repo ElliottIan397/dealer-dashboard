@@ -4,21 +4,24 @@ export async function generateContract(data: Record<string, any>) {
     const response = await fetch("/Templates/subscription_agreement_template.html");
     let templateHtml = await response.text();
 
-    const devices = (data.Devices_Table || []) as {
+    type Device = {
       Model: string;
       Serial: string;
       Black_Annual_Volume?: number;
       Color_Annual_Volume?: number;
-    }[];
+      Volume: number;
+    };
 
-    devices.sort((a, b) => {
-      const aVol = (a.Black_Annual_Volume ?? 0) + (a.Color_Annual_Volume ?? 0);
-      const bVol = (b.Black_Annual_Volume ?? 0) + (b.Color_Annual_Volume ?? 0);
-      return bVol - aVol;
-    });
+    const devices = (data.Devices_Table || [])
+      .map((d: any) => ({
+        ...d,
+        Volume: (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0)
+      }))
+      .sort((a: any, b: any) => b.Volume - a.Volume);
+    data.Devices_Table = devices;
 
     const formatDevicesTable = (rows: typeof devices) => {
-      return rows.map(d => {
+      return rows.map((d: Device) => {
         const mono = d.Black_Annual_Volume ?? 0;
         const color = d.Color_Annual_Volume ?? 0;
         const volume = mono + color;
@@ -63,6 +66,8 @@ export async function generateContract(data: Record<string, any>) {
     }
 
     // 🔽 Download contract data as JSON
+    console.log("✅ Devices (with Volume):", devices);
+    data.Devices_Table = devices;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -71,9 +76,9 @@ export async function generateContract(data: Record<string, any>) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-} catch (err) {
-  console.error("Contract generation failed:", err);
-  alert("Failed to generate contract.");
-}
+
+  } catch (err) {
+    console.error("Contract generation failed:", err);
+    alert("Failed to generate contract.");
+  }
 }
