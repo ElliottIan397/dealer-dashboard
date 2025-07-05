@@ -324,7 +324,7 @@ export default function SubscriptionPlanTable({
                   };
 
                   try {
-                    const response = await fetch('/api/generate-pdf', {
+                    const response = await fetch('https://pdf-generator-w32p.onrender.com/generate-pdf', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(contractData),
