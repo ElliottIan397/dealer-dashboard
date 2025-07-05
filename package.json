@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "chrome-aws-lambda": "^10.1.0",
     "docxtemplater": "^3.65.1",
     "file-saver": "^2.0.5",
     "handlebars": "^4.7.8",
@@ -16,6 +17,7 @@
     "next": "^15.3.3",
     "pizzip": "^3.2.0",
     "puppeteer": "^24.11.2",
+    "puppeteer-core": "^24.11.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-select": "^5.10.1",

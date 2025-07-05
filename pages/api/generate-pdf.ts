@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import puppeteer from 'puppeteer';
 import handlebars from 'handlebars';
 import { NextApiRequest, NextApiResponse } from 'next';
+import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -28,8 +29,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const template = handlebars.compile(templateHtml);
     const html = template(data);
 
-    // Launch Puppeteer
-    const browser = await puppeteer.launch({ headless: true });
+    // Launch Puppeteer in serverless-compatible mode
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+    });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
