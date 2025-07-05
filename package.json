@@ -2,7 +2,11 @@
   "name": "dealer-dashboard",
   "version": "0.1.0",
   "private": true,
+  "resolutions": {
+    "puppeteer-core": "10.4.0"
+  },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -30,6 +34,7 @@
     "@types/puppeteer": "^5.4.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "npm-force-resolutions": "^0.0.10",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
