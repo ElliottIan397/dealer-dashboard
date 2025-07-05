@@ -30,6 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const html = template(data);
 
     const executablePath = await chromium.executablePath || undefined;
+    console.log("Chromium executable path:", await chromium.executablePath);
 
     const browser = await puppeteer.launch({
       args: chromium.args,
