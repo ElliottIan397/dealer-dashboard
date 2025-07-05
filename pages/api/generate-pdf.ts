@@ -28,6 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const template = handlebars.compile(templateHtml);
     const html = template(data);
 
+    const executablePath = await chromium.executablePath || undefined;
+
     const browser = await chromium.puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
