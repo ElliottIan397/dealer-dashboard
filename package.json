@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "chrome-aws-lambda": "^1.20.1",
+    "chrome-aws-lambda": "^1.20.4",
     "docxtemplater": "^3.65.1",
     "file-saver": "^2.0.5",
     "handlebars": "^4.7.8",
