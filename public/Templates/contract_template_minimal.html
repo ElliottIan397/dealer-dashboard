@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Subscription Agreement</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 1in;
+      color: #1a1a1a;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1em;
+      font-size: 0.9em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      text-align: left;
+    }
+    h1, h2, h3 {
+      margin-top: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Subscription Agreement</h1>
+  <p><strong>Customer:</strong> {{Customer_Name}}</p>
+  <p><strong>Dealer:</strong> {{Dealer_Name}}</p>
+  <p><strong>Sales Rep:</strong> {{Rep_Name}}</p>
+  <p><strong>Start Date:</strong> {{Start_Date}}</p>
+
+  <p><strong>Effective Date:</strong> {{Contract_Effective_Date}}</p>
+  <p><strong>Term:</strong> 12 months, auto-renews annually until terminated.</p>
+
+  <h3>1. Software & Automation Services Included</h3>
+  <p>The following SaaS services will be provided:</p>
+  {{#if includeDCA}}
+    <p>&bull; <strong>Data Capture Agent (DCA)</strong><br/>Continuous device connectivity and diagnostics.</p>
+  {{/if}}
+  {{#if includeJITR}}
+    <p>&bull; <strong>Just-in-Time Replenishment (JIT-R)</strong><br/>Automates supply replenishment and recycling.</p>
+  {{/if}}
+  <p>&bull; <strong>Subscription Management</strong><br/>Billing, alerts, usage tracking.</p>
+  {{#if includeQR}}
+    <p>&bull; <strong>QR-Code Integration</strong><br/>For device tracking and reordering.</p>
+  {{/if}}
+
+  <h3>2. Extended Service Warranties (ESW)</h3>
+  {{#if includeESW}}
+    <p>Full ESW terms apply. Reference Addendum 3.</p>
+  {{/if}}
+
+  <h3>3. Monthly Subscription Fee</h3>
+  <p>Total Monthly Fee: ${{Monthly_Subscription_Fee}} (excl. taxes)</p>
+
+  <div class="page-break"></div>
+  <h2>Addendum 1 – Covered Devices</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Serial</th>
+        <th>Annual Volume</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each Devices_Table}}
+        <tr>
+          <td>{{this.Model}}</td>
+          <td>{{this.Serial}}</td>
+          <td>{{this.Volume}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+  <h2>Addendum 2 – Output Guardrails</h2>
+  <p><strong>Overview:</strong> Guardrails define acceptable usage thresholds. Subscriptions remain unchanged if within bounds.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Guardrail</th>
+        <th>Limit</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each Guardrails_Table}}
+        <tr>
+          <td>{{this.[0]}}</td>
+          <td>{{this.[1]}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</body>
+</html>

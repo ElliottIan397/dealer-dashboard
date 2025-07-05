@@ -61,8 +61,19 @@ export async function generateContract(data: Record<string, any>) {
     } else {
       throw new Error("Failed to open new browser window.");
     }
-  } catch (err) {
-    console.error("Contract generation failed:", err);
-    alert("Failed to generate contract.");
-  }
+
+    // 🔽 Download contract data as JSON
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'contract_data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+} catch (err) {
+  console.error("Contract generation failed:", err);
+  alert("Failed to generate contract.");
+}
 }
