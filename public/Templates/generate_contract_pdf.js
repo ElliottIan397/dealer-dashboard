@@ -13,6 +13,20 @@ async function generatePDF() {
 
 const data = require('./contract_data.json');
 
+const guardrails = [
+  ["Fleet Output Avg. Mth. Lower Limit:", data.volumeLowerLimit],
+  ["Fleet Output Avg. Mth. Upper Limit:", data.volumeUpperLimit],
+  ["Device Lower Limit:", data.deviceLowerLimit],
+  ["Device Upper Limit:", data.deviceUpperLimit],
+];
+
+data.Guardrails_Table = guardrails.map(([label, value]) => `
+  <tr>
+    <td>${label}</td>
+    <td>${value}</td>
+  </tr>
+`).join('');
+
   // Inject data
   const html = template(data);
 
