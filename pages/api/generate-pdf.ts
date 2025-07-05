@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const devices = (data.Devices_Table || []).map((d: any) => ({
       ...d,
       Volume: (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0),
-    })).sort((a, b) => b.Volume - a.Volume);
+    })).sort((a: any, b: any) => b.Volume - a.Volume);
 
     data.Devices_Table = devices;
 
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const html = template(data);
 
     // Launch Puppeteer
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
