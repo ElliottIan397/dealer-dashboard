@@ -25,6 +25,7 @@
     "recharts": "^2.15.3"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/file-saver": "^2.0.7",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
