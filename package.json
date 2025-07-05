@@ -27,6 +27,7 @@
     "@types/file-saver": "^2.0.7",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
+    "@types/puppeteer": "^5.4.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
