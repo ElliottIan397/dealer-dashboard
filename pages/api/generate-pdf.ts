@@ -3,6 +3,7 @@ import path from 'path';
 import handlebars from 'handlebars';
 import { NextApiRequest, NextApiResponse } from 'next';
 import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core'; // ✅ Required
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -30,10 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const executablePath = await chromium.executablePath || undefined;
 
-    const browser = await chromium.puppeteer.launch({
+    const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
+      executablePath: await chromium.executablePath || undefined,
       headless: chromium.headless,
     });
 
