@@ -9,7 +9,9 @@ export function useMCARPData() {
   const [selectedContractType, setSelectedContractType] = useState("All");
 
   useEffect(() => {
-    const dataUrl = DASHBOARD_MODE === "demo" ? "/mcarp_demo.json" : "/mcarp.json";
+    const dataUrl = DASHBOARD_MODE === "demo"
+  ? "/data/demo/mcarp_demo.json"
+  : "/data/prod/mcarp.json";
     fetch(dataUrl)
       .then((res) => res.json())
       .then((json) => {

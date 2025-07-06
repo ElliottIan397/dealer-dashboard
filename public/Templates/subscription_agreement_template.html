@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract Preview</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body {
+        margin: 1in;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+      .avoid-break {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+
+  <script type="text/template" id="contract-template">
+    <div id="contract" class="max-w-3xl mx-auto">
+      <h1 class="text-2xl font-bold mb-4">Subscription Agreement</h1>
+
+      <p class="mb-2"><strong>Customer:</strong> {{Customer_Name}}</p>
+      <p class="mb-2"><strong>Dealer:</strong> {{Dealer_Name}}</p>
+      <p class="mb-2"><strong>Sales Rep:</strong> {{Rep_Name}}</p>
+      <p class="mb-6"><strong>Start Date:</strong> {{Start_Date}}</p>
+
+      <div class="mb-6 text-sm space-y-2 avoid-break">
+        <p><strong>Effective Date:</strong> {{Contract_Effective_Date}}</p>
+        <p><strong>Term:</strong> 12 months, automatically renews for successive one-year terms until terminated with notice.</p>
+        <h3 class="font-semibold mt-4">1. Software & Automation Services Included</h3>
+        <p>The following SaaS services will be provided under this Agreement:</p>
+        {{includeDCA}}
+        {{includeJITR}}
+        <p>&bull; <strong>Subscription Management</strong><br />Enables automatic billing, renewal alerts, and usage reporting.</p>
+        {{includeQR}}
+
+        <h3 class="font-semibold mt-4">2. Extended Service Warranties (ESW)</h3>
+        {{includeESW}}
+
+        <h3 class="font-semibold mt-4">3. Monthly Subscription Fee</h3>
+        <p>Total Monthly Fee: ${{Monthly_Subscription_Fee}} (Excluding applicable sales tax)</p>
+
+        <h3 class="font-semibold mt-4">4. Billing & Payment</h3>
+        <p>Invoiced monthly in advance.<br />Auto-charge to customer’s payment method on file.<br />Terms for late payment and service suspension included.</p>
+
+        <h3 class="font-semibold mt-4">5. Term and Termination</h3>
+        <p><strong>Initial Term:</strong> 12 months.<br /><strong>Automatic Renewal:</strong> Continues for successive 12-month terms unless one party gives 30 days’ written notice before renewal.<br /><strong>Termination:</strong> For convenience: 30 days’ notice.<br />For cause: immediate if payment or SLA obligations are breached.</p>
+      </div>
+
+      <div style="page-break-before: always;"></div>
+
+      <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 1 – Covered Devices</h2>
+      <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="border px-4 py-2 text-left">Model</th>
+            <th class="border px-4 py-2 text-left">Serial</th>
+            <th class="border px-4 py-2 text-left">Annual Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{Devices_Table}}
+        </tbody>
+      </table>
+
+      <div style="page-break-before: always;"></div>
+
+      <h2 class="text-xl font-semibold mt-8 mb-2">Addendum 2 – Output Guardrails</h2>
+      <p><strong>Guardrails Overview: </strong>The subscription plan includes guardrails to ensure fairness and stability for both the customer and the provider. These guardrails define upper and lower thresholds for the number of devices and average monthly print volume based on the customer's original estimates. Typically, the limits are set at ±10%, with device counts rounded to the nearest whole number and print volume rounded to the nearest thousand pages. At the end of each quarter, actual usage is compared to these boundaries. As long as usage stays within the guardrails, the subscription remains unchanged. If usage exceeds these limits, the plan will be reviewed and recalculated for the next quarter. This system protects customers from unexpected cost increases due to minor fluctuations, while also allowing the provider to respond appropriately if usage significantly deviates from the agreed scope.</p>
+      <br />
+      <table class="table-auto w-full border border-gray-400 text-sm mb-8 avoid-break">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="border px-4 py-2 text-left">Guardrail</th>
+            <th class="border px-4 py-2 text-left">Limit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{Guardrails_Table}}
+        </tbody>
+      </table>
+    </div>
+  </script>
+</head>
+
+<body class="bg-white text-gray-900 font-sans p-10">
+  <div id="contract-root"></div>
+  <div class="text-center mt-10">
+    <button id="download-btn" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
+  </div>
+
+  <script>
+    window.contractData = {
+      Customer_Name: "Acme Corp",
+      Dealer_Name: "Best Dealers Inc.",
+      Rep_Name: "Jane Doe",
+      Start_Date: "2025-07-01",
+      Contract_Effective_Date: "2025-07-01",
+      Monthly_Subscription_Fee: "299.99",
+      includeDCA: true,
+      includeJITR: false,
+      includeQR: true,
+      includeESW: false,
+      Devices_Table: [
+        { Model: "HP LaserJet Pro M404n", Serial: "SN123456", Volume: 25000 },
+        { Model: "Canon iR-ADV C3530i", Serial: "CN789012", Volume: 15000 }
+      ],
+      Guardrails_Table: [
+        ["Max Devices", "10"],
+        ["Min Devices", "2"],
+        ["Max Monthly Volume", "50,000 pages"],
+        ["Min Monthly Volume", "10,000 pages"]
+      ]
+    };
+
+    function initializeContract() {
+      const data = window.contractData;
+      if (!data) {
+        console.error("⚠️ window.contractData is missing.");
+        return;
+      }
+
+      function formatDevicesTable(rows) {
+        return rows.map(r => `
+          <tr>
+            <td class="border px-4 py-2">${r.Model}</td>
+            <td class="border px-4 py-2">${r.Serial}</td>
+            <td class="border px-4 py-2">${r.Volume.toLocaleString()}</td>
+          </tr>
+        `).join('');
+      }
+
+      function formatGuardrailsTable(rows) {
+        return rows.map(([label, value]) => `
+          <tr>
+            <td class="border px-4 py-2">${label}</td>
+            <td class="border px-4 py-2">${value}</td>
+          </tr>
+        `).join('');
+      }
+
+      function conditionalSection(enabled, html) {
+        return enabled ? html : '';
+      }
+
+      let html = document.getElementById("contract-template").innerHTML;
+      html = html.replace("{{Customer_Name}}", data.Customer_Name);
+      html = html.replace("{{Dealer_Name}}", data.Dealer_Name);
+      html = html.replace("{{Rep_Name}}", data.Rep_Name);
+      html = html.replace("{{Start_Date}}", data.Start_Date);
+      html = html.replace("{{Contract_Effective_Date}}", data.Contract_Effective_Date);
+      html = html.replace("{{Monthly_Subscription_Fee}}", data.Monthly_Subscription_Fee);
+      html = html.replace("{{Devices_Table}}", formatDevicesTable(data.Devices_Table));
+      html = html.replace("{{Guardrails_Table}}", formatGuardrailsTable(data.Guardrails_Table));
+      html = html.replace("{{includeDCA}}", conditionalSection(data.includeDCA, '<p>&bull; <strong>Data Capture Agent (DCA)</strong><br />The customer agrees to maintain continuous device connectivity as required by the DCA platform. Provides real-time monitoring of device status, usage, and diagnostics.</p>'));
+      html = html.replace("{{includeJITR}}", conditionalSection(data.includeJITR, '<p>&bull; <strong>Just-in-Time Replenishment (JIT‑R)</strong><br />Automates ink/toner shipment consolidation and oversees cartridge utilization and premature replacement. Also facilitates closed-loop recycling of spent cartridges.</p>'));
+      html = html.replace("{{includeQR}}", conditionalSection(data.includeQR, '<p>&bull; <strong>QR-Code Integration</strong><br />Adds scannable codes on devices/cartridges for simplified asset tracking and reordering.</p>'));
+      html = html.replace("{{includeESW}}", conditionalSection(data.includeESW, '<p>Service & Repair Scope and limitations of coverage - reference the ESW Addendum (see Addendum 3).</p>'));
+
+      document.getElementById("contract-root").innerHTML = html;
+    }
+
+    document.getElementById("download-btn").addEventListener("click", function () {
+      const contract = document.getElementById("contract");
+      if (!contract) {
+        console.error("❌ Contract element not found for PDF export.");
+        return;
+      }
+      html2pdf().set({
+        margin: 1,
+        filename: 'Subscription_Contract.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, scrollY: 0, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).from(contract).save();
+    });
+
+    initializeContract();
+  </script>
+</body>
+
+</html>

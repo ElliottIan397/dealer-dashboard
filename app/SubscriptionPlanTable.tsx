@@ -281,8 +281,8 @@ export default function SubscriptionPlanTable({
               ))}
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={() => {
-                  generateContract({
+                onClick={async () => {
+                  const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
                     Dealer_Address: "123 Dealer St.",
@@ -321,8 +321,31 @@ export default function SubscriptionPlanTable({
                     isO: bias === "O",
                     isR: bias === "R",
                     isN: bias === "N",
-                  });
-                  setShowForm(false);
+                  };
+
+                  try {
+                    const response = await fetch('https://pdf-generator-w32p.onrender.com/generate-pdf', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(contractData),
+                    });
+
+                    if (!response.ok) throw new Error('PDF generation failed.');
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'Subscription_Contract.pdf';
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+
+                    setShowForm(false);
+                  } catch (err) {
+                    console.error('PDF generation error:', err);
+                    alert('Failed to generate contract PDF.');
+                  }
                 }}
               >
 

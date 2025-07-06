@@ -1,76 +1,82 @@
 // app/generateContract.ts
-import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
-import { saveAs } from "file-saver";
-
 export async function generateContract(data: Record<string, any>) {
   try {
-    const response = await fetch("/Templates/subscription_agreement_template.docx");
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
+    const response = await fetch("/Templates/subscription_agreement_template.html");
+    let templateHtml = await response.text();
 
-    const zip = new PizZip(arrayBuffer);
-    const doc = new Docxtemplater(zip, {
-      paragraphLoop: true,
-      linebreaks: true,
-    });
-
-    // ✅ Format the device table as plain text
-    const devices = (data.Devices_Table || []) as {
+    type Device = {
       Model: string;
       Serial: string;
       Black_Annual_Volume?: number;
       Color_Annual_Volume?: number;
-    }[];
+      Volume: number;
+    };
 
-    // ✅ Sort by total volume descending
-    devices.sort((a, b) => {
-      const aVol = (a.Black_Annual_Volume ?? 0) + (a.Color_Annual_Volume ?? 0);
-      const bVol = (b.Black_Annual_Volume ?? 0) + (b.Color_Annual_Volume ?? 0);
-      return bVol - aVol;
-    });
+    const devices = (data.Devices_Table || [])
+      .map((d: any) => ({
+        ...d,
+        Volume: (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0)
+      }))
+      .sort((a: any, b: any) => b.Volume - a.Volume);
+    data.Devices_Table = devices;
 
-    const tableAsText = [
-      "Model                         Serial Number           Annual Volume",
-      ...devices.map(d => {
+    const formatDevicesTable = (rows: typeof devices) => {
+      return rows.map((d: Device) => {
         const mono = d.Black_Annual_Volume ?? 0;
         const color = d.Color_Annual_Volume ?? 0;
         const volume = mono + color;
-        return `${d.Model.padEnd(30)}${d.Serial.padEnd(25)}${volume.toLocaleString()}`;
-      }),
-    ].join("\n");
+        return `
+          <tr>
+            <td class="border px-4 py-2">${d.Model}</td>
+            <td class="border px-4 py-2">${d.Serial}</td>
+            <td class="border px-4 py-2">${volume.toLocaleString()}</td>
+          </tr>`;
+      }).join("");
+    };
 
-    const guardrailsTable = [
-      ["Guardrail", "Limit"],
+    const guardrailsTable: [string, string | number][] = [
       ["Fleet Output Avg. Mth. Lower Limit:", data.volumeLowerLimit],
       ["Fleet Output Avg. Mth. Upper Limit:", data.volumeUpperLimit],
       ["Device Lower Limit:", data.deviceLowerLimit],
       ["Device Upper Limit:", data.deviceUpperLimit],
-    ]
-      .map(([label, val]) => `${label.padEnd(40)}${val}`)
-      .join("\n");
+    ];
 
-    // ✅ Set all merge fields, including the rendered table
-    doc.setData({
-      ...data,
-      List_of_Devices: tableAsText,
-      Guardrails_Table: guardrailsTable,
-    });
+    const formatGuardrailsTable = (rows: [string, string | number][]) => {
+      return rows.map(([label, value]) => `
+        <tr>
+          <td class="border px-4 py-2">${label}</td>
+          <td class="border px-4 py-2">${value}</td>
+        </tr>`).join("");
+    };
 
-    try {
-      doc.render();
-    } catch (error) {
-      console.error("Template rendering error:", error);
-      throw error;
+    templateHtml = templateHtml
+      .replace("{{Customer_Name}}", data.Customer_Name)
+      .replace("{{Dealer_Name}}", data.Dealer_Name)
+      .replace("{{Rep_Name}}", data.Rep_Name)
+      .replace("{{Start_Date}}", data.Start_Date)
+      .replace("{{Devices_Table}}", formatDevicesTable(devices))
+      .replace("{{Guardrails_Table}}", formatGuardrailsTable(guardrailsTable));
+
+    const newWindow = window.open();
+    if (newWindow) {
+      newWindow.document.write(templateHtml);
+      newWindow.document.close();
+    } else {
+      throw new Error("Failed to open new browser window.");
     }
 
-    const output = doc.getZip().generate({
-      type: "blob",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    });
+    // 🔽 Download contract data as JSON
+    console.log("✅ Devices (with Volume):", devices);
+    data.Devices_Table = devices;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'contract_data.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    saveAs(output, "Subscription_Agreement.docx");
   } catch (err) {
     console.error("Contract generation failed:", err);
     alert("Failed to generate contract.");
