@@ -303,12 +303,46 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    Devices_Table: transactionalDevices.map(d => ({
-                      Model: d.Printer_Model,
-                      Serial: d.Serial_Number,
-                      Black_Annual_Volume: d.Black_Annual_Volume,
-                      Color_Annual_Volume: d.Color_Annual_Volume,
-                    })),
+                    Devices_Table: transactionalDevices
+                      .map(d => {
+                        const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+                          const colorInitialMap = {
+                            Black: "K",
+                            Cyan: "C",
+                            Magenta: "M",
+                            Yellow: "Y",
+                          };
+
+                          const colorInitial = colorInitialMap[color as keyof typeof colorInitialMap];
+
+                          // Mono device: skip C/M/Y cleanly
+                          if (d.Device_Type === "Mono" && color !== "Black") {
+                            return "-";
+                          }
+
+                          const fieldName = `${bias}_${colorInitial}_Origin`; // e.g., R_K_Origin
+                          const origin = (d as any)[fieldName];
+
+                          return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
+                        };
+
+                        const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
+
+                        return {
+                          Model: d.Printer_Model,
+                          Serial: d.Serial_Number,
+                          Black_Annual_Volume: d.Black_Annual_Volume,
+                          Color_Annual_Volume: d.Color_Annual_Volume,
+                          Volume: volume, // still a number for sorting
+                          VolumeFormatted: volume.toLocaleString(), // used in the PDF table
+                          Black_Bias: determineBias("Black"),
+                          Cyan_Bias: determineBias("Cyan"),
+                          Magenta_Bias: determineBias("Magenta"),
+                          Yellow_Bias: determineBias("Yellow"),
+                        };
+                      })
+                      .sort((a, b) => b.Volume - a.Volume), // ← Ensures descending volume sort
+
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
                     deviceUpperLimit: deviceUpperBound,
@@ -335,11 +369,7 @@ export default function SubscriptionPlanTable({
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
 
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'Subscription_Contract.pdf';
-                    link.click();
-                    window.URL.revokeObjectURL(url);
+                    window.open(url, '_blank');
 
                     setShowForm(false);
                   } catch (err) {
