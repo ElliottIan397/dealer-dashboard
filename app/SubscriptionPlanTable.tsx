@@ -306,23 +306,24 @@ export default function SubscriptionPlanTable({
                     Devices_Table: transactionalDevices
                       .map(d => {
                         const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
-                          const biasKeyMap = { O: '', R: 'R_', N: 'N_' };
-                          const biasPriorityMap = {
-                            O: ["O", "R", "N"],
-                            R: ["R", "N", "O"],
-                            N: ["N", "R", "O"],
+                          const colorInitialMap = {
+                            Black: "K",
+                            Cyan: "C",
+                            Magenta: "M",
+                            Yellow: "Y",
                           };
-                          const priority = biasPriorityMap[bias];
 
-                          // Mono devices have no color channels
-                          if (d.Device_Type === "Mono" && color !== "Black") return "N/A";
+                          const colorInitial = colorInitialMap[color as keyof typeof colorInitialMap];
 
-                          for (const biasOption of priority) {
-                            const key = `${biasKeyMap[biasOption as "O" | "R" | "N"]}${color}_SKU`;
-                            const value = (d as any)[key];
-                            if (value && value !== "0" && value !== "Not Reqd") return biasOption;
+                          // Mono device: skip C/M/Y cleanly
+                          if (d.Device_Type === "Mono" && color !== "Black") {
+                            return "-";
                           }
-                          return "N/A";
+
+                          const fieldName = `${bias}_${colorInitial}_Origin`; // e.g., R_K_Origin
+                          const origin = (d as any)[fieldName];
+
+                          return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
                         };
 
                         const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
