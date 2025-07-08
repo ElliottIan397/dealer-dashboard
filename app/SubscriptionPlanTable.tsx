@@ -369,11 +369,7 @@ export default function SubscriptionPlanTable({
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
 
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'Subscription_Contract.pdf';
-                    link.click();
-                    window.URL.revokeObjectURL(url);
+                    window.open(url, '_blank');
 
                     setShowForm(false);
                   } catch (err) {
