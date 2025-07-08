@@ -333,7 +333,8 @@ export default function SubscriptionPlanTable({
                           Serial: d.Serial_Number,
                           Black_Annual_Volume: d.Black_Annual_Volume,
                           Color_Annual_Volume: d.Color_Annual_Volume,
-                          Volume: volume,
+                          Volume: volume, // still a number for sorting
+                          VolumeFormatted: volume.toLocaleString(), // used in the PDF table
                           Black_Bias: determineBias("Black"),
                           Cyan_Bias: determineBias("Cyan"),
                           Magenta_Bias: determineBias("Magenta"),
