@@ -303,12 +303,36 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    Devices_Table: transactionalDevices.map(d => ({
-                      Model: d.Printer_Model,
-                      Serial: d.Serial_Number,
-                      Black_Annual_Volume: d.Black_Annual_Volume,
-                      Color_Annual_Volume: d.Color_Annual_Volume,
-                    })),
+                    Devices_Table: transactionalDevices.map(d => {
+                      const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+                        const biasKeyMap = { O: '', R: 'R_', N: 'N_' };
+                        const biasPriorityMap = {
+                          O: ["O", "R", "N"],
+                          R: ["R", "N", "O"],
+                          N: ["N", "R", "O"],
+                        };
+                        const priority = biasPriorityMap[bias];
+
+                        for (const biasOption of priority) {
+                          const key = `${biasKeyMap[biasOption as "O" | "R" | "N"]}${color}_SKU`;
+                          if ((d as any)[key]) return biasOption;
+                        }
+                        return "N/A";
+                      };
+                      
+                      return {
+                        Model: d.Printer_Model,
+                        Serial: d.Serial_Number,
+                        Black_Annual_Volume: d.Black_Annual_Volume,
+                        Color_Annual_Volume: d.Color_Annual_Volume,
+                        Volume: d.Black_Annual_Volume + d.Color_Annual_Volume, // ← ADD THIS
+                        Black_Bias: determineBias("Black"),
+                        Cyan_Bias: determineBias("Cyan"),
+                        Magenta_Bias: determineBias("Magenta"),
+                        Yellow_Bias: determineBias("Yellow"),
+                      };
+                    }),
+
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
                     deviceUpperLimit: deviceUpperBound,
