@@ -114,10 +114,10 @@ export default function SubscriptionPlanTable({
   const markupAmount = transactionalRevenue * appliedMarkup;
 
   const eswRateByRisk: Record<string, number> = {
-    Low: 6,
-    Moderate: 7,
-    High: 8.5,
-    Critical: 10,
+    Low: 8,
+    Moderate: 10,
+    High: 14,
+    Critical: 25,
   };
 
   const riskWeights: Record<string, number> = {
