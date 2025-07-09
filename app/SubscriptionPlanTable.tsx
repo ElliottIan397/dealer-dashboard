@@ -382,6 +382,11 @@ export default function SubscriptionPlanTable({
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
+                  if (formData.isFinalVersion) {
+                    alert("DocuSign not yet connected. Complete DocuSign setup before using this option.");
+                    return;
+                  }
+
                   try {
                     const response = await fetch('https://pdf-generator-w32p.onrender.com/generate-pdf', {
                       method: 'POST',
