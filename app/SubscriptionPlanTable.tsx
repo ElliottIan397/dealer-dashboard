@@ -383,8 +383,27 @@ export default function SubscriptionPlanTable({
                   };
 
                   if (formData.isFinalVersion) {
-                    alert("DocuSign not yet connected. Complete DocuSign setup before using this option.");
-                    return;
+                    try {
+                      const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          contractData,
+                          customerEmail: formData.customerEmail,
+                          customerName: selectedCustomer,
+                        }),
+                      });
+
+                      if (!docusignResponse.ok) throw new Error("DocuSign envelope failed.");
+
+                      alert("DocuSign envelope sent to customer successfully.");
+                      setShowForm(false);
+                      return;
+                    } catch (err) {
+                      console.error("DocuSign send error:", err);
+                      alert("Failed to send document for signing via DocuSign.");
+                      return;
+                    }
                   }
 
                   try {
