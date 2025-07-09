@@ -83,6 +83,8 @@ export default function SubscriptionPlanTable({
     state: "",
     zip: "",
     dealerRep: "",
+    customerEmail: "",      // ← Add this
+    isFinalVersion: false,  // ← Add this
   });
 
   if (transactionalDevices.length === 0) {
@@ -270,15 +272,39 @@ export default function SubscriptionPlanTable({
           {showForm && (
             <div className="p-4 border rounded bg-gray-50 space-y-3 w-full max-w-lg">
               <h3 className="text-lg font-semibold mb-2">Enter Customer and Dealer Info</h3>
-              {Object.entries(formData).map(([field, value]) => (
+
+              {/* Loop through all formData fields except customerEmail and isFinalVersion */}
+              {Object.entries(formData)
+                .filter(([field]) => field !== "customerEmail" && field !== "isFinalVersion")
+                .map(([field, value]) => (
+                  <input
+                    key={field}
+                    className="w-full p-2 border rounded"
+                    placeholder={field}
+                    value={String(value)}
+                    onChange={e => setFormData({ ...formData, [field]: e.target.value })}
+                  />
+                ))}
+
+              {/* Manually added Customer Email input */}
+              <input
+                className="w-full p-2 border rounded"
+                placeholder="Customer Email"
+                value={formData.customerEmail}
+                onChange={e => setFormData({ ...formData, customerEmail: e.target.value })}
+              />
+
+              {/* Manually added Final Version checkbox */}
+              <label className="text-sm flex items-center gap-2">
                 <input
-                  key={field}
-                  className="w-full p-2 border rounded"
-                  placeholder={field}
-                  value={value}
-                  onChange={e => setFormData({ ...formData, [field]: e.target.value })}
+                  type="checkbox"
+                  checked={formData.isFinalVersion}
+                  onChange={e => setFormData({ ...formData, isFinalVersion: e.target.checked })}
                 />
-              ))}
+                Final Version – Send for Signature via DocuSign
+              </label>
+
+              {/* Submit Button (unchanged) */}
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 onClick={async () => {
@@ -313,16 +339,11 @@ export default function SubscriptionPlanTable({
                             Yellow: "Y",
                           };
 
-                          const colorInitial = colorInitialMap[color as keyof typeof colorInitialMap];
+                          const colorInitial = colorInitialMap[color];
+                          if (d.Device_Type === "Mono" && color !== "Black") return "-";
 
-                          // Mono device: skip C/M/Y cleanly
-                          if (d.Device_Type === "Mono" && color !== "Black") {
-                            return "-";
-                          }
-
-                          const fieldName = `${bias}_${colorInitial}_Origin`; // e.g., R_K_Origin
+                          const fieldName = `${bias}_${colorInitial}_Origin`;
                           const origin = (d as any)[fieldName];
-
                           return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
                         };
 
@@ -333,15 +354,15 @@ export default function SubscriptionPlanTable({
                           Serial: d.Serial_Number,
                           Black_Annual_Volume: d.Black_Annual_Volume,
                           Color_Annual_Volume: d.Color_Annual_Volume,
-                          Volume: volume, // still a number for sorting
-                          VolumeFormatted: volume.toLocaleString(), // used in the PDF table
+                          Volume: volume,
+                          VolumeFormatted: volume.toLocaleString(),
                           Black_Bias: determineBias("Black"),
                           Cyan_Bias: determineBias("Cyan"),
                           Magenta_Bias: determineBias("Magenta"),
                           Yellow_Bias: determineBias("Yellow"),
                         };
                       })
-                      .sort((a, b) => b.Volume - a.Volume), // ← Ensures descending volume sort
+                      .sort((a, b) => b.Volume - a.Volume),
 
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
@@ -355,6 +376,10 @@ export default function SubscriptionPlanTable({
                     isO: bias === "O",
                     isR: bias === "R",
                     isN: bias === "N",
+
+                    // ✅ NEW fields
+                    Customer_Email: formData.customerEmail,
+                    Is_Final_Version: formData.isFinalVersion,
                   };
 
                   try {
@@ -368,10 +393,15 @@ export default function SubscriptionPlanTable({
 
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
-
                     window.open(url, '_blank');
 
                     setShowForm(false);
+
+                    // Future: trigger DocuSign here if `formData.isFinalVersion` is true
+                    if (formData.isFinalVersion) {
+                      console.log("✅ DocuSign trigger would happen here.");
+                    }
+
                   } catch (err) {
                     console.error('PDF generation error:', err);
                     alert('Failed to generate contract PDF.');
