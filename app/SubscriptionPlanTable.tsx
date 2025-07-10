@@ -321,6 +321,7 @@ export default function SubscriptionPlanTable({
                     Customer_Zip: formData.zip,
                     Customer_Contact: formData.contactName,
                     Customer_Contact_Title: formData.contactTitle,
+                    Customer_Email: formData.customerEmail,
                     Contract_Effective_Date: new Date().toLocaleDateString(),
                     Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
                     Fee_DCA: "included",
@@ -378,7 +379,7 @@ export default function SubscriptionPlanTable({
                     isN: bias === "N",
 
                     // ✅ NEW fields
-                    Customer_Email: formData.customerEmail,
+                    
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
