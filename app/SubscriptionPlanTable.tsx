@@ -387,11 +387,7 @@ export default function SubscriptionPlanTable({
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          contractData,
-                          customerEmail: formData.customerEmail,
-                          customerName: selectedCustomer,
-                        }),
+                        body: JSON.stringify(contractData),
                       });
 
                       if (!docusignResponse.ok) throw new Error("DocuSign envelope failed.");
