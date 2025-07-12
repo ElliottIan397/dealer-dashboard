@@ -325,6 +325,7 @@ export default function SubscriptionPlanTable({
                   } catch (err) {
                     console.error("Failed to encode scenario", err);
                   }
+                  console.log("✅ Scenario URL:", scenarioUrl);
                   const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
