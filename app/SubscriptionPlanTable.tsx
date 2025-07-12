@@ -321,7 +321,7 @@ export default function SubscriptionPlanTable({
                   let scenarioUrl = "";
                   try {
                     const encoded = btoa(JSON.stringify(scenario));
-                    scenarioUrl = `https://dealer-dashboard-lime.vercel.app/?s=${encoded}`;
+                    scenarioUrl = `${window.location.origin}/?s=${encoded}`;
                   } catch (err) {
                     console.error("Failed to encode scenario", err);
                   }
