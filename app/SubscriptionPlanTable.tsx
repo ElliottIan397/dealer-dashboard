@@ -308,6 +308,23 @@ export default function SubscriptionPlanTable({
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 onClick={async () => {
+                  const scenario = {
+                    bias,
+                    selectedCustomer,
+                    markupOverride,
+                    includeDCA,
+                    includeJITR,
+                    includeQR,
+                    includeESW
+                  };
+
+                  let scenarioUrl = "";
+                  try {
+                    const encoded = btoa(JSON.stringify(scenario));
+                    scenarioUrl = `https://dealer-dashboard-lime.vercel.app/?s=${encoded}`;
+                  } catch (err) {
+                    console.error("Failed to encode scenario", err);
+                  }
                   const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
@@ -330,6 +347,7 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
+                    Scenario_URL: scenarioUrl,
                     Devices_Table: transactionalDevices
                       .map(d => {
                         const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
@@ -379,7 +397,7 @@ export default function SubscriptionPlanTable({
                     isN: bias === "N",
 
                     // ✅ NEW fields
-                    
+
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
