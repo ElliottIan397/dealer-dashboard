@@ -265,7 +265,14 @@ export default function SubscriptionPlanTable({
         <div className="flex flex-col items-end mb-4 space-y-4">
           <button
             className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              const newScenarioUrl = `${window.location.origin}/?s=${btoa(JSON.stringify({
+                customer: selectedCustomer,
+                date: new Date().toISOString(),
+              }))}`;
+              setScenarioUrl(newScenarioUrl);
+              setShowForm(true);
+            }}
           >
             Generate Subscription Agreement
           </button>
