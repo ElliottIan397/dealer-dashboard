@@ -385,8 +385,8 @@ export default function SubscriptionPlanTable({
 
                   if (formData.isFinalVersion) {
                     try {
-                      // Step 1: Build contractData WITHOUT Scenario_URL first
-                      const baseContractData = {
+                      // Step 1: Build contractData with Scenario_URL placeholder
+                      let contractData = {
                         Customer_Name: selectedCustomer,
                         Dealer_Name: "Your Dealer Name",
                         Dealer_Address: "123 Dealer St.",
@@ -444,21 +444,15 @@ export default function SubscriptionPlanTable({
                         isR: bias === "R",
                         isN: bias === "N",
                         Is_Final_Version: true,
+                        Scenario_URL: "", // ← TS-safe placeholder
                       };
 
-                      // Step 2: Generate Scenario_URL from baseContractData
-                      const scenarioEncoded = btoa(JSON.stringify(baseContractData));
-                      const scenarioUrl = `${window.location.origin}/?s=${scenarioEncoded}`;
+                      // Step 2: Generate Scenario_URL and inject it
+                      const scenarioUrl = `${window.location.origin}/?s=${btoa(JSON.stringify(contractData))}`;
+                      contractData.Scenario_URL = scenarioUrl;
 
-                      // Step 3: Build final payload WITH Scenario_URL
-                      const contractData = {
-                        ...baseContractData,
-                        Scenario_URL: scenarioUrl,
-                      };
-
-                      console.log("✅ Final Payload Sent to DocuSign:", contractData);
-
-                      // Step 4: Send to DocuSign
+                      // Step 3: Send to backend
+                      console.log("📦 Sending contractData to DocuSign:", contractData);
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
