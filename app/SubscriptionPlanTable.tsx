@@ -73,6 +73,7 @@ export default function SubscriptionPlanTable({
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
+  const [scenarioUrl, setScenarioUrl] = useState("");
 
   const [formData, setFormData] = useState({
     contactName: "",
@@ -308,6 +309,7 @@ export default function SubscriptionPlanTable({
               <button
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                 onClick={async () => {
+                  // 1. Build the contractData object (with form fields)
                   const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
@@ -330,41 +332,30 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    Devices_Table: transactionalDevices
-                      .map(d => {
-                        const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
-                          const colorInitialMap = {
-                            Black: "K",
-                            Cyan: "C",
-                            Magenta: "M",
-                            Yellow: "Y",
-                          };
-
-                          const colorInitial = colorInitialMap[color];
-                          if (d.Device_Type === "Mono" && color !== "Black") return "-";
-
-                          const fieldName = `${bias}_${colorInitial}_Origin`;
-                          const origin = (d as any)[fieldName];
-                          return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
-                        };
-
-                        const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
-
-                        return {
-                          Model: d.Printer_Model,
-                          Serial: d.Serial_Number,
-                          Black_Annual_Volume: d.Black_Annual_Volume,
-                          Color_Annual_Volume: d.Color_Annual_Volume,
-                          Volume: volume,
-                          VolumeFormatted: volume.toLocaleString(),
-                          Black_Bias: determineBias("Black"),
-                          Cyan_Bias: determineBias("Cyan"),
-                          Magenta_Bias: determineBias("Magenta"),
-                          Yellow_Bias: determineBias("Yellow"),
-                        };
-                      })
-                      .sort((a, b) => b.Volume - a.Volume),
-
+                    Scenario_URL: scenarioUrl, // <-- use pre-generated scenarioUrl
+                    Devices_Table: transactionalDevices.map(d => {
+                      const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+                        const colorInitialMap = { Black: "K", Cyan: "C", Magenta: "M", Yellow: "Y" };
+                        const colorInitial = colorInitialMap[color];
+                        if (d.Device_Type === "Mono" && color !== "Black") return "-";
+                        const fieldName = `${bias}_${colorInitial}_Origin`;
+                        const origin = (d as any)[fieldName];
+                        return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
+                      };
+                      const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
+                      return {
+                        Model: d.Printer_Model,
+                        Serial: d.Serial_Number,
+                        Black_Annual_Volume: d.Black_Annual_Volume,
+                        Color_Annual_Volume: d.Color_Annual_Volume,
+                        Volume: volume,
+                        VolumeFormatted: volume.toLocaleString(),
+                        Black_Bias: determineBias("Black"),
+                        Cyan_Bias: determineBias("Cyan"),
+                        Magenta_Bias: determineBias("Magenta"),
+                        Yellow_Bias: determineBias("Yellow"),
+                      };
+                    }).sort((a, b) => b.Volume - a.Volume),
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
                     deviceUpperLimit: deviceUpperBound,
@@ -377,82 +368,14 @@ export default function SubscriptionPlanTable({
                     isO: bias === "O",
                     isR: bias === "R",
                     isN: bias === "N",
-
-                    // ✅ NEW fields
-
                     Is_Final_Version: formData.isFinalVersion,
+                    customerEmail: formData.customerEmail,
+                    customerName: selectedCustomer,
                   };
 
+                  // 2. If "Final Version" is checked, send to DocuSign
                   if (formData.isFinalVersion) {
                     try {
-                      // Step 1: Build contractData with Scenario_URL placeholder
-                      let contractData = {
-                        Customer_Name: selectedCustomer,
-                        Dealer_Name: "Your Dealer Name",
-                        Dealer_Address: "123 Dealer St.",
-                        Dealer_Phone: "(555) 123-4567",
-                        Dealer_SalesRep_Name: formData.dealerRep,
-                        Customer_Address_Line1: formData.address1,
-                        Customer_Address_Line2: formData.address2,
-                        Customer_City: formData.city,
-                        Customer_State: formData.state,
-                        Customer_Zip: formData.zip,
-                        Customer_Contact: formData.contactName,
-                        Customer_Contact_Title: formData.contactTitle,
-                        Customer_Email: formData.customerEmail,
-                        Contract_Effective_Date: new Date().toLocaleDateString(),
-                        Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
-                        Fee_DCA: "included",
-                        Fee_JIT: includeJITR ? "$XX" : "Not Included",
-                        Fee_QR: includeQR ? "$XX" : "Not Included",
-                        Fee_SubMgmt: "included",
-                        Fee_ESW: includeESW ? "$XX" : "Not Included",
-                        SKU_Bias_Option: bias,
-                        Devices_Table: transactionalDevices.map(d => {
-                          const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
-                            const colorInitialMap = { Black: "K", Cyan: "C", Magenta: "M", Yellow: "Y" };
-                            const colorInitial = colorInitialMap[color];
-                            if (d.Device_Type === "Mono" && color !== "Black") return "-";
-                            const fieldName = `${bias}_${colorInitial}_Origin`;
-                            const origin = (d as any)[fieldName];
-                            return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
-                          };
-                          const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
-                          return {
-                            Model: d.Printer_Model,
-                            Serial: d.Serial_Number,
-                            Black_Annual_Volume: d.Black_Annual_Volume,
-                            Color_Annual_Volume: d.Color_Annual_Volume,
-                            Volume: volume,
-                            VolumeFormatted: volume.toLocaleString(),
-                            Black_Bias: determineBias("Black"),
-                            Cyan_Bias: determineBias("Cyan"),
-                            Magenta_Bias: determineBias("Magenta"),
-                            Yellow_Bias: determineBias("Yellow"),
-                          };
-                        }).sort((a, b) => b.Volume - a.Volume),
-                        Customer_Rep_Name: formData.contactName,
-                        deviceLowerLimit: deviceLowerBound,
-                        deviceUpperLimit: deviceUpperBound,
-                        volumeLowerLimit: Math.round(volumeLowerBound / 1000) * 1000,
-                        volumeUpperLimit: Math.round(volumeUpperBound / 1000) * 1000,
-                        includeDCA,
-                        includeJITR,
-                        includeQR,
-                        includeESW,
-                        isO: bias === "O",
-                        isR: bias === "R",
-                        isN: bias === "N",
-                        Is_Final_Version: true,
-                        Scenario_URL: "", // ← TS-safe placeholder
-                      };
-
-                      // Step 2: Generate Scenario_URL and inject it
-                      const scenarioUrl = `${window.location.origin}/?s=${btoa(JSON.stringify(contractData))}`;
-                      contractData.Scenario_URL = scenarioUrl;
-
-                      // Step 3: Send to backend
-                      console.log("📦 Sending contractData to DocuSign:", contractData);
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -472,6 +395,7 @@ export default function SubscriptionPlanTable({
                     }
                   }
 
+                  // 3. Otherwise, generate and open the PDF
                   try {
                     const response = await fetch('https://pdf-generator-w32p.onrender.com/generate-pdf', {
                       method: 'POST',
@@ -487,20 +411,15 @@ export default function SubscriptionPlanTable({
 
                     setShowForm(false);
 
-                    // Future: trigger DocuSign here if `formData.isFinalVersion` is true
-                    if (formData.isFinalVersion) {
-                      console.log("✅ DocuSign trigger would happen here.");
-                    }
-
                   } catch (err) {
                     console.error('PDF generation error:', err);
                     alert('Failed to generate contract PDF.');
                   }
                 }}
               >
-
                 Submit and Generate Contract
               </button>
+
             </div>
           )}
 
