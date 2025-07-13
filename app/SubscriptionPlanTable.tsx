@@ -402,6 +402,8 @@ export default function SubscriptionPlanTable({
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
+                  console.log("Sending to server:", contractData);
+
                   if (formData.isFinalVersion) {
                     try {
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
