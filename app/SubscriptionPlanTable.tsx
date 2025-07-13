@@ -319,6 +319,7 @@ export default function SubscriptionPlanTable({
                   };
 
 
+                  // 1. Build contractData WITHOUT Scenario_URL
                   const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
@@ -341,42 +342,30 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    Scenario_URL:  "", // placeholder
-                    Devices_Table: transactionalDevices
-                      .map(d => {
-                        const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
-                          const colorInitialMap = {
-                            Black: "K",
-                            Cyan: "C",
-                            Magenta: "M",
-                            Yellow: "Y",
-                          };
-
-                          const colorInitial = colorInitialMap[color];
-                          if (d.Device_Type === "Mono" && color !== "Black") return "-";
-
-                          const fieldName = `${bias}_${colorInitial}_Origin`;
-                          const origin = (d as any)[fieldName];
-                          return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
-                        };
-
-                        const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
-
-                        return {
-                          Model: d.Printer_Model,
-                          Serial: d.Serial_Number,
-                          Black_Annual_Volume: d.Black_Annual_Volume,
-                          Color_Annual_Volume: d.Color_Annual_Volume,
-                          Volume: volume,
-                          VolumeFormatted: volume.toLocaleString(),
-                          Black_Bias: determineBias("Black"),
-                          Cyan_Bias: determineBias("Cyan"),
-                          Magenta_Bias: determineBias("Magenta"),
-                          Yellow_Bias: determineBias("Yellow"),
-                        };
-                      })
-                      .sort((a, b) => b.Volume - a.Volume),
-
+                    Scenario_URL: "", // placeholder
+                    Devices_Table: transactionalDevices.map(d => {
+                      const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+                        const colorInitialMap = { Black: "K", Cyan: "C", Magenta: "M", Yellow: "Y" };
+                        const colorInitial = colorInitialMap[color];
+                        if (d.Device_Type === "Mono" && color !== "Black") return "-";
+                        const fieldName = `${bias}_${colorInitial}_Origin`;
+                        const origin = (d as any)[fieldName];
+                        return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
+                      };
+                      const volume = (d.Black_Annual_Volume ?? 0) + (d.Color_Annual_Volume ?? 0);
+                      return {
+                        Model: d.Printer_Model,
+                        Serial: d.Serial_Number,
+                        Black_Annual_Volume: d.Black_Annual_Volume,
+                        Color_Annual_Volume: d.Color_Annual_Volume,
+                        Volume: volume,
+                        VolumeFormatted: volume.toLocaleString(),
+                        Black_Bias: determineBias("Black"),
+                        Cyan_Bias: determineBias("Cyan"),
+                        Magenta_Bias: determineBias("Magenta"),
+                        Yellow_Bias: determineBias("Yellow"),
+                      };
+                    }).sort((a, b) => b.Volume - a.Volume),
                     Customer_Rep_Name: formData.contactName,
                     deviceLowerLimit: deviceLowerBound,
                     deviceUpperLimit: deviceUpperBound,
@@ -389,13 +378,10 @@ export default function SubscriptionPlanTable({
                     isO: bias === "O",
                     isR: bias === "R",
                     isN: bias === "N",
-
-                    // ✅ NEW fields
-
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
-                  // Step 2: Encode contractData
+                  // 2. Generate the Scenario_URL
                   let scenarioUrl = "";
                   try {
                     const encoded = btoa(JSON.stringify(contractData));
@@ -406,7 +392,8 @@ export default function SubscriptionPlanTable({
                   }
 
                   console.log("✅ Scenario URL:", scenarioUrl);
-                  console.log("Sending to server:", contractData);
+                  console.log("📦 contractData:", contractData);
+
 
                   if (formData.isFinalVersion) {
                     try {
