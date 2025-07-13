@@ -318,14 +318,7 @@ export default function SubscriptionPlanTable({
                     includeESW
                   };
 
-                  let scenarioUrl = "";
-                  try {
-                    const encoded = btoa(JSON.stringify(scenario));
-                    scenarioUrl = `${window.location.origin}/?s=${encoded}`;
-                  } catch (err) {
-                    console.error("Failed to encode scenario", err);
-                  }
-                  console.log("✅ Scenario URL:", scenarioUrl);
+
                   const contractData = {
                     Customer_Name: selectedCustomer,
                     Dealer_Name: "Your Dealer Name",
@@ -348,7 +341,7 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
-                    Scenario_URL: scenarioUrl,
+                    Scenario_URL:  "", // placeholder
                     Devices_Table: transactionalDevices
                       .map(d => {
                         const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
@@ -402,6 +395,17 @@ export default function SubscriptionPlanTable({
                     Is_Final_Version: formData.isFinalVersion,
                   };
 
+                  // Step 2: Encode contractData
+                  let scenarioUrl = "";
+                  try {
+                    const encoded = btoa(JSON.stringify(contractData));
+                    scenarioUrl = `${window.location.origin}/?s=${encoded}`;
+                    contractData.Scenario_URL = scenarioUrl;
+                  } catch (err) {
+                    console.error("Failed to encode scenario", err);
+                  }
+
+                  console.log("✅ Scenario URL:", scenarioUrl);
                   console.log("Sending to server:", contractData);
 
                   if (formData.isFinalVersion) {
