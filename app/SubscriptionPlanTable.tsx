@@ -266,10 +266,68 @@ export default function SubscriptionPlanTable({
           <button
             className="bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
             onClick={() => {
-              const newScenarioUrl = `${window.location.origin}/?s=${btoa(JSON.stringify({
-                customer: selectedCustomer,
-                date: new Date().toISOString(),
-              }))}`;
+              const contractData = {
+                Customer_Name: selectedCustomer,
+                Dealer_Name: "Your Dealer Name",
+                Dealer_Address: "123 Dealer St.",
+                Dealer_Phone: "(555) 123-4567",
+                Dealer_SalesRep_Name: formData.dealerRep,
+                Customer_Address_Line1: formData.address1,
+                Customer_Address_Line2: formData.address2,
+                Customer_City: formData.city,
+                Customer_State: formData.state,
+                Customer_Zip: formData.zip,
+                Customer_Contact: formData.contactName,
+                Customer_Contact_Title: formData.contactTitle,
+                Customer_Email: formData.customerEmail,
+                Contract_Effective_Date: new Date().toLocaleDateString(),
+                Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
+                Fee_DCA: "included",
+                Fee_JIT: includeJITR ? "$XX" : "Not Included",
+                Fee_QR: includeQR ? "$XX" : "Not Included",
+                Fee_SubMgmt: "included",
+                Fee_ESW: includeESW ? "$XX" : "Not Included",
+                SKU_Bias_Option: bias,
+                Devices_Table: transactionalDevices.map(d => {
+                  const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+                    const colorInitialMap = { Black: "K", Cyan: "C", Magenta: "M", Yellow: "Y" };
+                    const colorInitial = colorInitialMap[color];
+                    if (d.Device_Type === "Mono" && color !== "Black") return "-";
+                    const fieldName = `${bias}_${colorInitial}_Origin`;
+                    const origin = (d as any)[fieldName];
+                    return origin && origin !== "Not Reqd" && origin !== "0" ? origin : "N/A";
+                  };
+
+                  return {
+                    Model: d.Printer_Model,
+                    Serial: d.Serial_Number,
+                    Black_Annual_Volume: d.Black_Annual_Volume,
+                    Color_Annual_Volume: d.Color_Annual_Volume,
+                    Mono_Cpp: monoCpp,
+                    Color_Cpp: colorCpp,
+                    Bias_K: determineBias("Black"),
+                    Bias_C: determineBias("Cyan"),
+                    Bias_M: determineBias("Magenta"),
+                    Bias_Y: determineBias("Yellow"),
+                  };
+                }),
+                includeDCA,
+                includeJITR,
+                includeQR,
+                includeESW,
+                isO: bias === "O",
+                isR: bias === "R",
+                isN: bias === "N",
+                volumeLowerLimit: volumeLowerBound,
+                volumeUpperLimit: volumeUpperBound,
+                deviceLowerLimit: deviceLowerBound,
+                deviceUpperLimit: deviceUpperBound,
+                Is_Final_Version: formData.isFinalVersion,
+                customerName: selectedCustomer,
+                customerEmail: formData.customerEmail,
+              };
+
+              const newScenarioUrl = `${window.location.origin}/?s=${btoa(JSON.stringify(contractData))}`;
               setScenarioUrl(newScenarioUrl);
               setShowForm(true);
             }}
