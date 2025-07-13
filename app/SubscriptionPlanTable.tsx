@@ -410,6 +410,7 @@ export default function SubscriptionPlanTable({
 
                   if (formData.isFinalVersion) {
                     try {
+                      contractData.Scenario_URL = scenarioUrl;
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
