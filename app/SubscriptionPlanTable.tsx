@@ -385,7 +385,7 @@ export default function SubscriptionPlanTable({
 
                   if (formData.isFinalVersion) {
                     try {
-                      // Step 1: Build base contractData without Scenario_URL
+                      // Step 1: Build contractData WITHOUT Scenario_URL first
                       const baseContractData = {
                         Customer_Name: selectedCustomer,
                         Dealer_Name: "Your Dealer Name",
@@ -446,15 +446,17 @@ export default function SubscriptionPlanTable({
                         Is_Final_Version: true,
                       };
 
-                      // Step 2: Generate scenario URL from base data
-                      const encoded = btoa(JSON.stringify(baseContractData));
-                      const scenarioUrl = `${window.location.origin}/?s=${encoded}`;
+                      // Step 2: Generate Scenario_URL from baseContractData
+                      const scenarioEncoded = btoa(JSON.stringify(baseContractData));
+                      const scenarioUrl = `${window.location.origin}/?s=${scenarioEncoded}`;
 
-                      // Step 3: Add the Scenario_URL to the payload
+                      // Step 3: Build final payload WITH Scenario_URL
                       const contractData = {
                         ...baseContractData,
                         Scenario_URL: scenarioUrl,
                       };
+
+                      console.log("✅ Final Payload Sent to DocuSign:", contractData);
 
                       // Step 4: Send to DocuSign
                       const docusignResponse = await fetch("https://pdf-generator-w32p.onrender.com/send-envelope", {
