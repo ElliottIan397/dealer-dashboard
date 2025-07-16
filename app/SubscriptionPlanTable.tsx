@@ -83,7 +83,7 @@ export default function SubscriptionPlanTable({
     city: "",
     state: "",
     zip: "",
-    dealerRep: "",
+    dealerRepEmail: "",
     customerEmail: "",      // ← Add this
     isFinalVersion: false,  // ← Add this
   });
@@ -271,7 +271,7 @@ export default function SubscriptionPlanTable({
                 Dealer_Name: "Your Dealer Name",
                 Dealer_Address: "123 Dealer St.",
                 Dealer_Phone: "(555) 123-4567",
-                Dealer_SalesRep_Name: formData.dealerRep,
+                Dealer_Email: formData.dealerRepEmail,
                 Customer_Address_Line1: formData.address1,
                 Customer_Address_Line2: formData.address2,
                 Customer_City: formData.city,
@@ -380,7 +380,7 @@ export default function SubscriptionPlanTable({
                     Dealer_Name: "Your Dealer Name",
                     Dealer_Address: "123 Dealer St.",
                     Dealer_Phone: "(555) 123-4567",
-                    Dealer_SalesRep_Name: formData.dealerRep,
+                    Dealer_Email: formData.dealerRepEmail,
                     Customer_Address_Line1: formData.address1,
                     Customer_Address_Line2: formData.address2,
                     Customer_City: formData.city,
