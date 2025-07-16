@@ -12,6 +12,7 @@ import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
+import { useSearchParams } from "next/navigation";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
@@ -58,7 +59,34 @@ export default function DealerDashboard() {
     }
   }, [viewMode]);
 
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const encoded = searchParams.get("s");
+    if (!encoded) return;
+
+    try {
+      const decoded = JSON.parse(atob(encoded));
+
+      if (decoded.Customer_Name) setSelectedCustomer(decoded.Customer_Name);
+      if (typeof decoded.includeDCA === "boolean") setIncludeDCA(decoded.includeDCA);
+      if (typeof decoded.includeJITR === "boolean") setIncludeJITR(decoded.includeJITR);
+      if (typeof decoded.includeQR === "boolean") setIncludeQR(decoded.includeQR);
+      if (typeof decoded.includeESW === "boolean") setIncludeESW(decoded.includeESW);
+
+      if (decoded.isO) setSelectedBias("O");
+      else if (decoded.isR) setSelectedBias("R");
+      else if (decoded.isN) setSelectedBias("N");
+
+      if (decoded.markupOverride != null) setMarkupOverride(decoded.markupOverride);
+
+      setViewMode("subscription"); // show the subscription UI
+    } catch (err) {
+      console.error("Invalid scenario URL format:", err);
+    }
+  }, []);
+
   const customerOptions = ["All", ...customers];
+
 
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
