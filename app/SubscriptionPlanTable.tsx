@@ -398,6 +398,7 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
+                    markupOverride,
                     Scenario_URL: scenarioUrl, // <-- use pre-generated scenarioUrl
                     Devices_Table: transactionalDevices.map(d => {
                       const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
