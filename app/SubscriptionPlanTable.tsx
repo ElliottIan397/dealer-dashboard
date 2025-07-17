@@ -282,6 +282,7 @@ export default function SubscriptionPlanTable({
                 Customer_Email: formData.customerEmail,
                 Contract_Effective_Date: new Date().toLocaleDateString(),
                 Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
+                Markup_Override: markupOverride ?? 0, // ✅ ADD THIS
                 Fee_DCA: "included",
                 Fee_JIT: includeJITR ? "$XX" : "Not Included",
                 Fee_QR: includeQR ? "$XX" : "Not Included",
