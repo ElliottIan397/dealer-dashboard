@@ -808,14 +808,14 @@ export default function SubscriptionPlanTable({
                       <td className="p-2 border">{d.Monitor}</td>
                       <td className="p-2 border">{d.Serial_Number}</td>
                       <td className="p-2 border">{d.Printer_Model}</td>
-                      <td className="p-2 border">{d.Black_Annual_Volume}</td>
-                      <td className="p-2 border">{d.Color_Annual_Volume}</td>
-                      <td className="p-2 border">{d.Device_Type}</td>
-                      <td className="p-2 border">{deviceClass || "—"}</td>
-                      <td className="p-2 border">{d.Engine_Cycles}</td>
-                      <td className="p-2 border">{d.Recalculated_Age_Years}</td>
-                      <td className="p-2 border">{risk || "—"}</td>
-                      <td className="p-2 border">
+                      <td className="p-2 border text-center">{d.Black_Annual_Volume.toLocaleString()}</td>
+                      <td className="p-2 border text-center">{d.Color_Annual_Volume.toLocaleString()}</td>
+                      <td className="p-2 border text-center">{d.Device_Type}</td>
+                      <td className="p-2 border text-center">{deviceClass || "—"}</td>
+                      <td className="p-2 border text-center">{d.Engine_Cycles.toLocaleString()}</td>
+                      <td className="p-2 border text-center">{d.Recalculated_Age_Years.toFixed(1)}</td>
+                      <td className="p-2 border text-center">{risk || "—"}</td>
+                      <td className="p-2 border text-center">
                         {rate !== undefined ? `$${rate.toFixed(2)}` : "—"}
                       </td>
                     </tr>
