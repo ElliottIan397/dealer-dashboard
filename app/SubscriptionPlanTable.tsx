@@ -267,6 +267,119 @@ export default function SubscriptionPlanTable({
         </div>
       </div>
 
+{includeESW && (
+  <div className="mt-8">
+    <h2 className="text-lg font-semibold mb-2">ESW Device Detail</h2>
+
+    <button
+      onClick={() => {
+        const headers = [
+          "Customer",
+          "Serial Number",
+          "Printer Model",
+          "Black Vol Fcst (Annual)",
+          "Color Vol Fcst (Annual)",
+          "Device Type",
+          "Device Class",
+          "Engine Cycles",
+          "Device Age (Months)",
+          "Device Risk",
+          "ESW Fee per Month",
+        ];
+
+        const rows = transactionalDevices.map((d) => {
+          const risk = d.Final_Risk_Level;
+          const deviceClass = d.Device_Class;
+          const rate =
+            deviceClass === "Class 2"
+              ? class2Rates[risk as keyof typeof class2Rates]
+              : class1Rates[risk as keyof typeof class1Rates];
+
+          return [
+            d.Monitor,
+            d.Serial_Number,
+            d.Printer_Model,
+            d.Black_Annual_Volume,
+            d.Color_Annual_Volume,
+            d.Device_Type,
+            deviceClass || "—",
+            d.Engine_Cycles,
+            d.Recalculated_Age_Years,
+            risk || "—",
+            rate !== undefined ? `$${rate.toFixed(2)}` : "—",
+          ];
+        });
+
+        const csvContent =
+          [headers, ...rows]
+            .map((row) => row.map((v) => `"${v}"`).join(","))
+            .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "esw_device_list.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }}
+      className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    >
+      Download CSV
+    </button>
+
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm border border-gray-300">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="p-2 border">Customer</th>
+            <th className="p-2 border">Serial Number</th>
+            <th className="p-2 border">Printer Model</th>
+            <th className="p-2 border">Black Vol Fcst (Annual)</th>
+            <th className="p-2 border">Color Vol Fcst (Annual)</th>
+            <th className="p-2 border">Device Type</th>
+            <th className="p-2 border">Device Class</th>
+            <th className="p-2 border">Engine Cycles</th>
+            <th className="p-2 border">Device Age (Months)</th>
+            <th className="p-2 border">Device Risk</th>
+            <th className="p-2 border">ESW Fee per Month</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactionalDevices.map((d, idx) => {
+            const risk = d.Final_Risk_Level;
+            const deviceClass = d.Device_Class;
+            const rate =
+              deviceClass === "Class 2"
+                ? class2Rates[risk as keyof typeof class2Rates]
+                : class1Rates[risk as keyof typeof class1Rates];
+
+            return (
+              <tr key={idx}>
+                <td className="p-2 border">{d.Monitor}</td>
+                <td className="p-2 border">{d.Serial_Number}</td>
+                <td className="p-2 border">{d.Printer_Model}</td>
+                <td className="p-2 border">{d.Black_Annual_Volume}</td>
+                <td className="p-2 border">{d.Color_Annual_Volume}</td>
+                <td className="p-2 border">{d.Device_Type}</td>
+                <td className="p-2 border">{deviceClass || "—"}</td>
+                <td className="p-2 border">{d.Engine_Cycles}</td>
+                <td className="p-2 border">{d.Recalculated_Age_Years}</td>
+                <td className="p-2 border">{risk || "—"}</td>
+                <td className="p-2 border">
+                  {rate !== undefined ? `$${rate.toFixed(2)}` : "—"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+
       {selectedCustomer !== "All" && (
         <div className="flex flex-col items-end mb-4 space-y-4">
           <button
