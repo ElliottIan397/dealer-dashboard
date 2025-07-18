@@ -809,12 +809,27 @@ export default function SubscriptionPlanTable({
                       <td className="p-2 border">{d.Serial_Number}</td>
                       <td className="p-2 border">{d.Printer_Model}</td>
                       <td className="p-2 border text-center">{d.Black_Annual_Volume.toLocaleString()}</td>
-                      <td className="p-2 border text-center">{d.Color_Annual_Volume.toLocaleString()}</td>
+                      <td className="p-2 border text-center">
+                        {d.Device_Type.toLowerCase() === "mono" ? "—" : d.Color_Annual_Volume.toLocaleString()}
+                      </td>
                       <td className="p-2 border text-center">{d.Device_Type}</td>
                       <td className="p-2 border text-center">{deviceClass || "—"}</td>
                       <td className="p-2 border text-center">{d.Engine_Cycles.toLocaleString()}</td>
                       <td className="p-2 border text-center">{d.Recalculated_Age_Years.toFixed(1)}</td>
-                      <td className="p-2 border text-center">{risk || "—"}</td>
+                      <td className="px-4 py-2 border text-center">
+                        <span
+                          className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${d.Final_Risk_Level === "Low"
+                              ? "bg-green-500"
+                              : d.Final_Risk_Level === "Moderate"
+                                ? "bg-yellow-500"
+                                : d.Final_Risk_Level === "High"
+                                  ? "bg-orange-500"
+                                  : "bg-red-600"
+                            }`}
+                        >
+                          {d.Final_Risk_Level}
+                        </span>
+                      </td>
                       <td className="p-2 border text-center">
                         {rate !== undefined ? `$${rate.toFixed(2)}` : "—"}
                       </td>
