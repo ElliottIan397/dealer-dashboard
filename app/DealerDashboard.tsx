@@ -41,7 +41,7 @@ export default function DealerDashboard() {
   const [includeJITR, setIncludeJITR] = useState(true);
   const [includeContract, setIncludeContract] = useState(true);
   const [includeQR, setIncludeQR] = useState(true);
-  const [includeESW, setIncludeESW] = useState(true);
+  const [includeESW, setIncludeESW] = useState(false);
   const [markupOverride, setMarkupOverride] = useState<number | null>(null);
 
   const manufacturerOptions = Array.from(
