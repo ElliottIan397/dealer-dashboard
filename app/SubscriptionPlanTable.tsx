@@ -818,7 +818,7 @@ export default function SubscriptionPlanTable({
                       <td className="p-2 border text-center">{d.Recalculated_Age_Years.toFixed(1)}</td>
                       <td className="px-4 py-2 border text-center">
                         <span
-                          className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${d.Final_Risk_Level === "Low"
+                          className={`px-1.5 py-0.5 rounded-full text-white text-xs font-medium ${d.Final_Risk_Level === "Low"
                               ? "bg-green-500"
                               : d.Final_Risk_Level === "Moderate"
                                 ? "bg-yellow-500"
