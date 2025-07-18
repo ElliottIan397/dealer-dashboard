@@ -83,7 +83,7 @@ export default function SubscriptionPlanTable({
     city: "",
     state: "",
     zip: "",
-    dealerRep: "",
+    dealerRepEmail: "",
     customerEmail: "",      // ← Add this
     isFinalVersion: false,  // ← Add this
   });
@@ -116,13 +116,6 @@ export default function SubscriptionPlanTable({
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
 
-  const eswRateByRisk: Record<string, number> = {
-    Low: 8,
-    Moderate: 10,
-    High: 14,
-    Critical: 25,
-  };
-
   const riskWeights: Record<string, number> = {
     Low: 0,
     Moderate: 1,
@@ -133,20 +126,27 @@ export default function SubscriptionPlanTable({
   let totalRiskScore = 0;
   let eswTotal = 0;
 
+  const class1Rates = { Low: 8, Moderate: 10, High: 14, Critical: 25 };
+  const class2Rates = { Low: 12, Moderate: 16, High: 20, Critical: 35 };
+
   if (includeESW) {
-    transactionalDevices.forEach((r) => {
-      const riskLevel = r.Final_Risk_Level;
-      const rate = eswRateByRisk[riskLevel] ?? 7.5;
-      const weight = riskWeights[riskLevel] ?? 1;
+    for (const device of transactionalDevices) {
+      const riskLevel = device.Final_Risk_Level;
+      const deviceClass = device.Device_Class;
+
+      if (!riskLevel || !deviceClass) {
+        alert("Cannot calculate ESW: all devices must have a risk level and be tagged Class 1 or Class 2.");
+        eswTotal = 0;
+        break;
+      }
+
+      const rate = deviceClass === "Class 2"
+        ? class2Rates[riskLevel as keyof typeof class2Rates]
+        : class1Rates[riskLevel as keyof typeof class1Rates];
 
       eswTotal += rate * 12;
-      totalRiskScore += weight;
-    });
-  } else {
-    totalRiskScore = transactionalDevices.reduce((sum, r) => {
-      const weight = riskWeights[r.Final_Risk_Level] ?? 1;
-      return sum + weight;
-    }, 0);
+      totalRiskScore += riskWeights[riskLevel] ?? 1;
+    }
   }
 
   const avgRiskScore =
@@ -176,12 +176,18 @@ export default function SubscriptionPlanTable({
   const deviceLowerBound = Math.max(0, Math.round(totalDevices * 0.9));
   const deviceUpperBound = Math.round(totalDevices * 1.1);
 
+  const allDevicesTagged = transactionalDevices.every(
+    (d) => d.Device_Class === "Class 1" || d.Device_Class === "Class 2"
+  );
+
+  console.log("Device_Class check:", transactionalDevices.map(d => d.Device_Class));
+
   const toggles = [
     { key: "DCA", value: true, setter: () => { }, disabled: true, greyed: true },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
     { key: "CONTRACT", value: true, setter: () => { }, disabled: true, greyed: true },
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
-    { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: false, greyed: false },
+    { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
 
   return (
@@ -271,7 +277,7 @@ export default function SubscriptionPlanTable({
                 Dealer_Name: "Your Dealer Name",
                 Dealer_Address: "123 Dealer St.",
                 Dealer_Phone: "(555) 123-4567",
-                Dealer_SalesRep_Name: formData.dealerRep,
+                Dealer_Email: formData.dealerRepEmail,
                 Customer_Address_Line1: formData.address1,
                 Customer_Address_Line2: formData.address2,
                 Customer_City: formData.city,
@@ -282,6 +288,7 @@ export default function SubscriptionPlanTable({
                 Customer_Email: formData.customerEmail,
                 Contract_Effective_Date: new Date().toLocaleDateString(),
                 Monthly_Subscription_Fee: (monthlySubscriptionPerDevice * totalDevices).toFixed(2),
+                Markup_Override: markupOverride ?? 0, // ✅ ADD THIS
                 Fee_DCA: "included",
                 Fee_JIT: includeJITR ? "$XX" : "Not Included",
                 Fee_QR: includeQR ? "$XX" : "Not Included",
@@ -380,7 +387,7 @@ export default function SubscriptionPlanTable({
                     Dealer_Name: "Your Dealer Name",
                     Dealer_Address: "123 Dealer St.",
                     Dealer_Phone: "(555) 123-4567",
-                    Dealer_SalesRep_Name: formData.dealerRep,
+                    Dealer_Email: formData.dealerRepEmail,
                     Customer_Address_Line1: formData.address1,
                     Customer_Address_Line2: formData.address2,
                     Customer_City: formData.city,
@@ -397,6 +404,7 @@ export default function SubscriptionPlanTable({
                     Fee_SubMgmt: "included",
                     Fee_ESW: includeESW ? "$XX" : "Not Included",
                     SKU_Bias_Option: bias,
+                    markupOverride,
                     Scenario_URL: scenarioUrl, // <-- use pre-generated scenarioUrl
                     Devices_Table: transactionalDevices.map(d => {
                       const determineBias = (color: "Black" | "Cyan" | "Magenta" | "Yellow") => {
@@ -517,6 +525,7 @@ export default function SubscriptionPlanTable({
                     onChange={e => setter(e.target.checked)}
                     disabled={disabled}
                     className={greyed ? 'accent-gray-400' : ''}
+                    title={key === "ESW" && !allDevicesTagged ? "ESW cannot be enabled. Some devices are missing Class 1/2 tags." : ""}
                   />
                 </th>
               ))}
