@@ -180,6 +180,8 @@ export default function SubscriptionPlanTable({
     (d) => d.Device_Class === "Class 1" || d.Device_Class === "Class 2"
   );
 
+  console.log("Device_Class check:", transactionalDevices.map(d => d.Device_Class));
+
   const toggles = [
     { key: "DCA", value: true, setter: () => { }, disabled: true, greyed: true },
     { key: "JITR", value: includeJITR, setter: setIncludeJITR, disabled: false, greyed: false },
