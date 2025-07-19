@@ -7,8 +7,7 @@ const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
 };
 
 const getBiasDaysLeft = (row: any, color: string, bias: 'O' | 'R' | 'N') => {
-  if (bias === 'O') return row[`${color}_Days_Left`] ?? Infinity;
-  return row[`${bias}_${color}_Days_Left`] ?? row[`${color}_Days_Left`] ?? Infinity;
+  return row[`${color}_Days_Left`] ?? 9999;
 };
 
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
