@@ -70,12 +70,13 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
     value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
 const filteredData = filterDays != null
-  ? data.filter(row =>
-      getBiasDaysLeft(row, "Black", bias) <= filterDays ||
-      getBiasDaysLeft(row, "Cyan", bias) <= filterDays ||
-      getBiasDaysLeft(row, "Magenta", bias) <= filterDays ||
-      getBiasDaysLeft(row, "Yellow", bias) <= filterDays
-    )
+  ? data.filter(row => {
+    const black = getBiasDaysLeft(row, "Black", bias);
+    const cyan = getBiasDaysLeft(row, "Cyan", bias);
+    const magenta = getBiasDaysLeft(row, "Magenta", bias);
+    const yellow = getBiasDaysLeft(row, "Yellow", bias);
+    return [black, cyan, magenta, yellow].some(v => v !== Infinity && v <= filterDays);
+  })
   : data;
 
 const grouped = Object.entries(
