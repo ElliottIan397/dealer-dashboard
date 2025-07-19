@@ -68,18 +68,32 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
   const formatCell = (value: number) =>
     value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
-const filteredData = filterDays != null
-  ? data.filter(row => {
-    const black = getBiasDaysLeft(row, "Black", bias);
-    const cyan = getBiasDaysLeft(row, "Cyan", bias);
-    const magenta = getBiasDaysLeft(row, "Magenta", bias);
-    const yellow = getBiasDaysLeft(row, "Yellow", bias);
-    return [black, cyan, magenta, yellow].some(v => v !== Infinity && v <= filterDays);
-  })
-  : data;
+  const filteredData = filterDays != null
+    ? data.filter(row => {
+      const black = getBiasDaysLeft(row, "Black", bias);
+      const cyan = getBiasDaysLeft(row, "Cyan", bias);
+      const magenta = getBiasDaysLeft(row, "Magenta", bias);
+      const yellow = getBiasDaysLeft(row, "Yellow", bias);
+      return [black, cyan, magenta, yellow].some(v => v !== Infinity && v <= filterDays);
+    })
+    : data;
 
-const grouped = Object.entries(
-  filteredData.reduce((acc: Record<string, Table1Row[]>, row) => {
+  console.log("Bias:", bias);
+  console.log("Filter Days:", filterDays);
+  console.log("Raw data count:", data.length);
+
+  const sample = data.slice(0, 3).map(row => ({
+    Serial: row.Serial_Number,
+    Black: row.Black_Days_Left,
+    Cyan: row.Cyan_Days_Left,
+    Magenta: row.Magenta_Days_Left,
+    Yellow: row.Yellow_Days_Left
+  }));
+  console.log("Sample rows (Days_Left):", sample);
+  console.log("Filtered count:", filteredData.length);
+
+  const grouped = Object.entries(
+    filteredData.reduce((acc: Record<string, Table1Row[]>, row) => {
 
       if (!row) return acc;
       acc[row.Monitor] = acc[row.Monitor] || [];
@@ -92,16 +106,16 @@ const grouped = Object.entries(
 
   return (
     <div className="overflow-x-auto">
-  <div className="mb-4">
-    <label className="mr-2 text-sm">Filter by Days Ahead:</label>
-    <input
-      type="number"
-      value={filterDays ?? ''}
-      onChange={(e) => setFilterDays(e.target.value ? parseInt(e.target.value) : null)}
-      placeholder="+Days"
-      className="border px-2 py-1 text-sm"
-    />
-  </div>
+      <div className="mb-4">
+        <label className="mr-2 text-sm">Filter by Days Ahead:</label>
+        <input
+          type="number"
+          value={filterDays ?? ''}
+          onChange={(e) => setFilterDays(e.target.value ? parseInt(e.target.value) : null)}
+          placeholder="+Days"
+          className="border px-2 py-1 text-sm"
+        />
+      </div>
       <table className="min-w-full border text-sm text-gray-900">
         <thead className="bg-gray-100 text-xs font-semibold">
           <tr>
