@@ -6,6 +6,11 @@ const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
   return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 };
 
+const getBiasDaysLeft = (row: any, color: string, bias: 'O' | 'R' | 'N') => {
+  if (bias === 'O') return row[`${color}_Days_Left`] ?? Infinity;
+  return row[`${bias}_${color}_Days_Left`] ?? row[`${color}_Days_Left`] ?? Infinity;
+};
+
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import type { McarpRow } from "./types";
 
@@ -25,6 +30,20 @@ type Table1Row = {
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
+  Black_Days_Left?: number;
+  Cyan_Days_Left?: number;
+  Magenta_Days_Left?: number;
+  Yellow_Days_Left?: number;
+
+  R_Black_Days_Left?: number;
+  R_Cyan_Days_Left?: number;
+  R_Magenta_Days_Left?: number;
+  R_Yellow_Days_Left?: number;
+
+  N_Black_Days_Left?: number;
+  N_Cyan_Days_Left?: number;
+  N_Magenta_Days_Left?: number;
+  N_Yellow_Days_Left?: number;
 };
 
 type Props = {
@@ -42,14 +61,26 @@ function isStale(lastUpdated: number, currentDate: Date, days: number): boolean 
 }
 
 export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 'N' }) {
+  const [filterDays, setFilterDays] = React.useState<number | null>(null);
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
+
 
   const formatCell = (value: number) =>
     value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
-  const grouped = Object.entries(
-    data.reduce((acc: Record<string, Table1Row[]>, row) => {
+const filteredData = filterDays != null
+  ? data.filter(row =>
+      getBiasDaysLeft(row, "Black", bias) <= filterDays ||
+      getBiasDaysLeft(row, "Cyan", bias) <= filterDays ||
+      getBiasDaysLeft(row, "Magenta", bias) <= filterDays ||
+      getBiasDaysLeft(row, "Yellow", bias) <= filterDays
+    )
+  : data;
+
+const grouped = Object.entries(
+  filteredData.reduce((acc: Record<string, Table1Row[]>, row) => {
+
       if (!row) return acc;
       acc[row.Monitor] = acc[row.Monitor] || [];
       acc[row.Monitor].push(row);
@@ -61,6 +92,16 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
 
   return (
     <div className="overflow-x-auto">
+  <div className="mb-4">
+    <label className="mr-2 text-sm">Filter by Days Ahead:</label>
+    <input
+      type="number"
+      value={filterDays ?? ''}
+      onChange={(e) => setFilterDays(e.target.value ? parseInt(e.target.value) : null)}
+      placeholder="+Days"
+      className="border px-2 py-1 text-sm"
+    />
+  </div>
       <table className="min-w-full border text-sm text-gray-900">
         <thead className="bg-gray-100 text-xs font-semibold">
           <tr>
@@ -75,7 +116,7 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
             <th className="px-3 py-2 text-center">Magenta Ctgs</th>
             <th className="px-3 py-2 text-center">Yellow Ctgs</th>
             <th className="px-3 py-2 text-center">Contract Status</th>
-            <th className="px-3 py-2 text-center">Transact Rev</th>           
+            <th className="px-3 py-2 text-center">Transact Rev</th>
             <th className="px-3 py-2 text-center">Fulfillment Cost</th>
             <th className="px-3 py-2 text-center">Trans GM%</th>
             <th className="px-3 py-2 text-center">Contract Rev</th>
@@ -137,7 +178,7 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                     <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Magenta_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias))}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>                    
+                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>
                     <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias))}</td>
                     <td className="px-3 py-2 text-center">
                       {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias)))}
@@ -159,7 +200,7 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                   <td className="px-3 py-2 text-right">{formatCell(totals.Magenta)}</td>
                   <td className="px-3 py-2 text-right">{formatCell(totals.Yellow)}</td>
                   <td className="px-3 py-2 text-center"></td>
-                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>                 
+                  <td className="px-3 py-2 text-right">{formatCurrency(totals.SP)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Fulfillment)}</td>
                   <td className="px-3 py-2 text-center">{formatPercent(transactionalGM)}</td>
                   <td className="px-3 py-2 text-right">{formatCurrency(totals.Revenue)}</td>
