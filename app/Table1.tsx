@@ -7,7 +7,9 @@ const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
 };
 
 const getBiasDaysLeft = (row: any, color: string, bias: 'O' | 'R' | 'N') => {
-  return row[`${color}_Days_Left`] ?? 9999;
+  return bias === 'O'
+    ? row[`${color}_Days_Left`] ?? 9999
+    : row[`${bias}_${color}_Days_Left`] ?? row[`${color}_Days_Left`] ?? 9999;
 };
 
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
@@ -74,7 +76,7 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
       const cyan = getBiasDaysLeft(row, "Cyan", bias);
       const magenta = getBiasDaysLeft(row, "Magenta", bias);
       const yellow = getBiasDaysLeft(row, "Yellow", bias);
-      return [black, cyan, magenta, yellow].some(v => v !== Infinity && v <= filterDays);
+      return [black, cyan, magenta, yellow].some(v => v <= filterDays);
     })
     : data;
 
