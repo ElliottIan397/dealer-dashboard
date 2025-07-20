@@ -79,8 +79,9 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
   const filteredData = filterDays != null
     ? data.filter(row => {
       return ['Black', 'Cyan', 'Magenta', 'Yellow'].some(color => {
-        const daysLeft = row[`${color}_Days_Left`];
-        return typeof daysLeft === 'number' && daysLeft <= filterDays;
+        const ctgsPerYear = row[`${color}_Full_Cartridges_Required_365d`] ?? 0;
+        const daysLeft = row[`${color}_Days_Left`] ?? 9999;
+        return ctgsPerYear > 0 && daysLeft <= filterDays;
       });
     })
     : data;
