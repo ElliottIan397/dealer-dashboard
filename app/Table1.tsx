@@ -6,6 +6,12 @@ const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
   return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 };
 
+const needsCartridgeInWindow = (row: any, color: string, days: number | null) => {
+  if (days == null) return true; // show all if no filter
+  const daysLeft = row[`${color}_Days_Left`] ?? 9999;
+  return daysLeft <= days;
+};
+
 const getBiasDaysLeft = (row: any, color: string, bias: 'O' | 'R' | 'N') => {
   return bias === 'O'
     ? row[`${color}_Days_Left`] ?? 9999
@@ -72,11 +78,10 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
 
   const filteredData = filterDays != null
     ? data.filter(row => {
-      const black = getBiasDaysLeft(row, "Black", bias);
-      const cyan = getBiasDaysLeft(row, "Cyan", bias);
-      const magenta = getBiasDaysLeft(row, "Magenta", bias);
-      const yellow = getBiasDaysLeft(row, "Yellow", bias);
-      return [black, cyan, magenta, yellow].some(v => v <= filterDays);
+      return ['Black', 'Cyan', 'Magenta', 'Yellow'].some(color => {
+        const daysLeft = row[`${color}_Days_Left`];
+        return typeof daysLeft === 'number' && daysLeft <= filterDays;
+      });
     })
     : data;
 
@@ -189,15 +194,32 @@ export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 
                     <td className="px-3 py-2 text-center">{row.Device_Type}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Black_Annual_Volume)}</td>
                     <td className="px-3 py-2 text-right">{formatCell(row.Color_Annual_Volume)}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Black_Full_Cartridges_Required_365d", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Cyan_Full_Cartridges_Required_365d", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Magenta_Full_Cartridges_Required_365d", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCell(getBiasField(row, "Yellow_Full_Cartridges_Required_365d", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(needsCartridgeInWindow(row, "Black", filterDays) ? 1 : 0)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(needsCartridgeInWindow(row, "Cyan", filterDays) ? 1 : 0)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(needsCartridgeInWindow(row, "Magenta", filterDays) ? 1 : 0)}</td>
+                    <td className="px-3 py-2 text-right">{formatCell(needsCartridgeInWindow(row, "Yellow", filterDays) ? 1 : 0)}</td>
                     <td className="px-3 py-2 text-center">{row.Contract_Status}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Transactional_SP", bias))}</td>
-                    <td className="px-3 py-2 text-right">{formatCurrency(getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(
+                      (needsCartridgeInWindow(row, "Black", filterDays) ? 1 : 0) * getBiasField(row, "Black_Cartridge_SP", bias) +
+                      (needsCartridgeInWindow(row, "Cyan", filterDays) ? 1 : 0) * getBiasField(row, "Cyan_Cartridge_SP", bias) +
+                      (needsCartridgeInWindow(row, "Magenta", filterDays) ? 1 : 0) * getBiasField(row, "Magenta_Cartridge_SP", bias) +
+                      (needsCartridgeInWindow(row, "Yellow", filterDays) ? 1 : 0) * getBiasField(row, "Yellow_Cartridge_SP", bias))}</td>
+                    <td className="px-3 py-2 text-right">{formatCurrency(
+                      (needsCartridgeInWindow(row, "Black", filterDays) ? 1 : 0) * getBiasField(row, "Black_Cartridge_Cost", bias) +
+                      (needsCartridgeInWindow(row, "Cyan", filterDays) ? 1 : 0) * getBiasField(row, "Cyan_Cartridge_Cost", bias) +
+                      (needsCartridgeInWindow(row, "Magenta", filterDays) ? 1 : 0) * getBiasField(row, "Magenta_Cartridge_Cost", bias) +
+                      (needsCartridgeInWindow(row, "Yellow", filterDays) ? 1 : 0) * getBiasField(row, "Yellow_Cartridge_Cost", bias))}</td>
                     <td className="px-3 py-2 text-center">
-                      {formatPercent(computeGM(row.Twelve_Month_Transactional_SP, getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias)))}
+                      {formatPercent(computeGM(
+                        (needsCartridgeInWindow(row, "Black", filterDays) ? 1 : 0) * getBiasField(row, "Black_Cartridge_SP", bias) +
+                        (needsCartridgeInWindow(row, "Cyan", filterDays) ? 1 : 0) * getBiasField(row, "Cyan_Cartridge_SP", bias) +
+                        (needsCartridgeInWindow(row, "Magenta", filterDays) ? 1 : 0) * getBiasField(row, "Magenta_Cartridge_SP", bias) +
+                        (needsCartridgeInWindow(row, "Yellow", filterDays) ? 1 : 0) * getBiasField(row, "Yellow_Cartridge_SP", bias),
+
+                        (needsCartridgeInWindow(row, "Black", filterDays) ? 1 : 0) * getBiasField(row, "Black_Cartridge_Cost", bias) +
+                        (needsCartridgeInWindow(row, "Cyan", filterDays) ? 1 : 0) * getBiasField(row, "Cyan_Cartridge_Cost", bias) +
+                        (needsCartridgeInWindow(row, "Magenta", filterDays) ? 1 : 0) * getBiasField(row, "Magenta_Cartridge_Cost", bias) +
+                        (needsCartridgeInWindow(row, "Yellow", filterDays) ? 1 : 0) * getBiasField(row, "Yellow_Cartridge_Cost", bias)))}
                     </td>
                     <td className="px-3 py-2 text-right">{formatCurrency(row.Contract_Total_Revenue)}</td>
                     <td className="px-3 py-2 text-center">
