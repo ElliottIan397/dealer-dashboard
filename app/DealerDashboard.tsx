@@ -43,7 +43,7 @@ export default function DealerDashboard() {
   const [includeQR, setIncludeQR] = useState(true);
   const [includeESW, setIncludeESW] = useState(false);
   const [markupOverride, setMarkupOverride] = useState<number | null>(null);
-
+  const [selectedMonths, setSelectedMonths] = useState(12); // default to 12 months
   const manufacturerOptions = Array.from(
     new Set(data.map((row) => row.Manufacturer).filter(Boolean))
   )
@@ -92,23 +92,29 @@ export default function DealerDashboard() {
 
   const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
-  const table1Data = filtered.map((row) => ({
-    Monitor: row.Monitor,
-    Serial_Number: row.Serial_Number,
-    Printer_Model: row.Printer_Model,
-    Device_Type: row.Device_Type,
-    Black_Annual_Volume: row.Black_Annual_Volume,
-    Color_Annual_Volume: row.Color_Annual_Volume,
-    Black_Full_Cartridges_Required_365d: getBiasField(row, "Black_Full_Cartridges_Required_365d", selectedBias),
-    Cyan_Full_Cartridges_Required_365d: getBiasField(row, "Cyan_Full_Cartridges_Required_365d", selectedBias),
-    Magenta_Full_Cartridges_Required_365d: getBiasField(row, "Magenta_Full_Cartridges_Required_365d", selectedBias),
-    Yellow_Full_Cartridges_Required_365d: getBiasField(row, "Yellow_Full_Cartridges_Required_365d", selectedBias),
-    Contract_Status: row.Contract_Status,
-    Last_Updated: row.Last_Updated,
-    Twelve_Month_Fulfillment_Cost: getBiasField(row, "Twelve_Month_Fulfillment_Cost", selectedBias),
-    Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", selectedBias),
-    Contract_Total_Revenue: row.Contract_Total_Revenue,
-  }));
+  const fraction = selectedMonths / 12;
+
+  const table1Data = filtered.map((row) => {
+    const getVal = (field: string) => getBiasField(row, field, selectedBias) * fraction;
+
+    return {
+      Monitor: row.Monitor,
+      Serial_Number: row.Serial_Number,
+      Printer_Model: row.Printer_Model,
+      Device_Type: row.Device_Type,
+      Black_Annual_Volume: row.Black_Annual_Volume * fraction,
+      Color_Annual_Volume: row.Color_Annual_Volume * fraction,
+      Black_Full_Cartridges_Required_365d: getVal("Black_Full_Cartridges_Required_365d"),
+      Cyan_Full_Cartridges_Required_365d: getVal("Cyan_Full_Cartridges_Required_365d"),
+      Magenta_Full_Cartridges_Required_365d: getVal("Magenta_Full_Cartridges_Required_365d"),
+      Yellow_Full_Cartridges_Required_365d: getVal("Yellow_Full_Cartridges_Required_365d"),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
+      Twelve_Month_Fulfillment_Cost: getVal("Twelve_Month_Fulfillment_Cost"),
+      Twelve_Month_Transactional_SP: getVal("Twelve_Month_Transactional_SP"),
+      Contract_Total_Revenue: row.Contract_Total_Revenue * fraction,
+    };
+  });
 
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
@@ -193,6 +199,21 @@ export default function DealerDashboard() {
             <option value="All">All</option>
             <option value="C">Contracted (C)</option>
             <option value="T">Transactional (T)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Timeframe (months):</label>
+          <select
+            value={selectedMonths}
+            onChange={(e) => setSelectedMonths(Number(e.target.value))}
+            className="p-2 border border-gray-300 rounded w-64"
+          >
+            {[...Array(12)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>
+                +{i + 1} Month{i === 0 ? "" : "s"}
+              </option>
+            ))}
           </select>
         </div>
 
