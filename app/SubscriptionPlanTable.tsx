@@ -899,30 +899,57 @@ export default function SubscriptionPlanTable({
         </div>
       )}
       {showSubscriptionAnalytics && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Subscription P&amp;L (Cumulative)</h3>
-          <table className="min-w-full bg-white border border-gray-200">
-            <thead>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border border-gray-300">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="border px-4 py-2">Month</th>
-                <th className="border px-4 py-2">Cumulative Cartridges</th>
-                <th className="border px-4 py-2">Revenue</th>
-                <th className="border px-4 py-2">Fulfillment Cost</th>
-                <th className="border px-4 py-2">ESW Cost</th>
-                <th className="border px-4 py-2">GM$</th>
-                <th className="border px-4 py-2">GM%</th>
+                <th className="p-2 border">Month</th>
+                <th className="p-2 border">Cumulative Cartridges</th>
+                <th className="p-2 border">Cumulative Revenue</th>
+                <th className="p-2 border">Cumulative Fulfillment Cost</th>
+                <th className="p-2 border">Cumulative ESW Cost</th>
+                <th className="p-2 border">GM$</th>
+                <th className="p-2 border">GM%</th>
               </tr>
             </thead>
             <tbody>
               {monthlyPL.map((row) => (
                 <tr key={row.month}>
-                  <td className="border px-4 py-2">{row.month}</td>
-                  <td className="border px-4 py-2">{row.totalCartridges}</td>
-                  <td className="border px-4 py-2">${row.totalRevenue}</td>
-                  <td className="border px-4 py-2">${row.totalCost}</td>
-                  <td className="border px-4 py-2">${row.eswCost}</td>
-                  <td className="border px-4 py-2">${row.gm}</td>
-                  <td className="border px-4 py-2">{row.gmPercent}%</td>
+                  <td className="p-2 border text-center">{row.month}</td>
+                  <td className="p-2 border text-center">{row.totalCartridges}</td>
+                  <td className="p-2 border text-right">
+                    {Number(row.totalRevenue).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className="p-2 border text-right">
+                    {Number(row.totalCost).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className="p-2 border text-right">
+                    {Number(row.eswCost).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td
+                    className={`p-2 border text-center ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
+                      }`}
+                  >
+                    ${row.gm}
+                  </td>
+                  <td
+                    className={`p-2 border text-center ${parseFloat(row.gmPercent) < 0 ? "text-red-600 font-semibold" : ""
+                      }`}
+                  >
+                    {row.gmPercent}%
+                  </td>
                 </tr>
               ))}
             </tbody>
