@@ -191,7 +191,7 @@ export default function DealerDashboard() {
           <select
             value={selectedBias}
             onChange={(e) => setSelectedBias(e.target.value as "O" | "R" | "N")}
-            className="p-2 border border-gray-300 rounded w-64"
+            className="p-2 border border-gray-300 rounded w-48"
           >
             <option value="O">OEM</option>
             <option value="R">Reman</option>
@@ -204,7 +204,7 @@ export default function DealerDashboard() {
           <select
             value={selectedCustomer}
             onChange={(e) => setSelectedCustomer(e.target.value)}
-            className="p-2 border border-gray-300 rounded w-64"
+            className="p-2 border border-gray-300 rounded w-48"
           >
             {customerOptions.map((cust) => (
               <option key={cust} value={cust}>{cust}</option>
@@ -217,7 +217,7 @@ export default function DealerDashboard() {
           <select
             value={selectedContractType}
             onChange={(e) => setSelectedContractType(e.target.value)}
-            className="p-2 border border-gray-300 rounded w-64"
+            className="p-2 border border-gray-300 rounded w-48"
           >
             <option value="All">All</option>
             <option value="C">Contracted (C)</option>
@@ -230,7 +230,7 @@ export default function DealerDashboard() {
           <select
             value={selectedMonths}
             onChange={(e) => setSelectedMonths(Number(e.target.value))}
-            className="p-2 border border-gray-300 rounded w-64"
+            className="p-2 border border-gray-300 rounded w-48"
           >
             {[...Array(12)].map((_, i) => (
               <option key={i + 1} value={i + 1}>
@@ -245,7 +245,7 @@ export default function DealerDashboard() {
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor" | "subscription")}
-            className="p-2 border border-gray-300 rounded w-64"
+            className="p-2 border border-gray-300 rounded w-48"
           >
             <option value="">-- None --</option>
             <option value="risk">Show Margin & Risk Summary</option>

@@ -910,8 +910,8 @@ export default function SubscriptionPlanTable({
                   <th className="p-2 border">Cumulative Revenue</th>
                   <th className="p-2 border">Cumulative Fulfillment Cost</th>
                   <th className="p-2 border">Cumulative ESW Cost</th>
-                  <th className="p-2 border">GM$</th>
-                  <th className="p-2 border">GM%</th>
+                  <th className="p-2 border">Cumulative GM$</th>
+                  <th className="p-2 border">Cumulative GM%</th>
                 </tr>
               </thead>
               <tbody>
@@ -941,10 +941,14 @@ export default function SubscriptionPlanTable({
                       })}
                     </td>
                     <td
-                      className={`p-2 border text-center ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
+                      className={`p-2 border text-right ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
                         }`}
                     >
-                      ${row.gm}
+                      {Number(row.gm).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
                     </td>
                     <td
                       className={`p-2 border text-center ${parseFloat(row.gmPercent) < 0 ? "text-red-600 font-semibold" : ""
