@@ -73,6 +73,7 @@ export default function SubscriptionPlanTable({
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
+  const [showSubscriptionAnalytics, setShowSubscriptionAnalytics] = useState(false);
   const [scenarioUrl, setScenarioUrl] = useState("");
 
   const [formData, setFormData] = useState({
@@ -189,6 +190,47 @@ export default function SubscriptionPlanTable({
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
+  const monthlyPL = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+
+    let totalCartridges = 0;
+    let totalRevenue = 0;
+    let totalCost = 0;
+
+    filtered.forEach((row) => {
+      const fraction = month / 12;
+
+      const black = Math.ceil(row.Black_Full_Cartridges_Required_365d * fraction);
+      const cyan = Math.ceil(row.Cyan_Full_Cartridges_Required_365d * fraction);
+      const magenta = Math.ceil(row.Magenta_Full_Cartridges_Required_365d * fraction);
+      const yellow = Math.ceil(row.Yellow_Full_Cartridges_Required_365d * fraction);
+
+      const cartridges = black + cyan + magenta + yellow;
+      const annualCartridges = row.Black_Full_Cartridges_Required_365d +
+        row.Cyan_Full_Cartridges_Required_365d +
+        row.Magenta_Full_Cartridges_Required_365d +
+        row.Yellow_Full_Cartridges_Required_365d;
+
+      const unitSP = annualCartridges > 0 ? row.Twelve_Month_Transactional_SP / annualCartridges : 0;
+      const unitCost = annualCartridges > 0 ? row.Twelve_Month_Fulfillment_Cost / annualCartridges : 0;
+
+      totalCartridges += cartridges;
+      totalRevenue += unitSP * cartridges;
+      totalCost += unitCost * cartridges;
+    });
+
+    const gm = totalRevenue - totalCost;
+    const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
+
+    return {
+      month,
+      totalCartridges,
+      totalRevenue: totalRevenue.toFixed(2),
+      totalCost: totalCost.toFixed(2),
+      gm: gm.toFixed(2),
+      gmPercent: gmPercent.toFixed(1),
+    };
+  });
 
   return (
     <div className="mt-10">
@@ -495,6 +537,16 @@ export default function SubscriptionPlanTable({
 
             </div>
           )}
+
+          <label className="text-sm font-medium block mb-2">
+            <input
+              type="checkbox"
+              className="mr-2"
+              checked={showSubscriptionAnalytics}
+              onChange={(e) => setShowSubscriptionAnalytics(e.target.checked)}
+            />
+            Show Subscription P&amp;L
+          </label>
 
           <label className="text-sm font-medium">
             <input
@@ -819,12 +871,12 @@ export default function SubscriptionPlanTable({
                       <td className="px-4 py-2 border text-center">
                         <span
                           className={`px-1.5 py-0.5 rounded-full text-white text-xs font-medium ${d.Final_Risk_Level === "Low"
-                              ? "bg-green-500"
-                              : d.Final_Risk_Level === "Moderate"
-                                ? "bg-yellow-500"
-                                : d.Final_Risk_Level === "High"
-                                  ? "bg-orange-500"
-                                  : "bg-red-600"
+                            ? "bg-green-500"
+                            : d.Final_Risk_Level === "Moderate"
+                              ? "bg-yellow-500"
+                              : d.Final_Risk_Level === "High"
+                                ? "bg-orange-500"
+                                : "bg-red-600"
                             }`}
                         >
                           {d.Final_Risk_Level}
@@ -839,6 +891,35 @@ export default function SubscriptionPlanTable({
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+      {showSubscriptionAnalytics && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Subscription P&amp;L (Cumulative)</h3>
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr>
+                <th className="border px-4 py-2">Month</th>
+                <th className="border px-4 py-2">Cumulative Cartridges</th>
+                <th className="border px-4 py-2">Revenue</th>
+                <th className="border px-4 py-2">Fulfillment Cost</th>
+                <th className="border px-4 py-2">GM$</th>
+                <th className="border px-4 py-2">GM%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyPL.map((row) => (
+                <tr key={row.month}>
+                  <td className="border px-4 py-2">{row.month}</td>
+                  <td className="border px-4 py-2">{row.totalCartridges}</td>
+                  <td className="border px-4 py-2">${row.totalRevenue}</td>
+                  <td className="border px-4 py-2">${row.totalCost}</td>
+                  <td className="border px-4 py-2">${row.gm}</td>
+                  <td className="border px-4 py-2">{row.gmPercent}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
