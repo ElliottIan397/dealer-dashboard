@@ -219,6 +219,9 @@ export default function SubscriptionPlanTable({
       totalCost += unitCost * cartridges;
     });
 
+    const monthlyESW = eswTotal / 12;
+    const eswCost = monthlyESW * month;
+    const totalFulfillmentCost = totalCost + eswCost;
     const gm = totalRevenue - totalCost;
     const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
 
@@ -226,7 +229,9 @@ export default function SubscriptionPlanTable({
       month,
       totalCartridges,
       totalRevenue: totalRevenue.toFixed(2),
-      totalCost: totalCost.toFixed(2),
+      totalCost: totalCost.toFixed(2),            // Fulfillment only
+      eswCost: eswCost.toFixed(2),                // New column
+      totalWithESW: totalFulfillmentCost.toFixed(2),
       gm: gm.toFixed(2),
       gmPercent: gmPercent.toFixed(1),
     };
@@ -903,6 +908,7 @@ export default function SubscriptionPlanTable({
                 <th className="border px-4 py-2">Cumulative Cartridges</th>
                 <th className="border px-4 py-2">Revenue</th>
                 <th className="border px-4 py-2">Fulfillment Cost</th>
+                <th className="border px-4 py-2">ESW Cost</th>
                 <th className="border px-4 py-2">GM$</th>
                 <th className="border px-4 py-2">GM%</th>
               </tr>
@@ -914,6 +920,7 @@ export default function SubscriptionPlanTable({
                   <td className="border px-4 py-2">{row.totalCartridges}</td>
                   <td className="border px-4 py-2">${row.totalRevenue}</td>
                   <td className="border px-4 py-2">${row.totalCost}</td>
+                  <td className="border px-4 py-2">${row.eswCost}</td>
                   <td className="border px-4 py-2">${row.gm}</td>
                   <td className="border px-4 py-2">{row.gmPercent}%</td>
                 </tr>
