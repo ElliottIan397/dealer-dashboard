@@ -191,7 +191,7 @@ export default function DealerDashboard() {
           <select
             value={selectedBias}
             onChange={(e) => setSelectedBias(e.target.value as "O" | "R" | "N")}
-            className="p-2 border border-gray-300 rounded w-48"
+            className="p-2 border border-gray-300 rounded w-40"
           >
             <option value="O">OEM</option>
             <option value="R">Reman</option>
@@ -204,7 +204,7 @@ export default function DealerDashboard() {
           <select
             value={selectedCustomer}
             onChange={(e) => setSelectedCustomer(e.target.value)}
-            className="p-2 border border-gray-300 rounded w-48"
+            className="p-2 border border-gray-300 rounded w-64"
           >
             {customerOptions.map((cust) => (
               <option key={cust} value={cust}>{cust}</option>
@@ -245,7 +245,7 @@ export default function DealerDashboard() {
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor" | "subscription")}
-            className="p-2 border border-gray-300 rounded w-48"
+            className="p-2 border border-gray-300 rounded w-78"
           >
             <option value="">-- None --</option>
             <option value="risk">Show Margin & Risk Summary</option>
