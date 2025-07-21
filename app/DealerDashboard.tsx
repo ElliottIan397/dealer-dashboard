@@ -95,9 +95,26 @@ export default function DealerDashboard() {
   const fraction = selectedMonths / 12;
 
   const table1Data = filtered.map((row) => {
-    const getVal = (field: string) => getBiasField(row, field, selectedBias) * fraction;
+    const getVal = (field: string) => getBiasField(row, field, selectedBias);
     const getCartridgeCount = (field: string) =>
-      Math.ceil(getBiasField(row, field, selectedBias) * fraction);
+      Math.ceil(getVal(field) * fraction);
+
+    // Get adjusted cartridge counts
+    const blackCartridges = getCartridgeCount("Black_Full_Cartridges_Required_365d");
+    const cyanCartridges = getCartridgeCount("Cyan_Full_Cartridges_Required_365d");
+    const magentaCartridges = getCartridgeCount("Magenta_Full_Cartridges_Required_365d");
+    const yellowCartridges = getCartridgeCount("Yellow_Full_Cartridges_Required_365d");
+
+    const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
+
+    // Get per-cartridge pricing
+    const annualCartridges = getVal("Black_Full_Cartridges_Required_365d") +
+      getVal("Cyan_Full_Cartridges_Required_365d") +
+      getVal("Magenta_Full_Cartridges_Required_365d") +
+      getVal("Yellow_Full_Cartridges_Required_365d");
+
+    const unitSP = annualCartridges > 0 ? getVal("Twelve_Month_Transactional_SP") / annualCartridges : 0;
+    const unitCost = annualCartridges > 0 ? getVal("Twelve_Month_Fulfillment_Cost") / annualCartridges : 0;
 
     return {
       Monitor: row.Monitor,
@@ -106,15 +123,19 @@ export default function DealerDashboard() {
       Device_Type: row.Device_Type,
       Black_Annual_Volume: Math.round(row.Black_Annual_Volume * fraction),
       Color_Annual_Volume: Math.round(row.Color_Annual_Volume * fraction),
-      Black_Full_Cartridges_Required_365d: getCartridgeCount("Black_Full_Cartridges_Required_365d"),
-      Cyan_Full_Cartridges_Required_365d: getCartridgeCount("Cyan_Full_Cartridges_Required_365d"),
-      Magenta_Full_Cartridges_Required_365d: getCartridgeCount("Magenta_Full_Cartridges_Required_365d"),
-      Yellow_Full_Cartridges_Required_365d: getCartridgeCount("Yellow_Full_Cartridges_Required_365d"),
+      Black_Full_Cartridges_Required_365d: blackCartridges,
+      Cyan_Full_Cartridges_Required_365d: cyanCartridges,
+      Magenta_Full_Cartridges_Required_365d: magentaCartridges,
+      Yellow_Full_Cartridges_Required_365d: yellowCartridges,
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
-      Twelve_Month_Fulfillment_Cost: getVal("Twelve_Month_Fulfillment_Cost"),
-      Twelve_Month_Transactional_SP: getVal("Twelve_Month_Transactional_SP"),
-      Contract_Total_Revenue: row.Contract_Total_Revenue * fraction,
+
+      // New logic: cost and SP based on cartridge count × unit pricing
+      Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
+
+      // Still prorating contract revenue (this is OK if contract is time-based)
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * fraction).toFixed(2),
     };
   });
 
