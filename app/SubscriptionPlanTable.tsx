@@ -73,6 +73,7 @@ export default function SubscriptionPlanTable({
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
+  const [showSubscriptionAnalytics, setShowSubscriptionAnalytics] = useState(false);
   const [scenarioUrl, setScenarioUrl] = useState("");
 
   const [formData, setFormData] = useState({
@@ -189,6 +190,52 @@ export default function SubscriptionPlanTable({
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
+  const monthlyPL = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+
+    let totalCartridges = 0;
+    let totalRevenue = 0;
+    let totalCost = 0;
+
+    filtered.forEach((row) => {
+      const fraction = month / 12;
+
+      const black = Math.ceil(row.Black_Full_Cartridges_Required_365d * fraction);
+      const cyan = Math.ceil(row.Cyan_Full_Cartridges_Required_365d * fraction);
+      const magenta = Math.ceil(row.Magenta_Full_Cartridges_Required_365d * fraction);
+      const yellow = Math.ceil(row.Yellow_Full_Cartridges_Required_365d * fraction);
+
+      const cartridges = black + cyan + magenta + yellow;
+      const annualCartridges = row.Black_Full_Cartridges_Required_365d +
+        row.Cyan_Full_Cartridges_Required_365d +
+        row.Magenta_Full_Cartridges_Required_365d +
+        row.Yellow_Full_Cartridges_Required_365d;
+
+      const unitSP = annualCartridges > 0 ? row.Twelve_Month_Transactional_SP / annualCartridges : 0;
+      const unitCost = annualCartridges > 0 ? row.Twelve_Month_Fulfillment_Cost / annualCartridges : 0;
+
+      totalCartridges += cartridges;
+      totalRevenue = monthlySubscriptionPerDevice * month * filtered.length;
+      totalCost += unitCost * cartridges;
+    });
+
+    const monthlyESW = eswTotal / 12;
+    const eswCost = monthlyESW * month;
+    const totalFulfillmentCost = totalCost + eswCost;
+    const gm = totalRevenue - totalFulfillmentCost;
+    const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
+
+    return {
+      month,
+      totalCartridges,
+      totalRevenue: totalRevenue.toFixed(2),
+      totalCost: totalCost.toFixed(2),            // Fulfillment only
+      eswCost: eswCost.toFixed(2),                // New column
+      totalWithESW: totalFulfillmentCost.toFixed(2),
+      gm: gm.toFixed(2),
+      gmPercent: gmPercent.toFixed(1),
+    };
+  });
 
   return (
     <div className="mt-10">
@@ -495,6 +542,16 @@ export default function SubscriptionPlanTable({
 
             </div>
           )}
+
+          <label className="text-sm font-medium block mb-2">
+            <input
+              type="checkbox"
+              className="mr-2"
+              checked={showSubscriptionAnalytics}
+              onChange={(e) => setShowSubscriptionAnalytics(e.target.checked)}
+            />
+            Show Subscription P&amp;L
+          </label>
 
           <label className="text-sm font-medium">
             <input
@@ -818,13 +875,13 @@ export default function SubscriptionPlanTable({
                       <td className="p-2 border text-center">{d.Recalculated_Age_Years.toFixed(1)}</td>
                       <td className="px-4 py-2 border text-center">
                         <span
-                          className={`px-2 py-1 rounded-full text-white text-sm font-semibold ${d.Final_Risk_Level === "Low"
-                              ? "bg-green-500"
-                              : d.Final_Risk_Level === "Moderate"
-                                ? "bg-yellow-500"
-                                : d.Final_Risk_Level === "High"
-                                  ? "bg-orange-500"
-                                  : "bg-red-600"
+                          className={`px-1.5 py-0.5 rounded-full text-white text-xs font-medium ${d.Final_Risk_Level === "Low"
+                            ? "bg-green-500"
+                            : d.Final_Risk_Level === "Moderate"
+                              ? "bg-yellow-500"
+                              : d.Final_Risk_Level === "High"
+                                ? "bg-orange-500"
+                                : "bg-red-600"
                             }`}
                         >
                           {d.Final_Risk_Level}
@@ -836,6 +893,71 @@ export default function SubscriptionPlanTable({
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      {showSubscriptionAnalytics && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">Subscription Plan P&amp;L</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">Month</th>
+                  <th className="p-2 border">Cumulative Cartridges</th>
+                  <th className="p-2 border">Cumulative Revenue</th>
+                  <th className="p-2 border">Cumulative Fulfillment Cost</th>
+                  <th className="p-2 border">Cumulative ESW Cost</th>
+                  <th className="p-2 border">Cumulative GM$</th>
+                  <th className="p-2 border">Cumulative GM%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyPL.map((row) => (
+                  <tr key={row.month}>
+                    <td className="p-2 border text-center">{row.month}</td>
+                    <td className="p-2 border text-center">{row.totalCartridges}</td>
+                    <td className="p-2 border text-right">
+                      {Number(row.totalRevenue).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="p-2 border text-right">
+                      {Number(row.totalCost).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="p-2 border text-right">
+                      {Number(row.eswCost).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td
+                      className={`p-2 border text-right ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
+                        }`}
+                    >
+                      {Number(row.gm).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td
+                      className={`p-2 border text-center ${parseFloat(row.gmPercent) < 0 ? "text-red-600 font-semibold" : ""
+                        }`}
+                    >
+                      {row.gmPercent}%
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
