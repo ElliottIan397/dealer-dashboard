@@ -96,6 +96,8 @@ export default function DealerDashboard() {
 
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias) * fraction;
+    const getCartridgeCount = (field: string) =>
+      Math.ceil(getBiasField(row, field, selectedBias) * fraction);
 
     return {
       Monitor: row.Monitor,
@@ -104,10 +106,10 @@ export default function DealerDashboard() {
       Device_Type: row.Device_Type,
       Black_Annual_Volume: row.Black_Annual_Volume * fraction,
       Color_Annual_Volume: row.Color_Annual_Volume * fraction,
-      Black_Full_Cartridges_Required_365d: getVal("Black_Full_Cartridges_Required_365d"),
-      Cyan_Full_Cartridges_Required_365d: getVal("Cyan_Full_Cartridges_Required_365d"),
-      Magenta_Full_Cartridges_Required_365d: getVal("Magenta_Full_Cartridges_Required_365d"),
-      Yellow_Full_Cartridges_Required_365d: getVal("Yellow_Full_Cartridges_Required_365d"),
+      Black_Full_Cartridges_Required_365d: getCartridgeCount("Black_Full_Cartridges_Required_365d"),
+      Cyan_Full_Cartridges_Required_365d: getCartridgeCount("Cyan_Full_Cartridges_Required_365d"),
+      Magenta_Full_Cartridges_Required_365d: getCartridgeCount("Magenta_Full_Cartridges_Required_365d"),
+      Yellow_Full_Cartridges_Required_365d: getCartridgeCount("Yellow_Full_Cartridges_Required_365d"),
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
       Twelve_Month_Fulfillment_Cost: getVal("Twelve_Month_Fulfillment_Cost"),
