@@ -215,7 +215,7 @@ export default function SubscriptionPlanTable({
       const unitCost = annualCartridges > 0 ? row.Twelve_Month_Fulfillment_Cost / annualCartridges : 0;
 
       totalCartridges += cartridges;
-      totalRevenue += unitSP * cartridges;
+      totalRevenue = monthlySubscriptionPerDevice * month * filtered.length;
       totalCost += unitCost * cartridges;
     });
 
