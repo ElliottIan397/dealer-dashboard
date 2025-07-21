@@ -222,7 +222,7 @@ export default function SubscriptionPlanTable({
     const monthlyESW = eswTotal / 12;
     const eswCost = monthlyESW * month;
     const totalFulfillmentCost = totalCost + eswCost;
-    const gm = totalRevenue - totalCost;
+    const gm = totalRevenue - totalFulfillmentCost;
     const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
 
     return {
@@ -899,61 +899,64 @@ export default function SubscriptionPlanTable({
         </div>
       )}
       {showSubscriptionAnalytics && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">Month</th>
-                <th className="p-2 border">Cumulative Cartridges</th>
-                <th className="p-2 border">Cumulative Revenue</th>
-                <th className="p-2 border">Cumulative Fulfillment Cost</th>
-                <th className="p-2 border">Cumulative ESW Cost</th>
-                <th className="p-2 border">GM$</th>
-                <th className="p-2 border">GM%</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyPL.map((row) => (
-                <tr key={row.month}>
-                  <td className="p-2 border text-center">{row.month}</td>
-                  <td className="p-2 border text-center">{row.totalCartridges}</td>
-                  <td className="p-2 border text-right">
-                    {Number(row.totalRevenue).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                  <td className="p-2 border text-right">
-                    {Number(row.totalCost).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                  <td className="p-2 border text-right">
-                    {Number(row.eswCost).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                  <td
-                    className={`p-2 border text-center ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
-                      }`}
-                  >
-                    ${row.gm}
-                  </td>
-                  <td
-                    className={`p-2 border text-center ${parseFloat(row.gmPercent) < 0 ? "text-red-600 font-semibold" : ""
-                      }`}
-                  >
-                    {row.gmPercent}%
-                  </td>
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">Subscription Plan P&amp;L</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">Month</th>
+                  <th className="p-2 border">Cumulative Cartridges</th>
+                  <th className="p-2 border">Cumulative Revenue</th>
+                  <th className="p-2 border">Cumulative Fulfillment Cost</th>
+                  <th className="p-2 border">Cumulative ESW Cost</th>
+                  <th className="p-2 border">GM$</th>
+                  <th className="p-2 border">GM%</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {monthlyPL.map((row) => (
+                  <tr key={row.month}>
+                    <td className="p-2 border text-center">{row.month}</td>
+                    <td className="p-2 border text-center">{row.totalCartridges}</td>
+                    <td className="p-2 border text-right">
+                      {Number(row.totalRevenue).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="p-2 border text-right">
+                      {Number(row.totalCost).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="p-2 border text-right">
+                      {Number(row.eswCost).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td
+                      className={`p-2 border text-center ${parseFloat(row.gm) < 0 ? "text-red-600 font-semibold" : ""
+                        }`}
+                    >
+                      ${row.gm}
+                    </td>
+                    <td
+                      className={`p-2 border text-center ${parseFloat(row.gmPercent) < 0 ? "text-red-600 font-semibold" : ""
+                        }`}
+                    >
+                      {row.gmPercent}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
