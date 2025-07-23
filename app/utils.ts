@@ -23,6 +23,13 @@ export const parse = (val: any): number => {
   return isNaN(num) ? 0 : num;
 };
 
+export const getYieldMap = (row: any, bias: "O" | "R" | "N") => ({
+  black: parse(getBiasField(row, "K_Yield", bias)),
+  cyan: parse(getBiasField(row, "C_Yield", bias)),
+  magenta: parse(getBiasField(row, "M_Yield", bias)),
+  yellow: parse(getBiasField(row, "Y_Yield", bias)),
+});
+
 // SaaS cost constants (annual per device)
 const DCA_COST = 0.25;
 const JITR_COST = 0.42;
