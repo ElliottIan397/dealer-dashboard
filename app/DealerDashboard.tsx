@@ -93,7 +93,7 @@ export default function DealerDashboard() {
 
   const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
-    const table1Data = filtered.map((row) => {
+  const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
 
     // Step 1: compute actual cartridge plan
@@ -103,6 +103,14 @@ export default function DealerDashboard() {
       magenta: row.Magenta_Yield_Estimate,
       yellow: row.Yellow_Yield_Estimate,
     });
+    console.log("Yield Inputs:", {
+      black: row.Black_Yield_Estimate,
+      cyan: row.Cyan_Yield_Estimate,
+      magenta: row.Magenta_Yield_Estimate,
+      yellow: row.Yellow_Yield_Estimate,
+    });
+
+    console.log("Fulfillment Plan:", plan);
 
     // Step 2: sum cartridges needed in selected months
     const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
