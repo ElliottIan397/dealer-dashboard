@@ -151,7 +151,7 @@ function getYieldMapForBias(row: any, bias: "O" | "R" | "N") {
 
   return {
     black: parse(row[`${prefix}K_Yield`]),
-    cyan:  parse(row[`${prefix}C_Yield`]),
+    cyan: parse(row[`${prefix}C_Yield`]),
     magenta: parse(row[`${prefix}M_Yield`]),
     yellow: parse(row[`${prefix}Y_Yield`]),
   };
@@ -184,6 +184,15 @@ export function calculateMonthlyFulfillmentPlan(
     const monthly = Array(months).fill(0);
     const annualVolume = (volume90 / 90) * 365;
     const adjustedYield = getAdjustedYield(sku, coverage);
+    console.log("💥 Yield Debug", {
+      sku,
+      coverage,
+      yieldValue: yieldMap[sku],
+      adjustedYield,
+      pagesLeft,
+      daysLeft,
+      volume90,
+    });
     const dailyDemand = annualVolume / 365;
 
     console.log("DEBUG → dailyDemand:", dailyDemand, "adjustedYield:", adjustedYield);
