@@ -104,6 +104,7 @@ export default function DealerDashboard() {
       type: row.Device_Type,
     });
 
+    
     // Step 1: compute actual cartridge plan
     const yieldMap = {
       black: getBiasField(row, "K_Yield", selectedBias),
