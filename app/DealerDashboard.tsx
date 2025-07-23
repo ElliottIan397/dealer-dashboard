@@ -383,6 +383,7 @@ export default function DealerDashboard() {
             setIncludeESW={setIncludeESW}
             markupOverride={markupOverride}
             setMarkupOverride={setMarkupOverride}
+            selectedMonths={selectedMonths}
           />
         </div>
       )}
@@ -421,7 +422,7 @@ export default function DealerDashboard() {
             <>
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-                <Table1 data={table1Data} bias={selectedBias} />
+                <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
               </div>
 
               <div className="mt-10">

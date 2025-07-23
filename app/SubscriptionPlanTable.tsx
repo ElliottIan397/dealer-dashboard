@@ -6,6 +6,8 @@ import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
+import { calculateMonthlyFulfillmentPlan, parse, getYieldMap } from "./utils";
+
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
@@ -32,6 +34,7 @@ interface Props {
   setSelectedCustomer: React.Dispatch<React.SetStateAction<string>>;
   markupOverride: number | null;
   setMarkupOverride: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedMonths: number;
 }
 
 const COSTS = {
@@ -63,6 +66,7 @@ export default function SubscriptionPlanTable({
   setIncludeESW,
   markupOverride,
   setMarkupOverride,
+  selectedMonths,
 
 }: Props): React.JSX.Element {
   const [showOpportunities, setShowOpportunities] = useState(false);
@@ -97,6 +101,11 @@ export default function SubscriptionPlanTable({
     (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
     0
   );
+
+  const table1Data = transactionalDevices.map((row) => ({
+    ...row,
+    fulfillmentPlan: calculateMonthlyFulfillmentPlan(row, getYieldMap(row, bias)),
+  }));
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
@@ -629,17 +638,9 @@ export default function SubscriptionPlanTable({
       </div>
 
       {selectedCustomer !== "All" && showSummaryTable && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Supplies Program Summary by Device</h3>
-          <div className="overflow-x-auto">
-            <Table1
-              data={filtered.map(row => ({
-                ...row,
-                Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", bias),
-              }))}
-              bias={bias}
-            />
-          </div>
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Supplies Program Summary by Device</h2>
+          <Table1 data={table1Data} bias={bias} selectedMonths={selectedMonths} />
         </div>
       )}
 
