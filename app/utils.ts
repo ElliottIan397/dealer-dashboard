@@ -162,6 +162,9 @@ export function calculateMonthlyFulfillmentPlan(
     coverage: number,
     volume90: number
   ): number[] {
+    console.log("DEBUG buildPlan inputs", {
+      sku, level, pagesLeft, daysLeft, coverage, volume90,
+    });
     const monthly = Array(months).fill(0);
     const annualVolume = (volume90 / 90) * 365;
     const adjustedYield = getAdjustedYield(sku, coverage);
