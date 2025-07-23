@@ -171,7 +171,7 @@ export function calculateMonthlyFulfillmentPlan(
   }
 
   function buildPlan(
-    sku: string,
+    color: string,
     level: number,
     pagesLeft: number,
     daysLeft: number,
@@ -179,15 +179,15 @@ export function calculateMonthlyFulfillmentPlan(
     volume90: number
   ): number[] {
     console.log("DEBUG buildPlan inputs", {
-      sku, level, pagesLeft, daysLeft, coverage, volume90,
+      color, level, pagesLeft, daysLeft, coverage, volume90,
     });
     const monthly = Array(months).fill(0);
     const annualVolume = (volume90 / 90) * 365;
-    const adjustedYield = getAdjustedYield(sku, coverage);
+    const adjustedYield = getAdjustedYield(color, coverage);
     console.log("💥 Yield Debug", {
-      sku,
+      color,
       coverage,
-      yieldValue: yieldMap[sku],
+      yieldValue: yieldMap[color],
       adjustedYield,
       pagesLeft,
       daysLeft,
@@ -213,7 +213,7 @@ export function calculateMonthlyFulfillmentPlan(
 
   return {
     black: buildPlan(
-      device["Mono_SKU"],
+      "black",
       device["Black_Level"],
       device["Black_Pages_Left"],
       device["Black_Days_Left"],
@@ -221,7 +221,7 @@ export function calculateMonthlyFulfillmentPlan(
       device["Mono_(A4-equivalent)_Usage"]
     ),
     cyan: buildPlan(
-      device["Cyan_SKU"],
+      "cyan",
       device["Cyan_Level"],
       device["Cyan_Pages_Left"],
       device["Cyan_Days_Left"],
@@ -229,7 +229,7 @@ export function calculateMonthlyFulfillmentPlan(
       device["Colour_(A4-equivalent)_Usage"] / 3
     ),
     magenta: buildPlan(
-      device["Magenta_SKU"],
+      "magenta",
       device["Magenta_Level"],
       device["Magenta_Pages_Left"],
       device["Magenta_Days_Left"],
@@ -237,7 +237,7 @@ export function calculateMonthlyFulfillmentPlan(
       device["Colour_(A4-equivalent)_Usage"] / 3
     ),
     yellow: buildPlan(
-      device["Yellow_SKU"],
+      "yellow",
       device["Yellow_Level"],
       device["Yellow_Pages_Left"],
       device["Yellow_Days_Left"],
