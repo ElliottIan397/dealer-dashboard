@@ -173,10 +173,10 @@ export function calculateMonthlyFulfillmentPlan(
     if (dailyDemand <= 0 || adjustedYield <= 0) return monthly;
 
     let pointer = daysLeft;
+    const depletionDays = adjustedYield / dailyDemand;
+
     while (pointer < 365) {
-      const depletionDays = adjustedYield / dailyDemand;
-      const fulfillDay = Math.floor(pointer + depletionDays);
-      const monthIdx = Math.min(Math.floor(fulfillDay / daysPerMonth), 11);
+      const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
       monthly[monthIdx]++;
       pointer += depletionDays;
     }
