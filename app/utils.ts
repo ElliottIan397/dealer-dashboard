@@ -141,6 +141,22 @@ interface FulfillmentPlan {
   yellow: number[];
 }
 
+function getYieldMapForBias(row: any, bias: "O" | "R" | "N") {
+  const prefix = `${bias}_`;
+
+  const parse = (val: any) => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
+  };
+
+  return {
+    black: parse(row[`${prefix}K_Yield`]),
+    cyan:  parse(row[`${prefix}C_Yield`]),
+    magenta: parse(row[`${prefix}M_Yield`]),
+    yellow: parse(row[`${prefix}Y_Yield`]),
+  };
+}
+
 export function calculateMonthlyFulfillmentPlan(
   device: DeviceRow,
   yieldMap: Record<string, number>

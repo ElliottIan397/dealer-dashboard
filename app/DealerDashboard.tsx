@@ -105,18 +105,15 @@ export default function DealerDashboard() {
     });
 
     // Step 1: compute actual cartridge plan
-    const plan = calculateMonthlyFulfillmentPlan(row, {
-      black: row.Black_Yield_Estimate,
-      cyan: row.Cyan_Yield_Estimate,
-      magenta: row.Magenta_Yield_Estimate,
-      yellow: row.Yellow_Yield_Estimate,
-    });
-    console.log("Yield Inputs:", {
-      black: row.Black_Yield_Estimate,
-      cyan: row.Cyan_Yield_Estimate,
-      magenta: row.Magenta_Yield_Estimate,
-      yellow: row.Yellow_Yield_Estimate,
-    });
+    const yieldMap = {
+      black: getBiasField(row, "K_Yield", selectedBias),
+      cyan: getBiasField(row, "C_Yield", selectedBias),
+      magenta: getBiasField(row, "M_Yield", selectedBias),
+      yellow: getBiasField(row, "Y_Yield", selectedBias),
+    };
+    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+
+    console.log("Yield Inputs:", yieldMap);
 
     console.log("Fulfillment Plan:", JSON.stringify(plan));
 
