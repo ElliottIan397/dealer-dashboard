@@ -215,3 +215,67 @@ export function calculateMonthlyFulfillmentPlan(
     )
   };
 }
+export function calculateVolumeBasedFulfillmentPlan(row: any, yieldMap: any) {
+  const coverage = {
+    black: row.Black_Page_Coverage_Percent || 5,
+    cyan: row.Cyan_Page_Coverage_Percent || 5,
+    magenta: row.Magenta_Page_Coverage_Percent || 5,
+    yellow: row.Yellow_Page_Coverage_Percent || 5,
+  };
+
+  const isMono = row.Device_Type?.toLowerCase() === "mono";
+
+  const monthlyBlack = (row.Black_Annual_Volume ?? 0) / 12;
+  const monthlyColor = isMono ? 0 : (row.Color_Annual_Volume ?? 0) / 12;
+
+  const monthly = {
+    black: Array(12).fill(monthlyBlack),
+    cyan: Array(12).fill(monthlyColor / 3),
+    magenta: Array(12).fill(monthlyColor / 3),
+    yellow: Array(12).fill(monthlyColor / 3),
+  };
+
+  const safeYield = (val: number | undefined, coverageVal: number): number =>
+    val && val > 0 ? val * (5 / coverageVal) : 0;
+
+  const yields = {
+    black: safeYield(yieldMap.black, coverage.black),
+    cyan: isMono ? 0 : safeYield(yieldMap.cyan, coverage.cyan),
+    magenta: isMono ? 0 : safeYield(yieldMap.magenta, coverage.magenta),
+    yellow: isMono ? 0 : safeYield(yieldMap.yellow, coverage.yellow),
+  };
+
+  function calc(ctgPerMonth: number[], yieldVal: number): number[] {
+    let remaining = 0;
+    const result: number[] = [];
+
+    for (let i = 0; i < ctgPerMonth.length; i++) {
+      let pages = ctgPerMonth[i];
+      let count = 0;
+
+      if (yieldVal <= 0) {
+        result.push(0);
+        continue;
+      }
+
+      while (pages > 0) {
+        if (remaining <= 0) remaining = yieldVal;
+        const used = Math.min(pages, remaining);
+        remaining -= used;
+        pages -= used;
+        if (remaining === 0) count++;
+      }
+
+      result.push(count);
+    }
+
+    return result;
+  }
+
+  return {
+    black: calc(monthly.black, yields.black),
+    cyan: calc(monthly.cyan, yields.cyan),
+    magenta: calc(monthly.magenta, yields.magenta),
+    yellow: calc(monthly.yellow, yields.yellow),
+  };
+}

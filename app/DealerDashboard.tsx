@@ -13,7 +13,8 @@ import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
-import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
+import { calculateVolumeBasedFulfillmentPlan } from "@/app/utils";
+
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
@@ -97,7 +98,7 @@ export default function DealerDashboard() {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
 
     // Step 1: compute actual cartridge plan
-    const plan = calculateMonthlyFulfillmentPlan(row, {
+    const plan = calculateVolumeBasedFulfillmentPlan(row, {
       black: row.Black_Yield_Estimate,
       cyan: row.Cyan_Yield_Estimate,
       magenta: row.Magenta_Yield_Estimate,
