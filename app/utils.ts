@@ -122,3 +122,96 @@ export function calculateSubscriptionRevenue(
     sample,
   };
 }
+/**
+ * Calculates monthly cartridge fulfillment needs per device row
+ * using exact MCARP field names and logic.
+ * @param device - A single row from MCARP
+ * @param yieldMap - Map of SKU → Rated_Yield
+ * @returns Object with monthly fulfillment arrays per color
+ */
+
+interface DeviceRow {
+  [key: string]: any;
+}
+
+interface FulfillmentPlan {
+  black: number[];
+  cyan: number[];
+  magenta: number[];
+  yellow: number[];
+}
+
+export function calculateMonthlyFulfillmentPlan(
+  device: DeviceRow,
+  yieldMap: Record<string, number>
+): FulfillmentPlan {
+  const months = 12;
+  const daysPerMonth = 365 / months;
+
+  function getAdjustedYield(sku: string, coveragePercent: number): number {
+    const ratedYield = yieldMap[sku] || 0;
+    const safeCoverage = coveragePercent > 0 ? coveragePercent : 5;
+    return ratedYield * (5 / safeCoverage);
+  }
+
+  function buildPlan(
+    sku: string,
+    level: number,
+    pagesLeft: number,
+    daysLeft: number,
+    coverage: number,
+    volume90: number
+  ): number[] {
+    const monthly = Array(months).fill(0);
+    const annualVolume = (volume90 / 90) * 365;
+    const adjustedYield = getAdjustedYield(sku, coverage);
+    const dailyDemand = annualVolume / 365;
+
+    if (dailyDemand <= 0 || adjustedYield <= 0) return monthly;
+
+    let pointer = daysLeft;
+    while (pointer < 365) {
+      const depletionDays = adjustedYield / dailyDemand;
+      const fulfillDay = Math.floor(pointer + depletionDays);
+      const monthIdx = Math.min(Math.floor(fulfillDay / daysPerMonth), 11);
+      monthly[monthIdx]++;
+      pointer += depletionDays;
+    }
+    return monthly;
+  }
+
+  return {
+    black: buildPlan(
+      device["Mono_SKU"],
+      device["Black_Level"],
+      device["Black_Pages_Left"],
+      device["Black_Days_Left"],
+      device["Black_Page_Coverage_Percent"],
+      device["Mono_(A4-equivalent)_Usage"]
+    ),
+    cyan: buildPlan(
+      device["Cyan_SKU"],
+      device["Cyan_Level"],
+      device["Cyan_Pages_Left"],
+      device["Cyan_Days_Left"],
+      device["Cyan_Page_Coverage_Percent"],
+      device["Colour_(A4-equivalent)_Usage"] / 3
+    ),
+    magenta: buildPlan(
+      device["Magenta_SKU"],
+      device["Magenta_Level"],
+      device["Magenta_Pages_Left"],
+      device["Magenta_Days_Left"],
+      device["Magenta_Page_Coverage_Percent"],
+      device["Colour_(A4-equivalent)_Usage"] / 3
+    ),
+    yellow: buildPlan(
+      device["Yellow_SKU"],
+      device["Yellow_Level"],
+      device["Yellow_Pages_Left"],
+      device["Yellow_Days_Left"],
+      device["Yellow_Page_Coverage_Percent"],
+      device["Colour_(A4-equivalent)_Usage"] / 3
+    )
+  };
+}

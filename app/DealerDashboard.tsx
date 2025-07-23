@@ -13,6 +13,7 @@ import { useMCARPData } from "./useMCARPData";
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
+import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
