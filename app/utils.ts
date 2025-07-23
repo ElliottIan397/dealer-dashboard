@@ -176,6 +176,7 @@ export function calculateMonthlyFulfillmentPlan(
 
     let pointer = daysLeft;
     const depletionDays = adjustedYield / dailyDemand;
+    console.log("DEBUG loop inputs", { pointer, depletionDays }); // ← INSERT HERE
 
     while (pointer < 365) {
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
