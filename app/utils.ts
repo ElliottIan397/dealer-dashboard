@@ -18,6 +18,11 @@ export const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => 
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 };
 
+export const parse = (val: any): number => {
+  const num = Number(val);
+  return isNaN(num) ? 0 : num;
+};
+
 // SaaS cost constants (annual per device)
 const DCA_COST = 0.25;
 const JITR_COST = 0.42;

@@ -10,7 +10,12 @@ import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
-import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
+import {
+  safeCurrency as formatCurrency,
+  safePercent as formatPercent,
+  parse,
+} from "./utils";
+
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
 import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
@@ -110,11 +115,11 @@ export default function DealerDashboard() {
 
     // Step 1: compute actual cartridge plan
     const yieldMap = {
-      black: getBiasField(row, "K_Yield", selectedBias),
-      cyan: getBiasField(row, "C_Yield", selectedBias),
-      magenta: getBiasField(row, "M_Yield", selectedBias),
-      yellow: getBiasField(row, "Y_Yield", selectedBias),
-    };
+  black: parse(getBiasField(row, "K_Yield", selectedBias)),
+  cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
+  magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
+  yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
+};
     const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
 
     console.log("Yield Inputs:", yieldMap);
