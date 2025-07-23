@@ -170,6 +170,8 @@ export function calculateMonthlyFulfillmentPlan(
     const adjustedYield = getAdjustedYield(sku, coverage);
     const dailyDemand = annualVolume / 365;
 
+    console.log("DEBUG → dailyDemand:", dailyDemand, "adjustedYield:", adjustedYield);
+
     if (dailyDemand <= 0 || adjustedYield <= 0) return monthly;
 
     let pointer = daysLeft;
