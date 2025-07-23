@@ -97,6 +97,12 @@ export default function DealerDashboard() {
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
 
+    console.log("Row Volume Data:", {
+      black: row.Black_Annual_Volume,
+      color: row.Color_Annual_Volume,
+      type: row.Device_Type,
+    });
+
     // Step 1: compute actual cartridge plan
     const plan = calculateVolumeBasedFulfillmentPlan(row, {
       black: row.Black_Yield_Estimate,
