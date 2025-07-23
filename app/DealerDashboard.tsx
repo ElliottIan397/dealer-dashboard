@@ -93,50 +93,53 @@ export default function DealerDashboard() {
 
   const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
-  const fraction = selectedMonths / 12;
-
-  const table1Data = filtered.map((row) => {
+    const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
-    const getCartridgeCount = (field: string) =>
-      Math.ceil(getVal(field) * fraction);
 
-    // Get adjusted cartridge counts
-    const blackCartridges = getCartridgeCount("Black_Full_Cartridges_Required_365d");
-    const cyanCartridges = getCartridgeCount("Cyan_Full_Cartridges_Required_365d");
-    const magentaCartridges = getCartridgeCount("Magenta_Full_Cartridges_Required_365d");
-    const yellowCartridges = getCartridgeCount("Yellow_Full_Cartridges_Required_365d");
+    // Step 1: compute actual cartridge plan
+    const plan = calculateMonthlyFulfillmentPlan(row, {
+      black: row.Black_Yield_Estimate,
+      cyan: row.Cyan_Yield_Estimate,
+      magenta: row.Magenta_Yield_Estimate,
+      yellow: row.Yellow_Yield_Estimate,
+    });
+
+    // Step 2: sum cartridges needed in selected months
+    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
 
     const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
 
-    // Get per-cartridge pricing
-    const annualCartridges = getVal("Black_Full_Cartridges_Required_365d") +
-      getVal("Cyan_Full_Cartridges_Required_365d") +
-      getVal("Magenta_Full_Cartridges_Required_365d") +
-      getVal("Yellow_Full_Cartridges_Required_365d");
+    const unitSP = getVal("Twelve_Month_Transactional_SP") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
 
-    const unitSP = annualCartridges > 0 ? getVal("Twelve_Month_Transactional_SP") / annualCartridges : 0;
-    const unitCost = annualCartridges > 0 ? getVal("Twelve_Month_Fulfillment_Cost") / annualCartridges : 0;
+    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
 
     return {
       Monitor: row.Monitor,
       Serial_Number: row.Serial_Number,
       Printer_Model: row.Printer_Model,
       Device_Type: row.Device_Type,
-      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * fraction),
-      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * fraction),
+      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
+      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
       Black_Full_Cartridges_Required_365d: blackCartridges,
       Cyan_Full_Cartridges_Required_365d: cyanCartridges,
       Magenta_Full_Cartridges_Required_365d: magentaCartridges,
       Yellow_Full_Cartridges_Required_365d: yellowCartridges,
-      Contract_Status: row.Contract_Status,
-      Last_Updated: row.Last_Updated,
-
-      // New logic: cost and SP based on cartridge count × unit pricing
       Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
       Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
-
-      // Still prorating contract revenue (this is OK if contract is time-based)
-      Contract_Total_Revenue: +(row.Contract_Total_Revenue * fraction).toFixed(2),
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
     };
   });
 
