@@ -111,7 +111,7 @@ export default function DealerDashboard() {
       yellow: row.Yellow_Yield_Estimate,
     });
 
-    console.log("Fulfillment Plan:", plan);
+    console.log("Fulfillment Plan:", JSON.stringify(plan));
 
     // Step 2: sum cartridges needed in selected months
     const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
