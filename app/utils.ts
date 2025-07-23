@@ -164,8 +164,8 @@ export function calculateMonthlyFulfillmentPlan(
   const months = 12;
   const daysPerMonth = 365 / months;
 
-  function getAdjustedYield(sku: string, coveragePercent: number): number {
-    const ratedYield = yieldMap[sku] || 0;
+  function getAdjustedYield(color: string, coveragePercent: number): number {
+    const ratedYield = yieldMap[color] || 0;
     const safeCoverage = coveragePercent > 0 ? coveragePercent : 5;
     return ratedYield * (5 / safeCoverage);
   }
