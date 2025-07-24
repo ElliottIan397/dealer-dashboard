@@ -6,7 +6,7 @@ import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
-import { calculateMonthlyFulfillmentPlan, parse, getYieldMap } from "./utils";
+import { calculateMonthlyFulfillmentPlan, parse } from "@/app/utils";
 import { useMemo } from "react";
 import { generateTable1Data } from "./utils";
 
@@ -75,6 +75,7 @@ export default function SubscriptionPlanTable({
   const [searchCustomer, setSearchCustomer] = useState("");
   const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
   const [localBias, setBias] = useState<"O" | "R" | "N">("O");
+  const selectedBias = localBias;
 
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
@@ -105,7 +106,7 @@ export default function SubscriptionPlanTable({
   );
 
   const table1Data = filtered.map((row) => {
-      const getVal = (field: string) => getBiasField(row, field, bias);
+      const getVal = (field: string) => getBiasField(row, field, selectedBias);
   
       console.log("Row Volume Data:", {
         black: row.Black_Annual_Volume,
