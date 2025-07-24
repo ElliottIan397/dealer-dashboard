@@ -263,72 +263,66 @@ export default function SubscriptionPlanTable({
   ];
 
   // Accumulator for per-month cartridge counts
-  const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
-    black: 0,
-    cyan: 0,
-    magenta: 0,
-    yellow: 0,
-  }));
+const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
+  black: 0,
+  cyan: 0,
+  magenta: 0,
+  yellow: 0,
+}));
 
-  // Main P&L array construction
-  const monthlyPL = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1;
+let cumulativeRevenue = 0;
+let cumulativeCost = 0;
 
-    let totalCartridges = 0;
-    let totalRevenue = 0;
-    let totalCost = 0;
+const monthlyPL = Array.from({ length: 12 }, (_, i) => {
+  const month = i + 1;
+  let totalCostThisMonth = 0;
 
-    table1Data.forEach((row) => {
-      const annualCartridges =
-        row.Black_Full_Cartridges_Required_365d +
-        row.Cyan_Full_Cartridges_Required_365d +
-        row.Magenta_Full_Cartridges_Required_365d +
-        row.Yellow_Full_Cartridges_Required_365d;
+  table1Data.forEach((row) => {
+    const annualCartridges =
+      row.Black_Full_Cartridges_Required_365d +
+      row.Cyan_Full_Cartridges_Required_365d +
+      row.Magenta_Full_Cartridges_Required_365d +
+      row.Yellow_Full_Cartridges_Required_365d;
 
-      const unitCost =
-        annualCartridges > 0
-          ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
-          : 0;
+    const unitCost =
+      annualCartridges > 0
+        ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
+        : 0;
 
-      (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
-        const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
-        cartridgesPerMonth[i][color] += monthlyPlan;
-
-        // Cost is added per actual cartridge in this month
-        totalCost += unitCost * monthlyPlan;
-      });
+    (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
+      const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
+      cartridgesPerMonth[i][color] += monthlyPlan;
+      totalCostThisMonth += unitCost * monthlyPlan;
     });
-
-    // Cumulative cartridge count up to and including month i
-    const cumulativeCartridges = cartridgesPerMonth
-      .slice(0, i + 1)
-      .reduce(
-        (sum, month) =>
-          sum +
-          month.black +
-          month.cyan +
-          month.magenta +
-          month.yellow,
-        0
-      );
-
-    totalCartridges = cumulativeCartridges;
-    totalRevenue = monthlySubscriptionPerDevice * month * table1Data.length;
-
-    const gm = totalRevenue - totalCost;
-    const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
-
-    return {
-      month,
-      totalCartridges,
-      totalRevenue: totalRevenue.toFixed(2),
-      totalCost: totalCost.toFixed(2), // Fulfillment only
-      eswCost: "0.00",                 // Placeholder
-      totalWithESW: totalCost.toFixed(2), // Same as fulfillment for now
-      gm: gm.toFixed(2),
-      gmPercent: gmPercent.toFixed(1),
-    };
   });
+
+  // Calculate cumulative cartridges
+  const cumulativeCartridges = cartridgesPerMonth
+    .slice(0, i + 1)
+    .reduce(
+      (sum, month) =>
+        sum + month.black + month.cyan + month.magenta + month.yellow,
+      0
+    );
+
+  const revenueThisMonth = monthlySubscriptionPerDevice * table1Data.length;
+  cumulativeRevenue += revenueThisMonth;
+  cumulativeCost += totalCostThisMonth;
+
+  const gm = cumulativeRevenue - cumulativeCost;
+  const gmPercent = cumulativeRevenue > 0 ? (gm / cumulativeRevenue) * 100 : 0;
+
+  return {
+    month,
+    totalCartridges: cumulativeCartridges,
+    totalRevenue: cumulativeRevenue.toFixed(2),
+    totalCost: cumulativeCost.toFixed(2),
+    eswCost: "0.00",
+    totalWithESW: cumulativeCost.toFixed(2),
+    gm: gm.toFixed(2),
+    gmPercent: gmPercent.toFixed(1),
+  };
+});
 
   return (
     <div className="mt-10">
