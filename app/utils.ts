@@ -322,3 +322,49 @@ export function calculateVolumeBasedFulfillmentPlan(row: any, yieldMap: any) {
     yellow: calc(monthly.yellow, yields.yellow),
   };
 }
+export function generateTable1Data(
+  rows: any[],
+  bias: "O" | "R" | "N",
+  selectedMonths: number
+) {
+  return rows.map((row) => {
+    const getVal = (field: string) =>
+      bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+
+    const yieldMap = {
+      black: parseFloat(getVal("K_Yield")) || 0,
+      cyan: parseFloat(getVal("C_Yield")) || 0,
+      magenta: parseFloat(getVal("M_Yield")) || 0,
+      yellow: parseFloat(getVal("Y_Yield")) || 0,
+    };
+
+    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+
+    const black = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyan = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magenta = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellow = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const total = black + cyan + magenta + yellow || 1;
+
+    const unitSP = getVal("Twelve_Month_Transactional_SP") / total;
+    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") / total;
+
+    return {
+      Monitor: row.Monitor,
+      Serial_Number: row.Serial_Number,
+      Printer_Model: row.Printer_Model,
+      Device_Type: row.Device_Type,
+      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
+      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
+      Black_Full_Cartridges_Required_365d: black,
+      Cyan_Full_Cartridges_Required_365d: cyan,
+      Magenta_Full_Cartridges_Required_365d: magenta,
+      Yellow_Full_Cartridges_Required_365d: yellow,
+      Twelve_Month_Transactional_SP: +(unitSP * total).toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +(unitCost * total).toFixed(2),
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
+    };
+  });
+}

@@ -8,7 +8,7 @@ import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
 import { calculateMonthlyFulfillmentPlan, parse, getYieldMap } from "./utils";
 import { useMemo } from "react";
-
+import { generateTable1Data } from "./utils";
 
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
@@ -104,14 +104,14 @@ export default function SubscriptionPlanTable({
     0
   );
 
-  /*
+
   const table1Data = useMemo(() => {
     return transactionalDevices.map((row) => ({
       ...row,
       fulfillmentPlan: calculateMonthlyFulfillmentPlan(row, getYieldMap(row, bias)),
     }));
   }, [transactionalDevices, bias, selectedMonths]);
-*/
+
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
@@ -646,7 +646,11 @@ export default function SubscriptionPlanTable({
       {selectedCustomer !== "All" && showSummaryTable && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Supplies Program Summary by Device</h2>
-          <Table1 data={transactionalDevices} bias={bias} selectedMonths={selectedMonths} />
+          <Table1
+            data={generateTable1Data(transactionalDevices, bias, selectedMonths)}
+            bias={bias}
+            selectedMonths={selectedMonths}
+          />
         </div>
       )}
 
