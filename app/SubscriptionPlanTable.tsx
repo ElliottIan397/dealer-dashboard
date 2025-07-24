@@ -101,13 +101,15 @@ export default function SubscriptionPlanTable({
     return <div className="text-gray-500 mt-4">No transactional devices found for selected customer.</div>;
   }
 
-  const transactionalRevenue = transactionalDevices.reduce(
-    (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
-    0
-  );
+  //const transactionalRevenue = transactionalDevices.reduce(
+  //  (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+  //  0
+  //);
+
 
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, bias);
+
 
     console.log("Row Volume Data:", {
       black: row.Black_Annual_Volume,
@@ -168,6 +170,11 @@ export default function SubscriptionPlanTable({
       calculatedFulfillmentPlan: plan,
     };
   });
+
+  const transactionalRevenue = table1Data.reduce(
+    (sum, row) => sum + row.Twelve_Month_Transactional_SP,
+    0
+  );
 
   const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
@@ -263,66 +270,66 @@ export default function SubscriptionPlanTable({
   ];
 
   // Accumulator for per-month cartridge counts
-const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
-  black: 0,
-  cyan: 0,
-  magenta: 0,
-  yellow: 0,
-}));
+  const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
+    black: 0,
+    cyan: 0,
+    magenta: 0,
+    yellow: 0,
+  }));
 
-let cumulativeRevenue = 0;
-let cumulativeCost = 0;
+  let cumulativeRevenue = 0;
+  let cumulativeCost = 0;
 
-const monthlyPL = Array.from({ length: 12 }, (_, i) => {
-  const month = i + 1;
-  let totalCostThisMonth = 0;
+  const monthlyPL = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    let totalCostThisMonth = 0;
 
-  table1Data.forEach((row) => {
-    const annualCartridges =
-      row.Black_Full_Cartridges_Required_365d +
-      row.Cyan_Full_Cartridges_Required_365d +
-      row.Magenta_Full_Cartridges_Required_365d +
-      row.Yellow_Full_Cartridges_Required_365d;
+    table1Data.forEach((row) => {
+      const annualCartridges =
+        row.Black_Full_Cartridges_Required_365d +
+        row.Cyan_Full_Cartridges_Required_365d +
+        row.Magenta_Full_Cartridges_Required_365d +
+        row.Yellow_Full_Cartridges_Required_365d;
 
-    const unitCost =
-      annualCartridges > 0
-        ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
-        : 0;
+      const unitCost =
+        annualCartridges > 0
+          ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
+          : 0;
 
-    (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
-      const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
-      cartridgesPerMonth[i][color] += monthlyPlan;
-      totalCostThisMonth += unitCost * monthlyPlan;
+      (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
+        const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
+        cartridgesPerMonth[i][color] += monthlyPlan;
+        totalCostThisMonth += unitCost * monthlyPlan;
+      });
     });
+
+    // Calculate cumulative cartridges
+    const cumulativeCartridges = cartridgesPerMonth
+      .slice(0, i + 1)
+      .reduce(
+        (sum, month) =>
+          sum + month.black + month.cyan + month.magenta + month.yellow,
+        0
+      );
+
+    const revenueThisMonth = monthlySubscriptionPerDevice * table1Data.length;
+    cumulativeRevenue += revenueThisMonth;
+    cumulativeCost += totalCostThisMonth;
+
+    const gm = cumulativeRevenue - cumulativeCost;
+    const gmPercent = cumulativeRevenue > 0 ? (gm / cumulativeRevenue) * 100 : 0;
+
+    return {
+      month,
+      totalCartridges: cumulativeCartridges,
+      totalRevenue: cumulativeRevenue.toFixed(2),
+      totalCost: cumulativeCost.toFixed(2),
+      eswCost: "0.00",
+      totalWithESW: cumulativeCost.toFixed(2),
+      gm: gm.toFixed(2),
+      gmPercent: gmPercent.toFixed(1),
+    };
   });
-
-  // Calculate cumulative cartridges
-  const cumulativeCartridges = cartridgesPerMonth
-    .slice(0, i + 1)
-    .reduce(
-      (sum, month) =>
-        sum + month.black + month.cyan + month.magenta + month.yellow,
-      0
-    );
-
-  const revenueThisMonth = monthlySubscriptionPerDevice * table1Data.length;
-  cumulativeRevenue += revenueThisMonth;
-  cumulativeCost += totalCostThisMonth;
-
-  const gm = cumulativeRevenue - cumulativeCost;
-  const gmPercent = cumulativeRevenue > 0 ? (gm / cumulativeRevenue) * 100 : 0;
-
-  return {
-    month,
-    totalCartridges: cumulativeCartridges,
-    totalRevenue: cumulativeRevenue.toFixed(2),
-    totalCost: cumulativeCost.toFixed(2),
-    eswCost: "0.00",
-    totalWithESW: cumulativeCost.toFixed(2),
-    gm: gm.toFixed(2),
-    gmPercent: gmPercent.toFixed(1),
-  };
-});
 
   return (
     <div className="mt-10">
