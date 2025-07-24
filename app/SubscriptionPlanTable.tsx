@@ -279,6 +279,8 @@ export default function SubscriptionPlanTable({
 
   let cumulativeRevenue = 0;
   let cumulativeCost = 0;
+  let cumulativeESW = 0;
+  const monthlyESW = eswTotal / 12;
 
   const monthlyPL = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
@@ -315,8 +317,10 @@ export default function SubscriptionPlanTable({
     const revenueThisMonth = monthlySubscriptionPerDevice * table1Data.length;
     cumulativeRevenue += revenueThisMonth;
     cumulativeCost += totalCostThisMonth;
+    cumulativeESW += monthlyESW;
 
-    const gm = cumulativeRevenue - cumulativeCost;
+    const totalFulfillmentCost = cumulativeCost + cumulativeESW;
+    const gm = cumulativeRevenue - totalFulfillmentCost;
     const gmPercent = cumulativeRevenue > 0 ? (gm / cumulativeRevenue) * 100 : 0;
 
     return {
@@ -324,8 +328,8 @@ export default function SubscriptionPlanTable({
       totalCartridges: cumulativeCartridges,
       totalRevenue: cumulativeRevenue.toFixed(2),
       totalCost: cumulativeCost.toFixed(2),
-      eswCost: "0.00",
-      totalWithESW: cumulativeCost.toFixed(2),
+      eswCost: cumulativeESW.toFixed(2),
+      totalWithESW: totalFulfillmentCost.toFixed(2),
       gm: gm.toFixed(2),
       gmPercent: gmPercent.toFixed(1),
     };
