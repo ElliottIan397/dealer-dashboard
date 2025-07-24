@@ -77,7 +77,7 @@ export default function SubscriptionPlanTable({
   const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
   //const [bias, setBias] = useState<"O" | "R" | "N">("O");
 
-  
+
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
@@ -107,68 +107,68 @@ export default function SubscriptionPlanTable({
   );
 
   const table1Data = filtered.map((row) => {
-      const getVal = (field: string) => getBiasField(row, field, bias);
-  
-      console.log("Row Volume Data:", {
-        black: row.Black_Annual_Volume,
-        color: row.Color_Annual_Volume,
-        type: row.Device_Type,
-      });
-  
-  
-      // Step 1: compute actual cartridge plan
-      const yieldMap = {
-    black: parse(getBiasField(row, "K_Yield", bias)),
-    cyan: parse(getBiasField(row, "C_Yield", bias)),
-    magenta: parse(getBiasField(row, "M_Yield", bias)),
-    yellow: parse(getBiasField(row, "Y_Yield", bias)),
-  };
-      const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
-  
-      console.log("Yield Inputs:", yieldMap);
-  
-      console.log("Fulfillment Plan:", JSON.stringify(plan));
-  
-      // Step 2: sum cartridges needed in selected months
-      const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-      const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-      const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-      const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-  
-      const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
-  
-      const unitSP = getVal("Twelve_Month_Transactional_SP") /
-        (getVal("Black_Full_Cartridges_Required_365d") +
-          getVal("Cyan_Full_Cartridges_Required_365d") +
-          getVal("Magenta_Full_Cartridges_Required_365d") +
-          getVal("Yellow_Full_Cartridges_Required_365d") || 1);
-  
-      const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
-        (getVal("Black_Full_Cartridges_Required_365d") +
-          getVal("Cyan_Full_Cartridges_Required_365d") +
-          getVal("Magenta_Full_Cartridges_Required_365d") +
-          getVal("Yellow_Full_Cartridges_Required_365d") || 1);
-  
-      return {
-        Monitor: row.Monitor,
-        Serial_Number: row.Serial_Number,
-        Printer_Model: row.Printer_Model,
-        Device_Type: row.Device_Type,
-        Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
-        Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
-        Black_Full_Cartridges_Required_365d: blackCartridges,
-        Cyan_Full_Cartridges_Required_365d: cyanCartridges,
-        Magenta_Full_Cartridges_Required_365d: magentaCartridges,
-        Yellow_Full_Cartridges_Required_365d: yellowCartridges,
-        Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
-        Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
-        Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
-        Contract_Status: row.Contract_Status,
-        Last_Updated: row.Last_Updated,
-      };
+    const getVal = (field: string) => getBiasField(row, field, bias);
+
+    console.log("Row Volume Data:", {
+      black: row.Black_Annual_Volume,
+      color: row.Color_Annual_Volume,
+      type: row.Device_Type,
     });
 
-    const totalDevices = transactionalDevices.length;
+
+    // Step 1: compute actual cartridge plan
+    const yieldMap = {
+      black: parse(getBiasField(row, "K_Yield", bias)),
+      cyan: parse(getBiasField(row, "C_Yield", bias)),
+      magenta: parse(getBiasField(row, "M_Yield", bias)),
+      yellow: parse(getBiasField(row, "Y_Yield", bias)),
+    };
+    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+
+    console.log("Yield Inputs:", yieldMap);
+
+    console.log("Fulfillment Plan:", JSON.stringify(plan));
+
+    // Step 2: sum cartridges needed in selected months
+    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+
+    const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
+
+    const unitSP = getVal("Twelve_Month_Transactional_SP") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+
+    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+
+    return {
+      Monitor: row.Monitor,
+      Serial_Number: row.Serial_Number,
+      Printer_Model: row.Printer_Model,
+      Device_Type: row.Device_Type,
+      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
+      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
+      Black_Full_Cartridges_Required_365d: blackCartridges,
+      Cyan_Full_Cartridges_Required_365d: cyanCartridges,
+      Magenta_Full_Cartridges_Required_365d: magentaCartridges,
+      Yellow_Full_Cartridges_Required_365d: yellowCartridges,
+      Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
+    };
+  });
+
+  const totalDevices = transactionalDevices.length;
   const totalMono = transactionalDevices.reduce((sum, r) => sum + (r.Black_Annual_Volume ?? 0), 0);
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor || 1;
@@ -267,7 +267,7 @@ export default function SubscriptionPlanTable({
     let totalRevenue = 0;
     let totalCost = 0;
 
-    filtered.forEach((row) => {
+    table1Data.forEach((row) => {
       const fraction = month / 12;
 
       const black = Math.ceil(row.Black_Full_Cartridges_Required_365d * fraction);
@@ -276,16 +276,24 @@ export default function SubscriptionPlanTable({
       const yellow = Math.ceil(row.Yellow_Full_Cartridges_Required_365d * fraction);
 
       const cartridges = black + cyan + magenta + yellow;
-      const annualCartridges = row.Black_Full_Cartridges_Required_365d +
+      const annualCartridges =
+        row.Black_Full_Cartridges_Required_365d +
         row.Cyan_Full_Cartridges_Required_365d +
         row.Magenta_Full_Cartridges_Required_365d +
         row.Yellow_Full_Cartridges_Required_365d;
 
-      const unitSP = annualCartridges > 0 ? row.Twelve_Month_Transactional_SP / annualCartridges : 0;
-      const unitCost = annualCartridges > 0 ? row.Twelve_Month_Fulfillment_Cost / annualCartridges : 0;
+      const unitSP =
+        annualCartridges > 0
+          ? row.Twelve_Month_Transactional_SP / annualCartridges
+          : 0;
+
+      const unitCost =
+        annualCartridges > 0
+          ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
+          : 0;
 
       totalCartridges += cartridges;
-      totalRevenue = monthlySubscriptionPerDevice * month * filtered.length;
+      totalRevenue = monthlySubscriptionPerDevice * month * table1Data.length;
       totalCost += unitCost * cartridges;
     });
 
