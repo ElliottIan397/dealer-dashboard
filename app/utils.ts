@@ -332,10 +332,10 @@ export function generateTable1Data(
       bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
 
     const yieldMap = {
-      black: parseFloat(getVal("K_Yield")) || 0,
-      cyan: parseFloat(getVal("C_Yield")) || 0,
-      magenta: parseFloat(getVal("M_Yield")) || 0,
-      yellow: parseFloat(getVal("Y_Yield")) || 0,
+      black: getVal("K_Yield"),
+      cyan: getVal("C_Yield"),
+      magenta: getVal("M_Yield"),
+      yellow: getVal("Y_Yield"),
     };
 
     const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
