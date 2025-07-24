@@ -262,6 +262,7 @@ export default function SubscriptionPlanTable({
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
 
+  // Step 1: Pre-aggregate cartridge plans per month
   const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
     black: 0,
     cyan: 0,
@@ -269,62 +270,60 @@ export default function SubscriptionPlanTable({
     yellow: 0,
   }));
 
+  table1Data.forEach((row) => {
+    (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
+      const plan = row.calculatedFulfillmentPlan?.[color] ?? [];
+      plan.forEach((qty, monthIdx) => {
+        cartridgesPerMonth[monthIdx][color] += qty;
+      });
+    });
+  });
+
+  // Step 2: Build monthly P&L using the pre-aggregated data
   const monthlyPL = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
 
-    let totalCartridges = 0;
-    let totalRevenue = 0;
-    let totalCost = 0;
+    // Sum up cumulative cartridges up to this month
+    const cumulativeCartridges = cartridgesPerMonth
+      .slice(0, month)
+      .reduce(
+        (sum, m) =>
+          sum + m.black + m.cyan + m.magenta + m.yellow,
+        0
+      );
 
+    const totalRevenue = monthlySubscriptionPerDevice * month * table1Data.length;
+
+    // Estimate unit cost from table1Data
+    let totalCost = 0;
     table1Data.forEach((row) => {
-      (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
-        const monthlyPlan = (row as any).calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
-        cartridgesPerMonth[i][color] += monthlyPlan;
-      });
-      const cumulativeCartridges = cartridgesPerMonth
-        .slice(0, i + 1)
-        .reduce(
-          (sum, month) =>
-            sum +
-            month.black +
-            month.cyan +
-            month.magenta +
-            month.yellow,
-          0
-        );
       const annualCartridges =
         row.Black_Full_Cartridges_Required_365d +
         row.Cyan_Full_Cartridges_Required_365d +
         row.Magenta_Full_Cartridges_Required_365d +
         row.Yellow_Full_Cartridges_Required_365d;
 
-      const unitSP =
-        annualCartridges > 0
-          ? row.Twelve_Month_Transactional_SP / annualCartridges
-          : 0;
-
       const unitCost =
         annualCartridges > 0
           ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
           : 0;
 
-      totalCartridges += cumulativeCartridges;
-      totalRevenue += monthlySubscriptionPerDevice * month;
       totalCost += unitCost * cumulativeCartridges;
     });
 
     const monthlyESW = eswTotal / 12;
     const eswCost = monthlyESW * month;
+
     const totalFulfillmentCost = totalCost + eswCost;
     const gm = totalRevenue - totalFulfillmentCost;
     const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
 
     return {
       month,
-      totalCartridges,
+      totalCartridges: cumulativeCartridges,
       totalRevenue: totalRevenue.toFixed(2),
-      totalCost: totalCost.toFixed(2),            // Fulfillment only
-      eswCost: eswCost.toFixed(2),                // New column
+      totalCost: totalCost.toFixed(2),
+      eswCost: eswCost.toFixed(2),
       totalWithESW: totalFulfillmentCost.toFixed(2),
       gm: gm.toFixed(2),
       gmPercent: gmPercent.toFixed(1),
