@@ -10,7 +10,10 @@ import { calculateMonthlyFulfillmentPlan, parse } from "@/app/utils";
 import { useMemo } from "react";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
-  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+  const biasKey = `${bias}_${field}`;
+  if (row?.[biasKey] != null) return row[biasKey];
+  if (row?.[field] != null) return row[field];
+  return 0;
 };
 
 interface Props {
