@@ -8,8 +8,6 @@ import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
 import { calculateMonthlyFulfillmentPlan, parse } from "@/app/utils";
 import { useMemo } from "react";
-import { generateTable1Data } from "./utils";
-
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
@@ -74,9 +72,9 @@ export default function SubscriptionPlanTable({
   const [showOpportunities, setShowOpportunities] = useState(false);
   const [searchCustomer, setSearchCustomer] = useState("");
   const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
-  const [localBias, setBias] = useState<"O" | "R" | "N">("O");
-  const selectedBias = localBias;
+  //const [bias, setBias] = useState<"O" | "R" | "N">("O");
 
+  
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
   const [showSummaryTable, setShowSummaryTable] = useState(false);
