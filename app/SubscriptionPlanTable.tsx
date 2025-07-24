@@ -281,12 +281,17 @@ export default function SubscriptionPlanTable({
         const monthlyPlan = (row as any).calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
         cartridgesPerMonth[i][color] += monthlyPlan;
       });
-      const cartridges =
-        cartridgesPerMonth[i].black +
-        cartridgesPerMonth[i].cyan +
-        cartridgesPerMonth[i].magenta +
-        cartridgesPerMonth[i].yellow;
-
+      const cumulativeCartridges = cartridgesPerMonth
+        .slice(0, i + 1)
+        .reduce(
+          (sum, month) =>
+            sum +
+            month.black +
+            month.cyan +
+            month.magenta +
+            month.yellow,
+          0
+        );
       const annualCartridges =
         row.Black_Full_Cartridges_Required_365d +
         row.Cyan_Full_Cartridges_Required_365d +
@@ -303,9 +308,9 @@ export default function SubscriptionPlanTable({
           ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
           : 0;
 
-      totalCartridges += cartridges;
-      totalRevenue = monthlySubscriptionPerDevice * month * table1Data.length;
-      totalCost += unitCost * cartridges;
+      totalCartridges += cumulativeCartridges;
+      totalRevenue += monthlySubscriptionPerDevice * month;
+      totalCost += unitCost * cumulativeCartridges;
     });
 
     const monthlyESW = eswTotal / 12;
