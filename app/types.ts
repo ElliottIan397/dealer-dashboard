@@ -8,7 +8,7 @@ export type McarpRow = {
   Subscription_Flag?: string;
   viewMode?: string;
   Device_Class?: "Class 1" | "Class 2";
-
+  
   // Table 1 fields
   Black_Annual_Volume: number;
   Color_Annual_Volume: number;
@@ -21,6 +21,14 @@ export type McarpRow = {
   Twelve_Month_Fulfillment_Cost: number;
   Twelve_Month_Transactional_SP: number;
   Contract_Total_Revenue: number;
+
+  // Fulfillment plan (for P&L)
+  calculatedFulfillmentPlan?: {
+  black?: number[];
+  cyan?: number[];
+  magenta?: number[];
+  yellow?: number[];
+};
 
   // Table 2 fields
   Contract_Mono_CPP: number;
@@ -71,5 +79,3 @@ export interface ChartBlockProps {
   setIncludeQR: React.Dispatch<React.SetStateAction<boolean>>;
   setIncludeESW:  React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-

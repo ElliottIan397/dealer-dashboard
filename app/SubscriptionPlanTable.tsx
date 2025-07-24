@@ -165,6 +165,7 @@ export default function SubscriptionPlanTable({
       Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
+      calculatedFulfillmentPlan: plan,
     };
   });
 
@@ -260,6 +261,14 @@ export default function SubscriptionPlanTable({
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
+
+  const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
+    black: 0,
+    cyan: 0,
+    magenta: 0,
+    yellow: 0,
+  }));
+
   const monthlyPL = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
 
@@ -268,14 +277,16 @@ export default function SubscriptionPlanTable({
     let totalCost = 0;
 
     table1Data.forEach((row) => {
-      const fraction = month / 12;
+      (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
+        const monthlyPlan = (row as any).calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
+        cartridgesPerMonth[i][color] += monthlyPlan;
+      });
+      const cartridges =
+        cartridgesPerMonth[i].black +
+        cartridgesPerMonth[i].cyan +
+        cartridgesPerMonth[i].magenta +
+        cartridgesPerMonth[i].yellow;
 
-      const black = Math.ceil(row.Black_Full_Cartridges_Required_365d * fraction);
-      const cyan = Math.ceil(row.Cyan_Full_Cartridges_Required_365d * fraction);
-      const magenta = Math.ceil(row.Magenta_Full_Cartridges_Required_365d * fraction);
-      const yellow = Math.ceil(row.Yellow_Full_Cartridges_Required_365d * fraction);
-
-      const cartridges = black + cyan + magenta + yellow;
       const annualCartridges =
         row.Black_Full_Cartridges_Required_365d +
         row.Cyan_Full_Cartridges_Required_365d +
