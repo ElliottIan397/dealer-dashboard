@@ -106,7 +106,7 @@ export default function SubscriptionPlanTable({
   );
 
   const table1Data = filtered.map((row) => {
-      const getVal = (field: string) => getBiasField(row, field, selectedBias);
+      const getVal = (field: string) => getBiasField(row, field, bias);
   
       console.log("Row Volume Data:", {
         black: row.Black_Annual_Volume,
