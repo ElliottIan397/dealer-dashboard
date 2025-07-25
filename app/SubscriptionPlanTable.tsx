@@ -6,9 +6,14 @@ import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
+import { calculateMonthlyFulfillmentPlan, parse } from "@/app/utils";
+import { useMemo } from "react";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
-  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+  const biasKey = `${bias}_${field}`;
+  if (row?.[biasKey] != null) return row[biasKey];
+  if (row?.[field] != null) return row[field];
+  return 0;
 };
 
 interface Props {
@@ -32,6 +37,7 @@ interface Props {
   setSelectedCustomer: React.Dispatch<React.SetStateAction<string>>;
   markupOverride: number | null;
   setMarkupOverride: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedMonths: number;
 }
 
 const COSTS = {
@@ -63,12 +69,14 @@ export default function SubscriptionPlanTable({
   setIncludeESW,
   markupOverride,
   setMarkupOverride,
+  selectedMonths,
 
 }: Props): React.JSX.Element {
   const [showOpportunities, setShowOpportunities] = useState(false);
   const [searchCustomer, setSearchCustomer] = useState("");
   const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
-  const [localBias, setBias] = useState<"O" | "R" | "N">("O");
+  //const [bias, setBias] = useState<"O" | "R" | "N">("O");
+
 
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
@@ -93,8 +101,78 @@ export default function SubscriptionPlanTable({
     return <div className="text-gray-500 mt-4">No transactional devices found for selected customer.</div>;
   }
 
-  const transactionalRevenue = transactionalDevices.reduce(
-    (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+  //const transactionalRevenue = transactionalDevices.reduce(
+  //  (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
+  //  0
+  //);
+
+
+  const table1Data = filtered.map((row) => {
+    const getVal = (field: string) => getBiasField(row, field, bias);
+
+
+    console.log("Row Volume Data:", {
+      black: row.Black_Annual_Volume,
+      color: row.Color_Annual_Volume,
+      type: row.Device_Type,
+    });
+
+
+    // Step 1: compute actual cartridge plan
+    const yieldMap = {
+      black: parse(getBiasField(row, "K_Yield", bias)),
+      cyan: parse(getBiasField(row, "C_Yield", bias)),
+      magenta: parse(getBiasField(row, "M_Yield", bias)),
+      yellow: parse(getBiasField(row, "Y_Yield", bias)),
+    };
+    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+
+    console.log("Yield Inputs:", yieldMap);
+
+    console.log("Fulfillment Plan:", JSON.stringify(plan));
+
+    // Step 2: sum cartridges needed in selected months
+    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+
+    const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
+
+    const unitSP = getVal("Twelve_Month_Transactional_SP") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+
+    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+
+    return {
+      Monitor: row.Monitor,
+      Serial_Number: row.Serial_Number,
+      Printer_Model: row.Printer_Model,
+      Device_Type: row.Device_Type,
+      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
+      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
+      Black_Full_Cartridges_Required_365d: blackCartridges,
+      Cyan_Full_Cartridges_Required_365d: cyanCartridges,
+      Magenta_Full_Cartridges_Required_365d: magentaCartridges,
+      Yellow_Full_Cartridges_Required_365d: yellowCartridges,
+      Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
+      calculatedFulfillmentPlan: plan,
+    };
+  });
+
+  const transactionalRevenue = table1Data.reduce(
+    (sum, row) => sum + row.Twelve_Month_Transactional_SP,
     0
   );
 
@@ -190,47 +268,67 @@ export default function SubscriptionPlanTable({
     { key: "QR", value: includeQR, setter: setIncludeQR, disabled: false, greyed: false },
     { key: "ESW", value: includeESW, setter: setIncludeESW, disabled: !allDevicesTagged, greyed: !allDevicesTagged },
   ];
+
+  // Accumulator for per-month cartridge counts
+  const cartridgesPerMonth = Array.from({ length: 12 }, () => ({
+    black: 0,
+    cyan: 0,
+    magenta: 0,
+    yellow: 0,
+  }));
+
+  let cumulativeRevenue = 0;
+  let cumulativeCost = 0;
+  let cumulativeESW = 0;
+  const monthlyESW = eswTotal / 12;
+
   const monthlyPL = Array.from({ length: 12 }, (_, i) => {
     const month = i + 1;
+    let totalCostThisMonth = 0;
 
-    let totalCartridges = 0;
-    let totalRevenue = 0;
-    let totalCost = 0;
-
-    filtered.forEach((row) => {
-      const fraction = month / 12;
-
-      const black = Math.ceil(row.Black_Full_Cartridges_Required_365d * fraction);
-      const cyan = Math.ceil(row.Cyan_Full_Cartridges_Required_365d * fraction);
-      const magenta = Math.ceil(row.Magenta_Full_Cartridges_Required_365d * fraction);
-      const yellow = Math.ceil(row.Yellow_Full_Cartridges_Required_365d * fraction);
-
-      const cartridges = black + cyan + magenta + yellow;
-      const annualCartridges = row.Black_Full_Cartridges_Required_365d +
+    table1Data.forEach((row) => {
+      const annualCartridges =
+        row.Black_Full_Cartridges_Required_365d +
         row.Cyan_Full_Cartridges_Required_365d +
         row.Magenta_Full_Cartridges_Required_365d +
         row.Yellow_Full_Cartridges_Required_365d;
 
-      const unitSP = annualCartridges > 0 ? row.Twelve_Month_Transactional_SP / annualCartridges : 0;
-      const unitCost = annualCartridges > 0 ? row.Twelve_Month_Fulfillment_Cost / annualCartridges : 0;
+      const unitCost =
+        annualCartridges > 0
+          ? row.Twelve_Month_Fulfillment_Cost / annualCartridges
+          : 0;
 
-      totalCartridges += cartridges;
-      totalRevenue = monthlySubscriptionPerDevice * month * filtered.length;
-      totalCost += unitCost * cartridges;
+      (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
+        const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
+        cartridgesPerMonth[i][color] += monthlyPlan;
+        totalCostThisMonth += unitCost * monthlyPlan;
+      });
     });
 
-    const monthlyESW = eswTotal / 12;
-    const eswCost = monthlyESW * month;
-    const totalFulfillmentCost = totalCost + eswCost;
-    const gm = totalRevenue - totalFulfillmentCost;
-    const gmPercent = totalRevenue > 0 ? (gm / totalRevenue) * 100 : 0;
+    // Calculate cumulative cartridges
+    const cumulativeCartridges = cartridgesPerMonth
+      .slice(0, i + 1)
+      .reduce(
+        (sum, month) =>
+          sum + month.black + month.cyan + month.magenta + month.yellow,
+        0
+      );
+
+    const revenueThisMonth = monthlySubscriptionPerDevice * table1Data.length;
+    cumulativeRevenue += revenueThisMonth;
+    cumulativeCost += totalCostThisMonth;
+    cumulativeESW += monthlyESW;
+
+    const totalFulfillmentCost = cumulativeCost + cumulativeESW;
+    const gm = cumulativeRevenue - totalFulfillmentCost;
+    const gmPercent = cumulativeRevenue > 0 ? (gm / cumulativeRevenue) * 100 : 0;
 
     return {
       month,
-      totalCartridges,
-      totalRevenue: totalRevenue.toFixed(2),
-      totalCost: totalCost.toFixed(2),            // Fulfillment only
-      eswCost: eswCost.toFixed(2),                // New column
+      totalCartridges: cumulativeCartridges,
+      totalRevenue: cumulativeRevenue.toFixed(2),
+      totalCost: cumulativeCost.toFixed(2),
+      eswCost: cumulativeESW.toFixed(2),
       totalWithESW: totalFulfillmentCost.toFixed(2),
       gm: gm.toFixed(2),
       gmPercent: gmPercent.toFixed(1),
@@ -629,17 +727,13 @@ export default function SubscriptionPlanTable({
       </div>
 
       {selectedCustomer !== "All" && showSummaryTable && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Supplies Program Summary by Device</h3>
-          <div className="overflow-x-auto">
-            <Table1
-              data={filtered.map(row => ({
-                ...row,
-                Twelve_Month_Transactional_SP: getBiasField(row, "Twelve_Month_Transactional_SP", bias),
-              }))}
-              bias={bias}
-            />
-          </div>
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4">Supplies Program Summary by Device</h2>
+          <Table1
+            data={table1Data}
+            bias={bias}
+            selectedMonths={selectedMonths}
+          />
         </div>
       )}
 

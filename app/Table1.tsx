@@ -2,8 +2,11 @@
 
 import React from "react";
 
-const getBiasField = (row: any, field: string, bias: 'O' | 'R' | 'N') => {
-  return bias === 'O' ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
+  const biasKey = `${bias}_${field}`;
+  if (row?.[biasKey] != null) return row[biasKey];
+  if (row?.[field] != null) return row[field];
+  return 0;
 };
 
 import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
@@ -27,9 +30,11 @@ type Table1Row = {
   Contract_Total_Revenue: number;
 };
 
-type Props = {
+interface Props {
   data: Table1Row[];
-};
+  bias: "O" | "R" | "N";
+  selectedMonths: number;
+}
 
 function excelDateToJSDate(serial: number): Date {
   return new Date((serial - 25569) * 86400 * 1000);
@@ -41,7 +46,7 @@ function isStale(lastUpdated: number, currentDate: Date, days: number): boolean 
   return diff > days;
 }
 
-export default function Table1({ data, bias }: { data: any[]; bias: 'O' | 'R' | 'N' }) {
+export default function Table1({ data, bias, selectedMonths }: Props) {
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
 

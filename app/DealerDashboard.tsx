@@ -10,13 +10,24 @@ import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
-import { safeCurrency as formatCurrency, safePercent as formatPercent } from "./utils";
+import {
+  safeCurrency as formatCurrency,
+  safePercent as formatPercent,
+  parse,
+} from "./utils";
+
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
+import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
+
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
-  return bias === "O" ? row[field] ?? 0 : row[`${bias}_${field}`] ?? row[field] ?? 0;
+  const biasKey = `${bias}_${field}`;
+  if (row?.[biasKey] != null) return row[biasKey];
+  if (row?.[field] != null) return row[field];
+  return 0;
 };
+
 
 export default function DealerDashboard() {
   const {
@@ -92,50 +103,65 @@ export default function DealerDashboard() {
 
   const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
-  const fraction = selectedMonths / 12;
-
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
-    const getCartridgeCount = (field: string) =>
-      Math.ceil(getVal(field) * fraction);
 
-    // Get adjusted cartridge counts
-    const blackCartridges = getCartridgeCount("Black_Full_Cartridges_Required_365d");
-    const cyanCartridges = getCartridgeCount("Cyan_Full_Cartridges_Required_365d");
-    const magentaCartridges = getCartridgeCount("Magenta_Full_Cartridges_Required_365d");
-    const yellowCartridges = getCartridgeCount("Yellow_Full_Cartridges_Required_365d");
+    console.log("Row Volume Data:", {
+      black: row.Black_Annual_Volume,
+      color: row.Color_Annual_Volume,
+      type: row.Device_Type,
+    });
+
+
+    // Step 1: compute actual cartridge plan
+    const yieldMap = {
+  black: parse(getBiasField(row, "K_Yield", selectedBias)),
+  cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
+  magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
+  yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
+};
+    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+
+    console.log("Yield Inputs:", yieldMap);
+
+    console.log("Fulfillment Plan:", JSON.stringify(plan));
+
+    // Step 2: sum cartridges needed in selected months
+    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
 
     const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
 
-    // Get per-cartridge pricing
-    const annualCartridges = getVal("Black_Full_Cartridges_Required_365d") +
-      getVal("Cyan_Full_Cartridges_Required_365d") +
-      getVal("Magenta_Full_Cartridges_Required_365d") +
-      getVal("Yellow_Full_Cartridges_Required_365d");
+    const unitSP = getVal("Twelve_Month_Transactional_SP") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
 
-    const unitSP = annualCartridges > 0 ? getVal("Twelve_Month_Transactional_SP") / annualCartridges : 0;
-    const unitCost = annualCartridges > 0 ? getVal("Twelve_Month_Fulfillment_Cost") / annualCartridges : 0;
+    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
+      (getVal("Black_Full_Cartridges_Required_365d") +
+        getVal("Cyan_Full_Cartridges_Required_365d") +
+        getVal("Magenta_Full_Cartridges_Required_365d") +
+        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
 
     return {
       Monitor: row.Monitor,
       Serial_Number: row.Serial_Number,
       Printer_Model: row.Printer_Model,
       Device_Type: row.Device_Type,
-      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * fraction),
-      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * fraction),
+      Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
+      Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
       Black_Full_Cartridges_Required_365d: blackCartridges,
       Cyan_Full_Cartridges_Required_365d: cyanCartridges,
       Magenta_Full_Cartridges_Required_365d: magentaCartridges,
       Yellow_Full_Cartridges_Required_365d: yellowCartridges,
-      Contract_Status: row.Contract_Status,
-      Last_Updated: row.Last_Updated,
-
-      // New logic: cost and SP based on cartridge count × unit pricing
       Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
       Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
-
-      // Still prorating contract revenue (this is OK if contract is time-based)
-      Contract_Total_Revenue: +(row.Contract_Total_Revenue * fraction).toFixed(2),
+      Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
+      Contract_Status: row.Contract_Status,
+      Last_Updated: row.Last_Updated,
     };
   });
 
@@ -357,6 +383,7 @@ export default function DealerDashboard() {
             setIncludeESW={setIncludeESW}
             markupOverride={markupOverride}
             setMarkupOverride={setMarkupOverride}
+            selectedMonths={selectedMonths}
           />
         </div>
       )}
@@ -395,7 +422,7 @@ export default function DealerDashboard() {
             <>
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-                <Table1 data={table1Data} bias={selectedBias} />
+                <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
               </div>
 
               <div className="mt-10">
