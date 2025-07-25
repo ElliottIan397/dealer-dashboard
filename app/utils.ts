@@ -181,16 +181,6 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     return isNaN(parsed) ? NaN : parsed;
   };
 
-  const getCoverage = (color: string): number => {
-    const raw = safeParse(device[`${color}_Page_Coverage_Percent`]);
-    return raw > 0 ? raw : 5;
-  };
-
-  const getUsage = (color: string): number => {
-    if (color === 'K') return safeParse(device['Mono_(A4-equivalent)_Usage']);
-    return safeParse(device['Colour_(A4-equivalent)_Usage']) / 3;
-  };
-
   const result: Record<string, number[]> = {
     black: Array(12).fill(0),
     cyan: Array(12).fill(0),
@@ -198,46 +188,68 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     yellow: Array(12).fill(0)
   };
 
+  const fieldMap: Record<string, { level: string; pagesLeft: string; daysLeft: string; coverage: string; usage: () => number; resultKey: string }> = {
+    K: {
+      level: 'Black_Level',
+      pagesLeft: 'Black_Pages_Left',
+      daysLeft: 'Black_Days_Left',
+      coverage: 'Black_Page_Coverage_Percent',
+      usage: () => safeParse(device['Mono_(A4-equivalent)_Usage']),
+      resultKey: 'black'
+    },
+    C: {
+      level: 'Cyan_Level',
+      pagesLeft: 'Cyan_Pages_Left',
+      daysLeft: 'Cyan_Days_Left',
+      coverage: 'Cyan_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'cyan'
+    },
+    M: {
+      level: 'Magenta_Level',
+      pagesLeft: 'Magenta_Pages_Left',
+      daysLeft: 'Magenta_Days_Left',
+      coverage: 'Magenta_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'magenta'
+    },
+    Y: {
+      level: 'Yellow_Level',
+      pagesLeft: 'Yellow_Pages_Left',
+      daysLeft: 'Yellow_Days_Left',
+      coverage: 'Yellow_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'yellow'
+    }
+  };
+
   colors.forEach(color => {
-    const colorKey =
-      color === 'K' ? 'black' : color === 'C' ? 'cyan' : color === 'M' ? 'magenta' : 'yellow';
+    const map = fieldMap[color];
+    const level = safeParse(device[map.level]);
+    const pagesLeft = safeParse(device[map.pagesLeft]);
+    const coverage = safeParse(device[map.coverage]) || 5;
+    const usage = map.usage();
+    const daysLeft = safeParse(device[map.daysLeft]) || 0;
+    const yieldField = `${bias}_${color}_Yield`;
+    const replYield = safeParse(device[yieldField]);
 
-    const level = safeParse(device[`${color}_Level`]);
-    const pagesLeft = safeParse(device[`${color}_Pages_Left`]);
-    const coverage = getCoverage(color);
-    const usage = getUsage(color);
-
-    if (isNaN(level) || isNaN(pagesLeft) || level <= 0 || usage <= 0) {
-      console.warn("⚠️ Skipping cartridge due to invalid inputs", {
-        color: colorKey,
-        sku: device[`${bias}_${color}_Yield`],
+    if (isNaN(level) || isNaN(pagesLeft) || isNaN(replYield) || level <= 0 || usage <= 0) {
+      console.warn('⚠️ Skipping cartridge due to invalid inputs', {
+        color: map.resultKey,
+        sku: replYield,
         level,
         pagesLeft,
-        usage,
         coverage,
+        usage
       });
       return;
     }
 
     const inferredYield = pagesLeft / (level * (coverage / 100));
-    const yieldField = `${bias}_${color}_Yield`;
-    const replYield = safeParse(device[yieldField]);
-    if (isNaN(replYield)) return;
-
     const adjustedYield = (y: number) => y * (5 / coverage);
     const dailyDemand = usage / 90;
 
-    console.log("📊 Fulfillment Calc", {
-      color: colorKey,
-      sku: device[yieldField],
-      inferredYield,
-      replYield,
-      adjustedYieldFirst: adjustedYield(inferredYield),
-      adjustedYieldRepl: adjustedYield(replYield),
-      dailyDemand,
-    });
-
-    let pointer = safeParse(device[`${color}_Days_Left`]) || 0;
+    let pointer = daysLeft;
     let first = true;
 
     while (pointer < 365) {
@@ -245,7 +257,7 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       const depletionDays = adjustedYield(thisYield) / dailyDemand;
 
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
-      result[colorKey][monthIdx]++;
+      result[map.resultKey][monthIdx]++;
 
       pointer += depletionDays;
       first = false;
