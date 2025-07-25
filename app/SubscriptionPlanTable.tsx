@@ -125,7 +125,7 @@ export default function SubscriptionPlanTable({
       magenta: parse(getBiasField(row, "M_Yield", bias)),
       yellow: parse(getBiasField(row, "Y_Yield", bias)),
     };
-    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+    const plan = calculateMonthlyFulfillmentPlan(row, bias);
 
     console.log("Yield Inputs:", yieldMap);
 

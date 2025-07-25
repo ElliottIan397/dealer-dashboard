@@ -120,7 +120,7 @@ export default function DealerDashboard() {
   magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
   yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
 };
-    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+    const plan = calculateMonthlyFulfillmentPlan(row, selectedBias);
 
     console.log("Yield Inputs:", yieldMap);
 
