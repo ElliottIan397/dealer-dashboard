@@ -210,7 +210,6 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     if (isNaN(level) || isNaN(pagesLeft) || level <= 0 || usage <= 0) return;
 
     const inferredYield = pagesLeft / (level * (coverage / 100));
-
     const yieldField = `${bias}_${color}_Yield`;
     const replYield = safeParse(device[yieldField]);
     if (isNaN(replYield)) return;
@@ -224,12 +223,11 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     while (pointer < 365) {
       const thisYield = first ? inferredYield : replYield;
       const depletionDays = adjustedYield(thisYield) / dailyDemand;
-      pointer += depletionDays;
-      if (pointer >= 365) break;
 
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
       result[colorKey][monthIdx]++;
 
+      pointer += depletionDays;
       first = false;
     }
   });
