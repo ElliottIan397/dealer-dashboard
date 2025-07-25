@@ -207,7 +207,17 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     const coverage = getCoverage(color);
     const usage = getUsage(color);
 
-    if (isNaN(level) || isNaN(pagesLeft) || level <= 0 || usage <= 0) return;
+    if (isNaN(level) || isNaN(pagesLeft) || level <= 0 || usage <= 0) {
+      console.warn("⚠️ Skipping cartridge due to invalid inputs", {
+        color: colorKey,
+        sku: device[`${bias}_${color}_Yield`],
+        level,
+        pagesLeft,
+        usage,
+        coverage,
+      });
+      return;
+    }
 
     const inferredYield = pagesLeft / (level * (coverage / 100));
     const yieldField = `${bias}_${color}_Yield`;
@@ -216,6 +226,16 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
 
     const adjustedYield = (y: number) => y * (5 / coverage);
     const dailyDemand = usage / 90;
+
+    console.log("📊 Fulfillment Calc", {
+      color: colorKey,
+      sku: device[yieldField],
+      inferredYield,
+      replYield,
+      adjustedYieldFirst: adjustedYield(inferredYield),
+      adjustedYieldRepl: adjustedYield(replYield),
+      dailyDemand,
+    });
 
     let pointer = safeParse(device[`${color}_Days_Left`]) || 0;
     let first = true;
