@@ -169,159 +169,104 @@ function getYieldMapForBias(row: any, bias: "O" | "R" | "N") {
   };
 }
 
-export function calculateMonthlyFulfillmentPlan(
-  device: DeviceRow,
-  yieldMap: Record<string, number>
-): FulfillmentPlan {
-  const months = 12;
-  const daysPerMonth = 365 / months;
+export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | 'N') {
+  const daysPerMonth = 365 / 12;
+  const isColorDevice = device['Device_Type'] === 'Color';
+  const colors = isColorDevice ? ['K', 'C', 'M', 'Y'] : ['K'];
 
-  function getAdjustedYield(color: string, coveragePercent: number): number {
-    const ratedYield = yieldMap[color] || 0;
-    const safeCoverage = coveragePercent > 0 ? coveragePercent : 5;
-    return ratedYield * (5 / safeCoverage);
-  }
+  const safeParse = (val: any): number => {
+    if (typeof val === 'number') return val;
+    if (val === 'NULL' || val === 'NO SKU' || val === 'ADD YIELD') return NaN;
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? NaN : parsed;
+  };
 
-  function buildPlan(
-    color: string,
-    level: number,
-    pagesLeft: number,
-    daysLeft: number,
-    coverage: number,
-    volume90: number
-  ): number[] {
-    console.log("DEBUG buildPlan inputs", {
-      color, level, pagesLeft, daysLeft, coverage, volume90,
-    });
-    const monthly = Array(months).fill(0);
-    const annualVolume = (volume90 / 90) * 365;
-    const adjustedYield = getAdjustedYield(color, coverage);
-    console.log("💥 Yield Debug", {
-      color,
-      coverage,
-      yieldValue: yieldMap[color],
-      adjustedYield,
-      pagesLeft,
-      daysLeft,
-      volume90,
-    });
-    const dailyDemand = annualVolume / 365;
+  const result: Record<string, number[]> = {
+    black: Array(12).fill(0),
+    cyan: Array(12).fill(0),
+    magenta: Array(12).fill(0),
+    yellow: Array(12).fill(0)
+  };
 
-    console.log("DEBUG → dailyDemand:", dailyDemand, "adjustedYield:", adjustedYield);
+  const fieldMap: Record<string, { level: string; pagesLeft: string; daysLeft: string; coverage: string; usage: () => number; resultKey: string }> = {
+    K: {
+      level: 'Black_Level',
+      pagesLeft: 'Black_Pages_Left',
+      daysLeft: 'Black_Days_Left',
+      coverage: 'Black_Page_Coverage_Percent',
+      usage: () => safeParse(device['Mono_(A4-equivalent)_Usage']),
+      resultKey: 'black'
+    },
+    C: {
+      level: 'Cyan_Level',
+      pagesLeft: 'Cyan_Pages_Left',
+      daysLeft: 'Cyan_Days_Left',
+      coverage: 'Cyan_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'cyan'
+    },
+    M: {
+      level: 'Magenta_Level',
+      pagesLeft: 'Magenta_Pages_Left',
+      daysLeft: 'Magenta_Days_Left',
+      coverage: 'Magenta_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'magenta'
+    },
+    Y: {
+      level: 'Yellow_Level',
+      pagesLeft: 'Yellow_Pages_Left',
+      daysLeft: 'Yellow_Days_Left',
+      coverage: 'Yellow_Page_Coverage_Percent',
+      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
+      resultKey: 'yellow'
+    }
+  };
 
-    if (dailyDemand <= 0 || adjustedYield <= 0) return monthly;
+  colors.forEach(color => {
+    const map = fieldMap[color];
+    const level = safeParse(device[map.level]);
+    const pagesLeft = safeParse(device[map.pagesLeft]);
+    const coverage = safeParse(device[map.coverage]) || 5;
+    const usage = map.usage();
+    const daysLeft = safeParse(device[map.daysLeft]) || 0;
+    const yieldField = `${bias}_${color}_Yield`;
+    const replYield = safeParse(device[yieldField]);
+
+    if (isNaN(level) || isNaN(pagesLeft) || isNaN(replYield) || level <= 0 || usage <= 0) {
+      console.warn('⚠️ Skipping cartridge due to invalid inputs', {
+        color: map.resultKey,
+        sku: replYield,
+        level,
+        pagesLeft,
+        coverage,
+        usage
+      });
+      return;
+    }
+
+    const inferredYield = pagesLeft / (level * (coverage / 100));
+    const adjustedYield = (y: number) => y * (5 / coverage);
+    const dailyDemand = usage / 90;
 
     let pointer = daysLeft;
-    const depletionDays = adjustedYield / dailyDemand;
-    console.log("DEBUG loop inputs", { pointer, depletionDays }); // ← INSERT HERE
+    let first = true;
 
     while (pointer < 365) {
+      const thisYield = first ? inferredYield : replYield;
+      const depletionDays = adjustedYield(thisYield) / dailyDemand;
+
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
-      monthly[monthIdx]++;
+      result[map.resultKey][monthIdx]++;
+
       pointer += depletionDays;
+      first = false;
     }
-    return monthly;
-  }
+  });
 
-  return {
-    black: buildPlan(
-      "black",
-      device["Black_Level"],
-      device["Black_Pages_Left"],
-      device["Black_Days_Left"],
-      device["Black_Page_Coverage_Percent"],
-      device["Mono_(A4-equivalent)_Usage"]
-    ),
-    cyan: buildPlan(
-      "cyan",
-      device["Cyan_Level"],
-      device["Cyan_Pages_Left"],
-      device["Cyan_Days_Left"],
-      device["Cyan_Page_Coverage_Percent"],
-      device["Colour_(A4-equivalent)_Usage"] / 3
-    ),
-    magenta: buildPlan(
-      "magenta",
-      device["Magenta_Level"],
-      device["Magenta_Pages_Left"],
-      device["Magenta_Days_Left"],
-      device["Magenta_Page_Coverage_Percent"],
-      device["Colour_(A4-equivalent)_Usage"] / 3
-    ),
-    yellow: buildPlan(
-      "yellow",
-      device["Yellow_Level"],
-      device["Yellow_Pages_Left"],
-      device["Yellow_Days_Left"],
-      device["Yellow_Page_Coverage_Percent"],
-      device["Colour_(A4-equivalent)_Usage"] / 3
-    )
-  };
+  return result;
 }
-export function calculateVolumeBasedFulfillmentPlan(row: any, yieldMap: any) {
-  const coverage = {
-    black: row.Black_Page_Coverage_Percent || 5,
-    cyan: row.Cyan_Page_Coverage_Percent || 5,
-    magenta: row.Magenta_Page_Coverage_Percent || 5,
-    yellow: row.Yellow_Page_Coverage_Percent || 5,
-  };
 
-  const isMono = row.Device_Type?.toLowerCase() === "mono";
-
-  const monthlyBlack = (row.Black_Annual_Volume ?? 0) / 12;
-  const monthlyColor = isMono ? 0 : (row.Color_Annual_Volume ?? 0) / 12;
-
-  const monthly = {
-    black: Array(12).fill(monthlyBlack),
-    cyan: Array(12).fill(monthlyColor / 3),
-    magenta: Array(12).fill(monthlyColor / 3),
-    yellow: Array(12).fill(monthlyColor / 3),
-  };
-
-  const safeYield = (val: number | undefined, coverageVal: number): number =>
-    val && val > 0 ? val * (5 / coverageVal) : 0;
-
-  const yields = {
-    black: safeYield(yieldMap.black, coverage.black),
-    cyan: isMono ? 0 : safeYield(yieldMap.cyan, coverage.cyan),
-    magenta: isMono ? 0 : safeYield(yieldMap.magenta, coverage.magenta),
-    yellow: isMono ? 0 : safeYield(yieldMap.yellow, coverage.yellow),
-  };
-
-  function calc(ctgPerMonth: number[], yieldVal: number): number[] {
-    let remaining = 0;
-    const result: number[] = [];
-
-    for (let i = 0; i < ctgPerMonth.length; i++) {
-      let pages = ctgPerMonth[i];
-      let count = 0;
-
-      if (yieldVal <= 0) {
-        result.push(0);
-        continue;
-      }
-
-      while (pages > 0) {
-        if (remaining <= 0) remaining = yieldVal;
-        const used = Math.min(pages, remaining);
-        remaining -= used;
-        pages -= used;
-        if (remaining === 0) count++;
-      }
-
-      result.push(count);
-    }
-
-    return result;
-  }
-
-  return {
-    black: calc(monthly.black, yields.black),
-    cyan: calc(monthly.cyan, yields.cyan),
-    magenta: calc(monthly.magenta, yields.magenta),
-    yellow: calc(monthly.yellow, yields.yellow),
-  };
-}
 export function generateTable1Data(
   rows: any[],
   bias: "O" | "R" | "N",
@@ -338,7 +283,7 @@ export function generateTable1Data(
       yellow: getVal("Y_Yield"),
     };
 
-    const plan = calculateMonthlyFulfillmentPlan(row, yieldMap);
+    const plan = calculateMonthlyFulfillmentPlan(row, bias);
 
     const black = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
     const cyan = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
