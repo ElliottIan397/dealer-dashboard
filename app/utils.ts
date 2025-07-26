@@ -242,7 +242,7 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       const thisYield = first ? pagesLeft : replYield;
       const depletionDays = thisYield / dailyDepletion;
 
-      if (!isFinite(depletionDays) || depletionDays <= 0) {
+      if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
         console.warn('⚠️ Skipping cartridge due to invalid depletion data', {
           color: map.resultKey,
           serial: device['Serial_Number'],
