@@ -238,27 +238,36 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     let remainingPages = pagesLeft;
     let first = true;
 
-while (pointer < 365) {
-  const thisYield = first ? pagesLeft : replYield;
-  const depletionDays = thisYield / dailyDepletion;
+    while (pointer < 365) {
+      const thisYield = first ? pagesLeft : replYield;
+      const depletionDays = thisYield / dailyDepletion;
 
-  if (!isFinite(depletionDays) || depletionDays <= 0) {
-    console.warn('❌ Invalid depletionDays value - breaking loop', {
-      color: map.resultKey,
-      thisYield,
-      dailyDepletion,
-      depletionDays
-    });
-    break;
-  }
+      if (!isFinite(depletionDays) || depletionDays <= 0) {
+        console.warn('⚠️ Skipping cartridge due to invalid depletion data', {
+          color: map.resultKey,
+          serial: device['Serial_Number'],
+          pagesLeft,
+          daysLeft,
+          replYield,
+          level: safeParse(device[`${color === 'K' ? 'Black' : color}_Level`]),
+          coverage: safeParse(device[`${color}_Page_Coverage_Percent`]),
+          usage: safeParse(color === 'K' ? device['Mono_(A4-equivalent)_Usage'] : device['Colour_(A4-equivalent)_Usage']),
+          inDeviceYield: safeParse(device[`${color === 'K' ? 'Black' : color}_In_Device_Yield`]),
+          monoUsage: device['Mono_(A4-equivalent)_Usage'],
+          blackLevel: device['Black_Level'],
+          blackPagesLeft: device['Black_Pages_Left'],
+          blackDaysLeft: device['Black_Days_Left']
+        });
+        break;
+      }
 
-  const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
-  result[map.resultKey][monthIdx]++;
+      const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
+      result[map.resultKey][monthIdx]++;
 
-  pointer += depletionDays;
-  remainingPages = thisYield;
-  first = false;
-}
+      pointer += depletionDays;
+      remainingPages = thisYield;
+      first = false;
+    }
   });
 
   return result;
