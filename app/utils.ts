@@ -235,6 +235,9 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       }
     });
 
+    if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+      return;
+    }
     const dailyDepletion = pagesLeft / daysLeft;
     let pointer = daysLeft;
     let remainingPages = pagesLeft;
