@@ -242,23 +242,29 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       const thisYield = first ? pagesLeft : replYield;
       const depletionDays = thisYield / dailyDepletion;
 
-      if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+      if (
+        isNaN(pagesLeft) ||
+        isNaN(daysLeft) ||
+        isNaN(replYield) ||
+        pagesLeft <= 0 ||
+        daysLeft <= 0
+      ) {
         console.warn('⚠️ Skipping cartridge due to invalid depletion data', {
           color: map.resultKey,
           serial: device['Serial_Number'],
           pagesLeft,
           daysLeft,
           replYield,
-          level: safeParse(device[`${color === 'K' ? 'Black' : color}_Level`]),
-          coverage: safeParse(device[`${color}_Page_Coverage_Percent`]),
-          usage: safeParse(color === 'K' ? device['Mono_(A4-equivalent)_Usage'] : device['Colour_(A4-equivalent)_Usage']),
-          inDeviceYield: safeParse(device[`${color === 'K' ? 'Black' : color}_In_Device_Yield`]),
           monoUsage: device['Mono_(A4-equivalent)_Usage'],
           blackLevel: device['Black_Level'],
           blackPagesLeft: device['Black_Pages_Left'],
-          blackDaysLeft: device['Black_Days_Left']
+          blackDaysLeft: device['Black_Days_Left'],
+          inDeviceYield: device['Black_In_Device_Yield']
         });
-        break;
+
+        // Option 1: assign zeroes and continue
+        result[map.resultKey] = Array(12).fill(0);
+        return;
       }
 
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
