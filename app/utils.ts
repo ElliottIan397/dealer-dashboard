@@ -238,14 +238,17 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
         color: map.resultKey,
         sku: replYield,
         monoUsage: device['Mono_(A4-equivalent)_Usage'],
-        blackLevel: device['Black_Level'],
-        blackPagesLeft: device['Black_Pages_Left'],
-        blackDaysLeft: device['Black_Days_Left'],
-        inDeviceYield: device['Black_In_Device_Yield'],
-        level,
-        pagesLeft,
-        coverage,
-        usage
+        colorUsage: device['Colour_(A4-equivalent)_Usage'],
+        level: device[map.level],
+        pagesLeft: device[map.pagesLeft],
+        daysLeft: device[map.daysLeft],
+        coverage: device[map.coverage],
+        inDeviceYield: device[`${map.resultKey.charAt(0).toUpperCase() + map.resultKey.slice(1)}_In_Device_Yield`],
+        parsedLevel: level,
+        parsedPagesLeft: pagesLeft,
+        parsedCoverage: coverage,
+        parsedUsage: usage,
+        parsedYield: replYield
       });
       return;
     }
