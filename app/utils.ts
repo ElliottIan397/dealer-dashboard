@@ -238,16 +238,27 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     let remainingPages = pagesLeft;
     let first = true;
 
-    while (pointer < 365) {
-      const thisYield = first ? pagesLeft : replYield;
-      const depletionDays = thisYield / dailyDepletion;
-      const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
-      result[map.resultKey][monthIdx]++;
+while (pointer < 365) {
+  const thisYield = first ? pagesLeft : replYield;
+  const depletionDays = thisYield / dailyDepletion;
 
-      pointer += depletionDays;
-      remainingPages = thisYield;
-      first = false;
-    }
+  if (!isFinite(depletionDays) || depletionDays <= 0) {
+    console.warn('❌ Invalid depletionDays value - breaking loop', {
+      color: map.resultKey,
+      thisYield,
+      dailyDepletion,
+      depletionDays
+    });
+    break;
+  }
+
+  const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
+  result[map.resultKey][monthIdx]++;
+
+  pointer += depletionDays;
+  remainingPages = thisYield;
+  first = false;
+}
   });
 
   return result;
