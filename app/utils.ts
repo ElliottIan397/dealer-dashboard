@@ -222,18 +222,18 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     const daysLeft = safeParse(daysLeftRaw);
     const replYield = safeParse(replYieldRaw);
 
-    console.log('ℹ️ Cartridge Check', {
-      color: map.resultKey,
-      serial: device['Serial_Number'],
-      pagesLeft,
-      daysLeft,
-      replYield,
-      raw: {
-        pagesLeft: pagesLeftRaw,
-        daysLeft: daysLeftRaw,
-        replYield: replYieldRaw
-      }
-    });
+    //console.log('ℹ️ Cartridge Check', {
+      //color: map.resultKey,
+      //serial: device['Serial_Number'],
+      //pagesLeft,
+      //daysLeft,
+      //replYield,
+      //raw: {
+        //pagesLeft: pagesLeftRaw,
+        //daysLeft: daysLeftRaw,
+        //replYield: replYieldRaw
+      //}
+    //});
 
     if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
       return;
