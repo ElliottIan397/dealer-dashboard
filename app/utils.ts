@@ -188,86 +188,64 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     yellow: Array(12).fill(0)
   };
 
-  const fieldMap: Record<string, { level: string; pagesLeft: string; daysLeft: string; coverage: string; usage: () => number; resultKey: string }> = {
+  const fieldMap: Record<string, { pagesLeft: string; daysLeft: string; resultKey: string }> = {
     K: {
-      level: 'Black_Level',
       pagesLeft: 'Black_Pages_Left',
       daysLeft: 'Black_Days_Left',
-      coverage: 'Black_Page_Coverage_Percent',
-      usage: () => safeParse(device['Mono_(A4-equivalent)_Usage']),
       resultKey: 'black'
     },
     C: {
-      level: 'Cyan_Level',
       pagesLeft: 'Cyan_Pages_Left',
       daysLeft: 'Cyan_Days_Left',
-      coverage: 'Cyan_Page_Coverage_Percent',
-      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
       resultKey: 'cyan'
     },
     M: {
-      level: 'Magenta_Level',
       pagesLeft: 'Magenta_Pages_Left',
       daysLeft: 'Magenta_Days_Left',
-      coverage: 'Magenta_Page_Coverage_Percent',
-      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
       resultKey: 'magenta'
     },
     Y: {
-      level: 'Yellow_Level',
       pagesLeft: 'Yellow_Pages_Left',
       daysLeft: 'Yellow_Days_Left',
-      coverage: 'Yellow_Page_Coverage_Percent',
-      usage: () => safeParse(device['Colour_(A4-equivalent)_Usage']) / 3,
       resultKey: 'yellow'
     }
   };
 
   colors.forEach(color => {
     const map = fieldMap[color];
-    const level = safeParse(device[map.level]);
     const pagesLeft = safeParse(device[map.pagesLeft]);
-    const coverage = safeParse(device[map.coverage]) || 5;
-    const usage = map.usage();
-    const daysLeft = safeParse(device[map.daysLeft]) || 0;
+    const daysLeft = safeParse(device[map.daysLeft]);
     const yieldField = `${bias}_${color}_Yield`;
     const replYield = safeParse(device[yieldField]);
 
-    if (isNaN(level) || isNaN(pagesLeft) || isNaN(replYield) || level <= 0 || usage <= 0) {
-      console.warn('⚠️ Skipping cartridge due to invalid inputs', {
+    if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+      console.warn('⚠️ Skipping cartridge due to invalid depletion data', {
         color: map.resultKey,
-        sku: replYield,
+        pagesLeft,
+        daysLeft,
+        replYield,
         monoUsage: device['Mono_(A4-equivalent)_Usage'],
-        colorUsage: device['Colour_(A4-equivalent)_Usage'],
-        level: device[map.level],
-        pagesLeft: device[map.pagesLeft],
-        daysLeft: device[map.daysLeft],
-        coverage: device[map.coverage],
-        inDeviceYield: device[`${map.resultKey.charAt(0).toUpperCase() + map.resultKey.slice(1)}_In_Device_Yield`],
-        parsedLevel: level,
-        parsedPagesLeft: pagesLeft,
-        parsedCoverage: coverage,
-        parsedUsage: usage,
-        parsedYield: replYield
+        blackLevel: device['Black_Level'],
+        blackPagesLeft: device['Black_Pages_Left'],
+        blackDaysLeft: device['Black_Days_Left'],
+        inDeviceYield: device['Black_In_Device_Yield']
       });
       return;
     }
 
-    const inferredYield = pagesLeft / (level * (coverage / 100));
-    const adjustedYield = (y: number) => y * (5 / coverage);
-    const dailyDemand = usage / 90;
-
+    const dailyDepletion = pagesLeft / daysLeft;
     let pointer = daysLeft;
+    let remainingPages = pagesLeft;
     let first = true;
 
     while (pointer < 365) {
-      const thisYield = first ? inferredYield : replYield;
-      const depletionDays = adjustedYield(thisYield) / dailyDemand;
-
+      const thisYield = first ? pagesLeft : replYield;
+      const depletionDays = thisYield / dailyDepletion;
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
       result[map.resultKey][monthIdx]++;
 
       pointer += depletionDays;
+      remainingPages = thisYield;
       first = false;
     }
   });
