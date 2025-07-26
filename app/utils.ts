@@ -218,10 +218,10 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     const yieldField = `${bias}_${color}_Yield`;
     const replYield = safeParse(device[yieldField]);
 
-    if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
-      console.warn(`⚠️ Skipped ${map.resultKey} | SN: ${device['Serial_Number']} | pagesLeft: ${pagesLeft} | daysLeft: ${daysLeft} | replYield: ${replYield}`);
-      return;
-    }
+    //if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+    //  console.warn(`⚠️ Skipped ${map.resultKey} | SN: ${device['Serial_Number']} | pagesLeft: ${pagesLeft} | daysLeft: ${daysLeft} | replYield: ${replYield}`);
+    //  return;
+    //}
 
     const dailyDepletion = pagesLeft / daysLeft;
     let pointer = daysLeft;
