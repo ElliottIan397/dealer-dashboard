@@ -237,6 +237,11 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       console.warn('⚠️ Skipping cartridge due to invalid inputs', {
         color: map.resultKey,
         sku: replYield,
+        monoUsage: device['Mono_(A4-equivalent)_Usage'],
+        blackLevel: device['Black_Level'],
+        blackPagesLeft: device['Black_Pages_Left'],
+        blackDaysLeft: device['Black_Days_Left'],
+        inDeviceYield: device['Black_In_Device_Yield'],
         level,
         pagesLeft,
         coverage,
