@@ -242,28 +242,8 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       const thisYield = first ? pagesLeft : replYield;
       const depletionDays = thisYield / dailyDepletion;
 
-      if (
-        isNaN(pagesLeft) ||
-        isNaN(daysLeft) ||
-        isNaN(replYield) ||
-        pagesLeft <= 0 ||
-        daysLeft <= 0
-      ) {
-        console.warn('⚠️ Skipping cartridge due to invalid depletion data', {
-          color: map.resultKey,
-          serial: device['Serial_Number'],
-          pagesLeft,
-          daysLeft,
-          replYield,
-          monoUsage: device['Mono_(A4-equivalent)_Usage'],
-          blackLevel: device['Black_Level'],
-          blackPagesLeft: device['Black_Pages_Left'],
-          blackDaysLeft: device['Black_Days_Left'],
-          inDeviceYield: device['Black_In_Device_Yield']
-        });
-
-        // Option 1: assign zeroes and continue
-        result[map.resultKey] = Array(12).fill(0);
+      if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+        console.warn(`⚠️ Skipped ${map.resultKey} - SN: ${device['Serial_Number']} | pagesLeft: ${pagesLeft} | daysLeft: ${daysLeft} | replYield: ${replYield}`);
         return;
       }
 
