@@ -376,13 +376,21 @@ export function calculateMonthlyFulfillmentPlanV2(device: any, bias: 'O' | 'R' |
     const daysLeft = safeParse(daysLeftRaw);
     const replYield = safeParse(replYieldRaw);
 
-    if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
-      return;
+    let first = true;  // <--- Moved up here
+
+    if (
+      isNaN(pagesLeft) ||
+      isNaN(daysLeft) ||
+      pagesLeft <= 0 ||
+      daysLeft <= 0 ||
+      (isNaN(replYield) && !first)
+    ) {
+      return; // skip this color for this device, but do not exit the entire loop
     }
+
 
     const dailyDepletion = pagesLeft / daysLeft;
     let pointer = daysLeft;
-    let first = true;
     const timeLimit = timeframeInMonths * daysPerMonth;
 
     while (pointer < timeLimit) {
