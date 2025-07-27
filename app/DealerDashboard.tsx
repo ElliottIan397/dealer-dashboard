@@ -6,6 +6,7 @@ import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
+import Table4 from './Table4';
 import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
@@ -19,7 +20,7 @@ import {
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
 import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
-
+import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -115,11 +116,11 @@ export default function DealerDashboard() {
 
     // Step 1: compute actual cartridge plan
     const yieldMap = {
-  black: parse(getBiasField(row, "K_Yield", selectedBias)),
-  cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
-  magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
-  yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
-};
+      black: parse(getBiasField(row, "K_Yield", selectedBias)),
+      cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
+      magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
+      yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
+    };
     const plan = calculateMonthlyFulfillmentPlan(row, selectedBias);
 
     console.log("Yield Inputs:", yieldMap);
@@ -162,6 +163,19 @@ export default function DealerDashboard() {
       Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
+    };
+  });
+
+  const table4Data = filtered.map(device => {
+    const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+    return {
+      Serial_Number: device.Serial_Number,
+      totals: result?.totals || {
+        Black_Full_Cartridges_Required_365d: 0,
+        Cyan_Full_Cartridges_Required_365d: 0,
+        Magenta_Full_Cartridges_Required_365d: 0,
+        Yellow_Full_Cartridges_Required_365d: 0
+      }
     };
   });
 
@@ -423,6 +437,11 @@ export default function DealerDashboard() {
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
                 <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
+              </div>
+
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Monthly Fulfillment Plan</h2>
+                <Table4 data={table4Data} />
               </div>
 
               <div className="mt-10">

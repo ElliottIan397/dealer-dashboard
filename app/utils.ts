@@ -290,3 +290,88 @@ export function generateTable1Data(
     };
   });
 }
+
+
+export function calculateMonthlyFulfillmentPlanV2(device: any, bias: 'O' | 'R' | 'N', timeframeInMonths: number = 12) {
+  const daysPerMonth = 365 / 12;
+  const isColorDevice = device['Device_Type'] === 'Color';
+  const colors = isColorDevice ? ['K', 'C', 'M', 'Y'] : ['K'];
+
+  const safeParse = (val: any): number => {
+    if (typeof val === 'number') return val;
+    if (val === 'NULL' || val === 'NO SKU' || val === 'ADD YIELD') return NaN;
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? NaN : parsed;
+  };
+
+  const result: Record<string, number[]> = {
+    black: Array(12).fill(0),
+    cyan: Array(12).fill(0),
+    magenta: Array(12).fill(0),
+    yellow: Array(12).fill(0)
+  };
+
+  const fieldMap: Record<string, { pagesLeft: string; daysLeft: string; resultKey: string }> = {
+    K: {
+      pagesLeft: 'Black_Pages_Left',
+      daysLeft: 'Black_Days_Left',
+      resultKey: 'black'
+    },
+    C: {
+      pagesLeft: 'Cyan_Pages_Left',
+      daysLeft: 'Cyan_Days_Left',
+      resultKey: 'cyan'
+    },
+    M: {
+      pagesLeft: 'Magenta_Pages_Left',
+      daysLeft: 'Magenta_Days_Left',
+      resultKey: 'magenta'
+    },
+    Y: {
+      pagesLeft: 'Yellow_Pages_Left',
+      daysLeft: 'Yellow_Days_Left',
+      resultKey: 'yellow'
+    }
+  };
+
+  colors.forEach(color => {
+    const map = fieldMap[color];
+    const pagesLeftRaw = device[map.pagesLeft];
+    const daysLeftRaw = device[map.daysLeft];
+    const yieldField = `${bias}_${color}_Yield`;
+    const replYieldRaw = device[yieldField];
+
+    const pagesLeft = safeParse(pagesLeftRaw);
+    const daysLeft = safeParse(daysLeftRaw);
+    const replYield = safeParse(replYieldRaw);
+
+    if (isNaN(pagesLeft) || isNaN(daysLeft) || isNaN(replYield) || pagesLeft <= 0 || daysLeft <= 0) {
+      return;
+    }
+
+    const dailyDepletion = pagesLeft / daysLeft;
+    let pointer = daysLeft;
+    let first = true;
+    const timeLimit = timeframeInMonths * daysPerMonth;
+
+    while (pointer < timeLimit) {
+      const thisYield = first ? pagesLeft : replYield;
+      const depletionDays = thisYield / dailyDepletion;
+      const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
+      result[map.resultKey][monthIdx]++;
+
+      pointer += depletionDays;
+      first = false;
+    }
+  });
+
+  return {
+    totals: {
+      Black_Full_Cartridges_Required_365d: result.black.reduce((a, b) => a + b, 0),
+      Cyan_Full_Cartridges_Required_365d: result.cyan.reduce((a, b) => a + b, 0),
+      Magenta_Full_Cartridges_Required_365d: result.magenta.reduce((a, b) => a + b, 0),
+      Yellow_Full_Cartridges_Required_365d: result.yellow.reduce((a, b) => a + b, 0)
+    },
+    monthly: result
+  };
+}
