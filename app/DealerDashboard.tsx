@@ -167,24 +167,68 @@ export default function DealerDashboard() {
   });
 
 
-  let table4Data: any[] = [];
+type DevicePlan = {
+  Serial_Number: string;
+  totals: {
+    Black_Full_Cartridges_Required_365d: number;
+    Cyan_Full_Cartridges_Required_365d: number;
+    Magenta_Full_Cartridges_Required_365d: number;
+    Yellow_Full_Cartridges_Required_365d: number;
+  };
+};
 
-  try {
-    table4Data = filtered.map(device => {
-      const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
-      return {
-        Serial_Number: device.Serial_Number,
-        totals: result?.totals || {
-          Black_Full_Cartridges_Required_365d: 0,
-          Cyan_Full_Cartridges_Required_365d: 0,
-          Magenta_Full_Cartridges_Required_365d: 0,
-          Yellow_Full_Cartridges_Required_365d: 0
+  const [table4Data, setTable4Data] = useState<DevicePlan[]>([]);
+
+useEffect(() => {
+  let isCancelled = false;
+
+  const processData = async () => {
+    const chunkSize = 500;
+    const results: DevicePlan[] = [];
+
+    for (let i = 0; i < filtered.length; i += chunkSize) {
+      const chunk = filtered.slice(i, i + chunkSize);
+      const chunkResults = chunk.map(device => {
+        try {
+          const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+          return {
+            Serial_Number: device.Serial_Number,
+            totals: result?.totals || {
+              Black_Full_Cartridges_Required_365d: 0,
+              Cyan_Full_Cartridges_Required_365d: 0,
+              Magenta_Full_Cartridges_Required_365d: 0,
+              Yellow_Full_Cartridges_Required_365d: 0,
+            }
+          };
+        } catch (err) {
+          console.error("Fulfillment calc error:", err);
+          return {
+            Serial_Number: device.Serial_Number,
+            totals: {
+              Black_Full_Cartridges_Required_365d: 0,
+              Cyan_Full_Cartridges_Required_365d: 0,
+              Magenta_Full_Cartridges_Required_365d: 0,
+              Yellow_Full_Cartridges_Required_365d: 0,
+            }
+          };
         }
-      };
-    });
-  } catch (err) {
-    console.error("Error building Table4 data:", err);
-  }
+      });
+
+      if (!isCancelled) {
+        results.push(...chunkResults);
+        setTable4Data([...results]); // progressive updates
+      }
+
+      await new Promise(res => setTimeout(res, 10)); // allow UI to breathe
+    }
+  };
+
+  processData();
+
+  return () => {
+    isCancelled = true;
+  };
+}, [filtered, selectedBias, selectedMonths]);
 
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
