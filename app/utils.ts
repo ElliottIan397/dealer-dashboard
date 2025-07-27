@@ -322,7 +322,7 @@ export function generateTable1Data(
   });
 }
 
-/*
+
 export function calculateMonthlyFulfillmentPlanV2(device: any, bias: 'O' | 'R' | 'N', timeframeInMonths: number = 12) {
   const daysPerMonth = 365 / 12;
   const isColorDevice = device['Device_Type'] === 'Color';
@@ -406,4 +406,3 @@ export function calculateMonthlyFulfillmentPlanV2(device: any, bias: 'O' | 'R' |
     monthly: result
   };
 }
-  */
