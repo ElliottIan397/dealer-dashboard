@@ -20,7 +20,7 @@ import {
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
 import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
-import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
+//import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -166,6 +166,7 @@ export default function DealerDashboard() {
     };
   });
 
+  /*
   const table4Data = filtered.map(device => {
     const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
     return {
@@ -178,7 +179,7 @@ export default function DealerDashboard() {
       }
     };
   });
-
+*/
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
@@ -439,11 +440,12 @@ export default function DealerDashboard() {
                 <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
               </div>
 
+{/*
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Monthly Fulfillment Plan</h2>
                 <Table4 data={table4Data} />
               </div>
-
+*/}
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
                 <Table2 data={table2Data} />
