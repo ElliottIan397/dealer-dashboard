@@ -20,7 +20,7 @@ import {
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
 import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
-//import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
+import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -166,20 +166,26 @@ export default function DealerDashboard() {
     };
   });
 
-  /*
-  const table4Data = filtered.map(device => {
-    const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
-    return {
-      Serial_Number: device.Serial_Number,
-      totals: result?.totals || {
-        Black_Full_Cartridges_Required_365d: 0,
-        Cyan_Full_Cartridges_Required_365d: 0,
-        Magenta_Full_Cartridges_Required_365d: 0,
-        Yellow_Full_Cartridges_Required_365d: 0
-      }
-    };
-  });
-*/
+
+  let table4Data: any[] = [];
+
+  try {
+    table4Data = filtered.map(device => {
+      const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+      return {
+        Serial_Number: device.Serial_Number,
+        totals: result?.totals || {
+          Black_Full_Cartridges_Required_365d: 0,
+          Cyan_Full_Cartridges_Required_365d: 0,
+          Magenta_Full_Cartridges_Required_365d: 0,
+          Yellow_Full_Cartridges_Required_365d: 0
+        }
+      };
+    });
+  } catch (err) {
+    console.error("Error building Table4 data:", err);
+  }
+
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
     Serial_Number: row.Serial_Number,
