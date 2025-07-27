@@ -440,12 +440,12 @@ export default function DealerDashboard() {
                 <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
               </div>
 
-{/*
+
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Monthly Fulfillment Plan</h2>
-                <Table4 data={table4Data} />
+                <Table4 data={[]} />
               </div>
-*/}
+
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Contract Terms & Risk Analysis</h2>
                 <Table2 data={table2Data} />
