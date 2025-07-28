@@ -99,6 +99,17 @@ export default function DealerDashboard() {
 
   const customerOptions = ["All", ...customers];
 
+  type DevicePlan = {
+    Serial_Number: string;
+    totals: {
+      Black_Full_Cartridges_Required_365d: number;
+      Cyan_Full_Cartridges_Required_365d: number;
+      Magenta_Full_Cartridges_Required_365d: number;
+      Yellow_Full_Cartridges_Required_365d: number;
+    };
+  };
+
+  const [table4Data, setTable4Data] = useState<DevicePlan[]>([]);
 
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
@@ -167,68 +178,58 @@ export default function DealerDashboard() {
   });
 
 
-type DevicePlan = {
-  Serial_Number: string;
-  totals: {
-    Black_Full_Cartridges_Required_365d: number;
-    Cyan_Full_Cartridges_Required_365d: number;
-    Magenta_Full_Cartridges_Required_365d: number;
-    Yellow_Full_Cartridges_Required_365d: number;
-  };
-};
 
-  const [table4Data, setTable4Data] = useState<DevicePlan[]>([]);
 
-useEffect(() => {
-  let isCancelled = false;
+  useEffect(() => {
+    let isCancelled = false;
 
-  const processData = async () => {
-    const chunkSize = 500;
-    const results: DevicePlan[] = [];
+    const processData = async () => {
+      const chunkSize = 500;
+      const results: DevicePlan[] = [];
 
-    for (let i = 0; i < filtered.length; i += chunkSize) {
-      const chunk = filtered.slice(i, i + chunkSize);
-      const chunkResults = chunk.map(device => {
-        try {
-          const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
-          return {
-            Serial_Number: device.Serial_Number,
-            totals: result?.totals || {
-              Black_Full_Cartridges_Required_365d: 0,
-              Cyan_Full_Cartridges_Required_365d: 0,
-              Magenta_Full_Cartridges_Required_365d: 0,
-              Yellow_Full_Cartridges_Required_365d: 0,
-            }
-          };
-        } catch (err) {
-          console.error("Fulfillment calc error:", err);
-          return {
-            Serial_Number: device.Serial_Number,
-            totals: {
-              Black_Full_Cartridges_Required_365d: 0,
-              Cyan_Full_Cartridges_Required_365d: 0,
-              Magenta_Full_Cartridges_Required_365d: 0,
-              Yellow_Full_Cartridges_Required_365d: 0,
-            }
-          };
+      for (let i = 0; i < filtered.length; i += chunkSize) {
+        const chunk = filtered.slice(i, i + chunkSize);
+        const chunkResults = chunk.map(device => {
+          try {
+            const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+            return {
+              Serial_Number: device.Serial_Number,
+              totals: result?.totals || {
+                Black_Full_Cartridges_Required_365d: 0,
+                Cyan_Full_Cartridges_Required_365d: 0,
+                Magenta_Full_Cartridges_Required_365d: 0,
+                Yellow_Full_Cartridges_Required_365d: 0,
+              }
+            };
+          } catch (err) {
+            console.error("Fulfillment calc error:", err);
+            return {
+              Serial_Number: device.Serial_Number,
+              totals: {
+                Black_Full_Cartridges_Required_365d: 0,
+                Cyan_Full_Cartridges_Required_365d: 0,
+                Magenta_Full_Cartridges_Required_365d: 0,
+                Yellow_Full_Cartridges_Required_365d: 0,
+              }
+            };
+          }
+        });
+
+        if (!isCancelled) {
+          results.push(...chunkResults);
+          setTable4Data([...results]); // progressive updates
         }
-      });
 
-      if (!isCancelled) {
-        results.push(...chunkResults);
-        setTable4Data([...results]); // progressive updates
+        await new Promise(res => setTimeout(res, 10)); // allow UI to breathe
       }
+    };
 
-      await new Promise(res => setTimeout(res, 10)); // allow UI to breathe
-    }
-  };
+    processData();
 
-  processData();
-
-  return () => {
-    isCancelled = true;
-  };
-}, [filtered, selectedBias, selectedMonths]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [filtered, selectedBias, selectedMonths]);
 
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
