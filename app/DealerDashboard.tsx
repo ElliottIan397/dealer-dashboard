@@ -493,7 +493,7 @@ useEffect(() => {
 
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Monthly Fulfillment Plan</h2>
-                <Table4 data={[]} />
+                <Table4 data={table4Data} />
               </div>
 
               <div className="mt-10">
