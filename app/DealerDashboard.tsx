@@ -6,6 +6,7 @@ import ChartBlock from "./ChartBlock";
 import Table1 from "./Table1";
 import Table2 from "./Table2";
 import Table3 from "./Table3";
+import Table4 from './Table4';
 import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
@@ -19,7 +20,7 @@ import {
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
 import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
-
+import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -98,33 +99,95 @@ export default function DealerDashboard() {
 
   const customerOptions = ["All", ...customers];
 
+  type DevicePlan = {
+    Serial_Number: string;
+    totals: {
+      Black_Full_Cartridges_Required_365d: number;
+      Cyan_Full_Cartridges_Required_365d: number;
+      Magenta_Full_Cartridges_Required_365d: number;
+      Yellow_Full_Cartridges_Required_365d: number;
+    };
+  };
 
-  if (loading) return <div className="p-6 text-xl">Loading data...</div>;
+  const [table4Data, setTable4Data] = useState<DevicePlan[]>([]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    // if (loading) return <div className="p-6 text-xl">Loading data...</div>;
+
+    const processData = async () => {
+      const chunkSize = 500;
+      const results: DevicePlan[] = [];
+
+      for (let i = 0; i < filtered.length; i += chunkSize) {
+        const chunk = filtered.slice(i, i + chunkSize);
+        const chunkResults = chunk.map(device => {
+          try {
+            const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+            return {
+              Serial_Number: device.Serial_Number,
+              totals: result?.totals || {
+                Black_Full_Cartridges_Required_365d: 0,
+                Cyan_Full_Cartridges_Required_365d: 0,
+                Magenta_Full_Cartridges_Required_365d: 0,
+                Yellow_Full_Cartridges_Required_365d: 0,
+              }
+            };
+          } catch (err) {
+            console.error("Fulfillment calc error:", err);
+            return {
+              Serial_Number: device.Serial_Number,
+              totals: {
+                Black_Full_Cartridges_Required_365d: 0,
+                Cyan_Full_Cartridges_Required_365d: 0,
+                Magenta_Full_Cartridges_Required_365d: 0,
+                Yellow_Full_Cartridges_Required_365d: 0,
+              }
+            };
+          }
+        });
+
+        if (!isCancelled) {
+          results.push(...chunkResults);
+          setTable4Data([...results]); // progressive updates
+        }
+
+        await new Promise(res => setTimeout(res, 10)); // allow UI to breathe
+      }
+    };
+
+    processData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [filtered, selectedBias, selectedMonths]);
+if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
   const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
 
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
 
-    console.log("Row Volume Data:", {
-      black: row.Black_Annual_Volume,
-      color: row.Color_Annual_Volume,
-      type: row.Device_Type,
-    });
+    // console.log("Row Volume Data:", {
+      // black: row.Black_Annual_Volume,
+      // color: row.Color_Annual_Volume,
+      // type: row.Device_Type,
+    //});
 
 
     // Step 1: compute actual cartridge plan
     const yieldMap = {
-  black: parse(getBiasField(row, "K_Yield", selectedBias)),
-  cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
-  magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
-  yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
-};
+      black: parse(getBiasField(row, "K_Yield", selectedBias)),
+      cyan: parse(getBiasField(row, "C_Yield", selectedBias)),
+      magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
+      yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
+    };
     const plan = calculateMonthlyFulfillmentPlan(row, selectedBias);
 
-    console.log("Yield Inputs:", yieldMap);
+    // console.log("Yield Inputs:", yieldMap);
 
-    console.log("Fulfillment Plan:", JSON.stringify(plan));
+    // console.log("Fulfillment Plan:", JSON.stringify(plan));
 
     // Step 2: sum cartridges needed in selected months
     const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
@@ -164,6 +227,11 @@ export default function DealerDashboard() {
       Last_Updated: row.Last_Updated,
     };
   });
+
+
+
+
+
 
   const table2Data = filtered.map((row) => ({
     Monitor: row.Monitor,
@@ -423,6 +491,12 @@ export default function DealerDashboard() {
               <div className="mt-10">
                 <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
                 <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
+              </div>
+
+
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Monthly Fulfillment Plan</h2>
+                <Table4 data={table4Data} />
               </div>
 
               <div className="mt-10">

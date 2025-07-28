@@ -321,3 +321,103 @@ export function generateTable1Data(
     };
   });
 }
+
+
+export function calculateMonthlyFulfillmentPlanV2(
+  device: any,
+  bias: 'O' | 'R' | 'N',
+  timeframeInMonths: number = 12
+) {
+  const daysPerMonth = 365 / 12;
+  const isColorDevice = device['Device_Type'] === 'Color';
+  const colors = isColorDevice ? ['K', 'C', 'M', 'Y'] : ['K'];
+
+  const safeParse = (val: any): number => {
+    if (typeof val === 'number') return val;
+    if (val === 'NULL' || val === 'NO SKU' || val === 'ADD YIELD') return NaN;
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? NaN : parsed;
+  };
+
+  const result: Record<string, number[]> = {
+    black: Array(12).fill(0),
+    cyan: Array(12).fill(0),
+    magenta: Array(12).fill(0),
+    yellow: Array(12).fill(0)
+  };
+
+  const fieldMap: Record<string, { pagesLeft: string; daysLeft: string; resultKey: string; coverage: string }> = {
+    K: {
+      pagesLeft: 'Black_Pages_Left',
+      daysLeft: 'Black_Days_Left',
+      resultKey: 'black',
+      coverage: 'Black_Page_Coverage_Percent'
+    },
+    C: {
+      pagesLeft: 'Cyan_Pages_Left',
+      daysLeft: 'Cyan_Days_Left',
+      resultKey: 'cyan',
+      coverage: 'Cyan_Page_Coverage_Percent'
+    },
+    M: {
+      pagesLeft: 'Magenta_Pages_Left',
+      daysLeft: 'Magenta_Days_Left',
+      resultKey: 'magenta',
+      coverage: 'Magenta_Page_Coverage_Percent'
+    },
+    Y: {
+      pagesLeft: 'Yellow_Pages_Left',
+      daysLeft: 'Yellow_Days_Left',
+      resultKey: 'yellow',
+      coverage: 'Yellow_Page_Coverage_Percent'
+    }
+  };
+
+  colors.forEach(color => {
+    const map = fieldMap[color];
+    const pagesLeft = safeParse(device[map.pagesLeft]);
+    const daysLeft = safeParse(device[map.daysLeft]);
+    const replYield = safeParse(device[`${bias}_${color}_Yield`]);
+    const coverage = safeParse(device[map.coverage]);
+
+    if (
+      isNaN(pagesLeft) || isNaN(daysLeft) || pagesLeft <= 0 || daysLeft <= 0
+    ) {
+      return;
+    }
+
+    const dailyDepletion = pagesLeft / daysLeft;
+    let pointer = daysLeft;
+    const timeLimit = timeframeInMonths * daysPerMonth;
+    let first = true;
+
+    while (pointer < timeLimit) {
+      let thisYield: number;
+
+      if (first) {
+        thisYield = pagesLeft;
+      } else {
+        if (isNaN(replYield) || isNaN(coverage) || coverage <= 0) break;
+        const baseYield = color === 'K' ? replYield : replYield * 3;
+        thisYield = baseYield * (0.05 / (coverage / 100));
+      }
+
+      const depletionDays = thisYield / dailyDepletion;
+      pointer += depletionDays;
+      if (pointer > timeLimit) break; // ensure we don't over-count
+      const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
+      result[map.resultKey][monthIdx]++;
+      first = false;
+    }
+  });
+
+  return {
+    totals: {
+      Black_Full_Cartridges_Required_365d: result.black.reduce((a, b) => a + b, 0),
+      Cyan_Full_Cartridges_Required_365d: result.cyan.reduce((a, b) => a + b, 0),
+      Magenta_Full_Cartridges_Required_365d: result.magenta.reduce((a, b) => a + b, 0),
+      Yellow_Full_Cartridges_Required_365d: result.yellow.reduce((a, b) => a + b, 0)
+    },
+    monthly: result
+  };
+}
