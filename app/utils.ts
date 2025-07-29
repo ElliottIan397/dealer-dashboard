@@ -233,6 +233,7 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
     const yieldField = `${bias}_${color}_Yield`;
     const replYield = safeParse(device[yieldField]);
 
+    /*
     if (isNaN(level) || isNaN(pagesLeft) || isNaN(replYield) || level <= 0 || usage <= 0) {
       console.warn('⚠️ Skipping cartridge due to invalid inputs', {
         color: map.resultKey,
@@ -252,6 +253,7 @@ export function calculateMonthlyFulfillmentPlan(device: any, bias: 'O' | 'R' | '
       });
       return;
     }
+      */
 
     const inferredYield = pagesLeft / (level * (coverage / 100));
     const adjustedYield = (y: number) => y * (5 / coverage);
@@ -332,6 +334,8 @@ export function calculateMonthlyFulfillmentPlanV2(
   const isColorDevice = device['Device_Type'] === 'Color';
   const colors = isColorDevice ? ['K', 'C', 'M', 'Y'] : ['K'];
 
+  console.log(`✅ Table 4 active for device: ${device.Serial_Number}`);
+
   const safeParse = (val: any): number => {
     if (typeof val === 'number') return val;
     if (val === 'NULL' || val === 'NO SKU' || val === 'ADD YIELD') return NaN;
@@ -379,12 +383,47 @@ export function calculateMonthlyFulfillmentPlanV2(
     const daysLeft = safeParse(device[map.daysLeft]);
     const replYield = safeParse(device[`${bias}_${color}_Yield`]);
     const coverage = safeParse(device[map.coverage]);
+    const colorLevelMap: Record<string, string> = {
+      K: 'Black_Level',
+      C: 'Cyan_Level',
+      M: 'Magenta_Level',
+      Y: 'Yellow_Level'
+    };
+    const levelField = colorLevelMap[color];
+    const reportedLevel = safeParse(device[levelField]);
+
+    console.log(`📦 Table 4 cartridge debug — ${color}`, {
+      Serial: device.Serial_Number,
+      color: map.resultKey,
+      pagesLeftRaw: device[map.pagesLeft],
+      daysLeftRaw: device[map.daysLeft],
+      yieldRaw: device[`${bias}_${color}_Yield`],
+      coverageRaw: device[map.coverage],
+      parsedPagesLeft: pagesLeft,
+      parsedDaysLeft: daysLeft,
+      parsedYield: replYield,
+      parsedCoverage: coverage,
+      reportedLevel: reportedLevel
+    });
 
     if (
       isNaN(pagesLeft) || isNaN(daysLeft) || pagesLeft <= 0 || daysLeft <= 0
     ) {
+      console.warn('⚠️ Table 4: Skipping cartridge due to invalid inputs', {
+        color: map.resultKey,
+        sku: replYield,
+        pagesLeftRaw: device[map.pagesLeft],
+        daysLeftRaw: device[map.daysLeft],
+        parsedPagesLeft: pagesLeft,
+        parsedDaysLeft: daysLeft,
+        coverageRaw: device[map.coverage],
+        parsedCoverage: coverage,
+        yieldRaw: device[`${bias}_${color}_Yield`],
+        parsedYield: replYield
+      });
       return;
     }
+
 
     const dailyDepletion = pagesLeft / daysLeft;
     let pointer = daysLeft;
@@ -395,20 +434,35 @@ export function calculateMonthlyFulfillmentPlanV2(
       let thisYield: number;
 
       if (first) {
-        thisYield = pagesLeft;
+        pointer = daysLeft;
+        first = false;
+        continue;
       } else {
         if (isNaN(replYield) || isNaN(coverage) || coverage <= 0) break;
         const baseYield = color === 'K' ? replYield : replYield * 3;
-        thisYield = baseYield * (0.05 / (coverage / 100));
+        thisYield = baseYield * (0.05 / (coverage));
       }
 
-      const depletionDays = thisYield / dailyDepletion;
-      pointer += depletionDays;
-      if (pointer > timeLimit) break; // ensure we don't over-count
+      console.log('🧪 color identifier:', color);
+
+      const isColor = color !== 'K';
+      const dailyDepletion = pagesLeft / daysLeft;
+      //const adjustedDailyDepletion = color === 'K' ? dailyDepletion : dailyDepletion / 3;
+      const adjustedDailyDepletion = isColor ? dailyDepletion / 3 : dailyDepletion;
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
+      console.log(`📍 ${color} | pointer: ${pointer.toFixed(2)} | thisYield: ${thisYield.toFixed(2)} | adjDailyDepletion: ${adjustedDailyDepletion.toFixed(2)} | monthIdx: ${monthIdx}`);
       result[map.resultKey][monthIdx]++;
+      pointer += thisYield / adjustedDailyDepletion as any;
+      if (pointer > timeLimit) break;
       first = false;
     }
+  });
+
+  console.log(`🧾 Table 4 fulfillment plan for ${device.Serial_Number}`, {
+    black: result.black,
+    cyan: result.cyan,
+    magenta: result.magenta,
+    yellow: result.yellow
   });
 
   return {
