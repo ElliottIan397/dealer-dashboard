@@ -19,8 +19,9 @@ import {
 
 import { DASHBOARD_MODE } from "./config";
 import { useSearchParams } from "next/navigation";
-import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
+//import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
 import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
+import type { McarpRow } from "./types";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -68,6 +69,7 @@ export default function DealerDashboard() {
       setSelectedContractType("All");
     } else if (viewMode === "subscription") {
       setSelectedContractType("T");
+      setSelectedMonths(12);
     }
   }, [viewMode]);
 
@@ -162,17 +164,20 @@ export default function DealerDashboard() {
       isCancelled = true;
     };
   }, [filtered, selectedBias, selectedMonths]);
-if (loading) return <div className="p-6 text-xl">Loading data...</div>;
+  if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
-  const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
+  //const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
+
 
   const table1Data = filtered.map((row) => {
     const getVal = (field: string) => getBiasField(row, field, selectedBias);
 
+    //const contractOnly = table1Data.filter((row) => row.Contract_Status === "C") as McarpRow[];
+
     // console.log("Row Volume Data:", {
-      // black: row.Black_Annual_Volume,
-      // color: row.Color_Annual_Volume,
-      // type: row.Device_Type,
+    // black: row.Black_Annual_Volume,
+    // color: row.Color_Annual_Volume,
+    // type: row.Device_Type,
     //});
 
 
@@ -183,31 +188,65 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
       magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
       yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
     };
-    const plan = calculateMonthlyFulfillmentPlan(row, selectedBias);
+    const plan = calculateMonthlyFulfillmentPlanV2(row, selectedBias, selectedMonths);
 
     // console.log("Yield Inputs:", yieldMap);
 
     // console.log("Fulfillment Plan:", JSON.stringify(plan));
 
     // Step 2: sum cartridges needed in selected months
-    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const blackCartridges = plan.monthly.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.monthly.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.monthly.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.monthly.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
 
     const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
 
-    const unitSP = getVal("Twelve_Month_Transactional_SP") /
-      (getVal("Black_Full_Cartridges_Required_365d") +
-        getVal("Cyan_Full_Cartridges_Required_365d") +
-        getVal("Magenta_Full_Cartridges_Required_365d") +
-        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+    const biasPrefix = selectedBias === "O" ? "" : selectedBias + "_";
 
-    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
-      (getVal("Black_Full_Cartridges_Required_365d") +
-        getVal("Cyan_Full_Cartridges_Required_365d") +
-        getVal("Magenta_Full_Cartridges_Required_365d") +
-        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const getPrice = (type: "Buy" | "Sell", color?: string): number => {
+      if (!color) return parse(getVal(`${biasPrefix}${type}_Price`)) || 0;
+      const suffix = type === "Buy" ? "Cost" : "SP";
+      const key = `${biasPrefix}${capitalize(color)}_Cartridge_${suffix}`;
+      return parse(getVal(key)) || 0;
+    };
+
+    const fulfillmentCost =
+      blackCartridges * getPrice("Buy") +
+      cyanCartridges * getPrice("Buy", "Cyan") +
+      magentaCartridges * getPrice("Buy", "Magenta") +
+      yellowCartridges * getPrice("Buy", "Yellow");
+
+    const transactionalSP =
+      blackCartridges * getPrice("Sell") +
+      cyanCartridges * getPrice("Sell", "Cyan") +
+      magentaCartridges * getPrice("Sell", "Magenta") +
+      yellowCartridges * getPrice("Sell", "Yellow");
+
+    console.log("CARTRIDGE REVENUE DEBUG", {
+      Serial: row.Serial_Number,
+      selectedBias,
+      blackCartridges,
+      cyanCartridges,
+      magentaCartridges,
+      yellowCartridges,
+      Buy: {
+        Black: getPrice("Buy"),
+        Cyan: getPrice("Buy", "Cyan"),
+        Magenta: getPrice("Buy", "Magenta"),
+        Yellow: getPrice("Buy", "Yellow"),
+      },
+      Sell: {
+        Black: getPrice("Sell"),
+        Cyan: getPrice("Sell", "Cyan"),
+        Magenta: getPrice("Sell", "Magenta"),
+        Yellow: getPrice("Sell", "Yellow"),
+      },
+      fulfillmentCost,
+      transactionalSP,
+    });
 
     return {
       Monitor: row.Monitor,
@@ -220,16 +259,18 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
       Cyan_Full_Cartridges_Required_365d: cyanCartridges,
       Magenta_Full_Cartridges_Required_365d: magentaCartridges,
       Yellow_Full_Cartridges_Required_365d: yellowCartridges,
-      Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
-      Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
+      Twelve_Month_Transactional_SP: +transactionalSP.toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +fulfillmentCost.toFixed(2),
       Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
     };
   });
 
-
-
+  // 2. Define contractOnly *after* table1Data is built
+  const contractOnly = table1Data.filter(
+    (row) => row.Contract_Status === "C"
+  ) as McarpRow[];
 
 
 
@@ -324,7 +365,8 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
           <select
             value={selectedMonths}
             onChange={(e) => setSelectedMonths(Number(e.target.value))}
-            className="p-2 border border-gray-300 rounded w-48"
+            disabled={viewMode === "subscription"}
+            className="p-2 border border-gray-300 rounded w-48 bg-gray-100 text-gray-500 cursor-not-allowed"
           >
             {[...Array(12)].map((_, i) => (
               <option key={i + 1} value={i + 1}>
@@ -379,14 +421,14 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
       </div>
 
       {viewMode === "risk" && (
-        <RiskMarginTable
-          filtered={
-            selectedCustomer === "All"
-              ? filtered                       // all rows
-              : filtered.filter(r => r.Monitor === selectedCustomer)  // chosen customer only
-          }
-          bias={selectedBias}
-        />
+<RiskMarginTable
+  filtered={
+    selectedCustomer === "All"
+      ? table1Data as McarpRow[]
+      : (table1Data.filter(r => r.Monitor === selectedCustomer) as McarpRow[])
+  }
+  bias={selectedBias}
+/>
       )}
       {viewMode === "vendor" && (
         <div className="mt-10">
@@ -405,7 +447,7 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
           <h2 className="text-xl font-semibold mb-4">Subscription Plan Summary</h2>
           <div className="mb-6">
             <ChartBlock
-              filtered={filtered}
+              filtered={table1Data as McarpRow[]}       // ✅ fixed: use enriched data
               contractOnly={contractOnly}
               bias={selectedBias}
               contractType={selectedContractType}
@@ -463,8 +505,8 @@ if (loading) return <div className="p-6 text-xl">Loading data...</div>;
             <ChartBlock
               filtered={
                 selectedCustomer === "All"
-                  ? filtered
-                  : filtered.filter(row => row.Monitor === selectedCustomer)
+                  ? (table1Data as McarpRow[])
+                  : (table1Data.filter(row => row.Monitor === selectedCustomer) as McarpRow[])
               }
               contractOnly={contractOnly}
               bias={selectedBias}

@@ -18,8 +18,8 @@ import type { McarpRow } from "./types";
 import { ChartBlockProps } from "./types";
 import { calculateSubscriptionCost, calculateSubscriptionRevenue, getBiasField } from "./utils";
 
-export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode, 
-  monoCpp, colorCpp, 
+export default function ChartBlock({ filtered, contractOnly, bias, contractType, viewMode,
+  monoCpp, colorCpp,
   includeDCA, includeJITR, includeContract, includeQR, includeESW, markupOverride, }: ChartBlockProps) {
   console.log("ChartBlock: contractType=", contractType, "viewMode=", viewMode);
   if (!filtered || filtered.length === 0) {
@@ -36,19 +36,50 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
   const blackVol = total(filtered.map((r: McarpRow) => r.Black_Annual_Volume));
   const colorVol = total(filtered.map((r: McarpRow) => r.Color_Annual_Volume));
 
+  const v2Enriched = filtered.filter((r) =>
+    r.Twelve_Month_Transactional_SP !== undefined &&
+    r.Twelve_Month_Transactional_SP > 0 &&
+    r.Twelve_Month_Fulfillment_Cost !== undefined
+  );
+
+  console.log("Raw filtered rows:", filtered.map(r => ({
+    SN: r.Serial_Number,
+    Status: r.Contract_Status,
+    SP: r.Twelve_Month_Transactional_SP,
+  })));
+
   const transactionalDevices = contractType === "C"
-  ? [...(contractOnly ?? [])]
-  : [...filtered.filter((r: McarpRow) => r.Contract_Status === "T")];
+    ? [...(contractOnly ?? [])]
+    : [...v2Enriched.filter((r: McarpRow) => r.Contract_Status === "T")];
+
+  //const transactionalDevices = [...(contractOnly ?? [])];
 
   const contractDevices = filtered.filter((r: McarpRow) => r.Contract_Status === "C");
 
-  const transactionalSP = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias)));
-  const transactionalCost = total(transactionalDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
+  console.log("ChartBlock: SP per row", transactionalDevices.map((r) => ({
+    SN: r.Serial_Number,
+    SP: r.Twelve_Month_Transactional_SP,
+    enriched: Object.keys(r).includes("Twelve_Month_Transactional_SP")
+  })));
+
+  const transactionalSP = total(transactionalDevices.map((r) => r.Twelve_Month_Transactional_SP ?? 0));
+  const transactionalCost = total(transactionalDevices.map((r) => r.Twelve_Month_Fulfillment_Cost ?? 0));
   const transactionalGM = transactionalSP > 0 ? ((transactionalSP - transactionalCost) / transactionalSP) * 100 : 0;
   const transactionalGMdollar = transactionalSP - transactionalCost;
   const avgTransactionalMonthlyRevenue = transactionalDevices.length > 0
     ? transactionalSP / transactionalDevices.length / 12
     : 0;
+
+  console.log("Chart 2 Debug → Transactional Totals", {
+    devices: transactionalDevices.map((r) => ({
+      SN: r.Serial_Number,
+      SP: r.Twelve_Month_Transactional_SP,
+      Cost: r.Twelve_Month_Fulfillment_Cost
+    })),
+    totalSP: transactionalSP,
+    totalCost: transactionalCost,
+    GM: transactionalGM.toFixed(2) + "%",
+  });
 
   const contractRevenue = total(contractDevices.map((r) => r.Contract_Total_Revenue ?? 0));
   const contractCost = total(contractDevices.map((r) => getBiasField(r, "Twelve_Month_Fulfillment_Cost", bias)));
@@ -66,37 +97,37 @@ export default function ChartBlock({ filtered, contractOnly, bias, contractType,
     includeQR,
     includeESW,
   });
-const transactionalRevenue = total(
-  subscriptionDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias))
-);
+  const transactionalRevenue = total(
+    subscriptionDevices.map((r) => getBiasField(r, "Twelve_Month_Transactional_SP", bias))
+  );
 
-const getDefaultMarkup = (total: number): number => {
-  if (total < 1000) return 0.25;
-  if (total < 2000) return 0.2;
-  if (total < 3000) return 0.15;
-  if (total < 4000) return 0.1;
-  return 0.075;
-};
+  const getDefaultMarkup = (total: number): number => {
+    if (total < 1000) return 0.25;
+    if (total < 2000) return 0.2;
+    if (total < 3000) return 0.15;
+    if (total < 4000) return 0.1;
+    return 0.075;
+  };
 
-const defaultMarkup = getDefaultMarkup(transactionalRevenue);
-const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
-const markupAmount = transactionalRevenue * appliedMarkup;
+  const defaultMarkup = getDefaultMarkup(transactionalRevenue);
+  const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
+  const markupAmount = transactionalRevenue * appliedMarkup;
 
-const eswRateByRisk: Record<string, number> = {
-  Low: 6,
-  Moderate: 7,
-  High: 8.5,
-  Critical: 10,
-};
+  const eswRateByRisk: Record<string, number> = {
+    Low: 6,
+    Moderate: 7,
+    High: 8.5,
+    Critical: 10,
+  };
 
-const eswRevenue = includeESW
-  ? subscriptionDevices.reduce((sum, r) => {
+  const eswRevenue = includeESW
+    ? subscriptionDevices.reduce((sum, r) => {
       const risk = eswRateByRisk[r.Final_Risk_Level] ?? 7.5;
       return sum + risk * 12;
     }, 0)
-  : 0;
+    : 0;
 
-const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenue;
+  const totalSubscriptionRevenue = transactionalRevenue + markupAmount + eswRevenue;
 
   const subscriptionGM =
     totalSubscriptionRevenue > 0

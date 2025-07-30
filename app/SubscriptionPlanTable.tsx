@@ -6,7 +6,7 @@ import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
-import { calculateMonthlyFulfillmentPlan, parse } from "@/app/utils";
+import { calculateMonthlyFulfillmentPlanV2, parse } from "@/app/utils";
 import { useMemo } from "react";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
@@ -125,31 +125,43 @@ export default function SubscriptionPlanTable({
       magenta: parse(getBiasField(row, "M_Yield", bias)),
       yellow: parse(getBiasField(row, "Y_Yield", bias)),
     };
-    const plan = calculateMonthlyFulfillmentPlan(row, bias);
+    const plan = calculateMonthlyFulfillmentPlanV2(row, bias, selectedMonths);
 
     console.log("Yield Inputs:", yieldMap);
 
     console.log("Fulfillment Plan:", JSON.stringify(plan));
 
     // Step 2: sum cartridges needed in selected months
-    const blackCartridges = plan.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const cyanCartridges = plan.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const magentaCartridges = plan.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
-    const yellowCartridges = plan.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const blackCartridges = plan.monthly.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const cyanCartridges = plan.monthly.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const magentaCartridges = plan.monthly.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+    const yellowCartridges = plan.monthly.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
 
     const totalCartridges = blackCartridges + cyanCartridges + magentaCartridges + yellowCartridges;
 
-    const unitSP = getVal("Twelve_Month_Transactional_SP") /
-      (getVal("Black_Full_Cartridges_Required_365d") +
-        getVal("Cyan_Full_Cartridges_Required_365d") +
-        getVal("Magenta_Full_Cartridges_Required_365d") +
-        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+    const biasPrefix = bias === "O" ? "" : bias + "_"; // O = no prefix
 
-    const unitCost = getVal("Twelve_Month_Fulfillment_Cost") /
-      (getVal("Black_Full_Cartridges_Required_365d") +
-        getVal("Cyan_Full_Cartridges_Required_365d") +
-        getVal("Magenta_Full_Cartridges_Required_365d") +
-        getVal("Yellow_Full_Cartridges_Required_365d") || 1);
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const getPrice = (type: "Buy" | "Sell", color?: string): number => {
+      if (!color) return parse(getVal(`${biasPrefix}${type}_Price`)) || 0;
+      const suffix = type === "Buy" ? "Cost" : "SP";
+      const key = `${biasPrefix}${capitalize(color)}_Cartridge_${suffix}`;
+      return parse(getVal(key)) || 0;
+    };
+
+    const fulfillmentCost =
+      blackCartridges * getPrice("Buy") +
+      cyanCartridges * getPrice("Buy", "Cyan") +
+      magentaCartridges * getPrice("Buy", "Magenta") +
+      yellowCartridges * getPrice("Buy", "Yellow");
+
+    const transactionalSP =
+      blackCartridges * getPrice("Sell") +
+      cyanCartridges * getPrice("Sell", "Cyan") +
+      magentaCartridges * getPrice("Sell", "Magenta") +
+      yellowCartridges * getPrice("Sell", "Yellow");
+
 
     return {
       Monitor: row.Monitor,
@@ -162,8 +174,8 @@ export default function SubscriptionPlanTable({
       Cyan_Full_Cartridges_Required_365d: cyanCartridges,
       Magenta_Full_Cartridges_Required_365d: magentaCartridges,
       Yellow_Full_Cartridges_Required_365d: yellowCartridges,
-      Twelve_Month_Transactional_SP: +(unitSP * totalCartridges).toFixed(2),
-      Twelve_Month_Fulfillment_Cost: +(unitCost * totalCartridges).toFixed(2),
+      Twelve_Month_Transactional_SP: +transactionalSP.toFixed(2),
+      Twelve_Month_Fulfillment_Cost: +fulfillmentCost.toFixed(2),
       Contract_Total_Revenue: +(row.Contract_Total_Revenue * (selectedMonths / 12)).toFixed(2),
       Contract_Status: row.Contract_Status,
       Last_Updated: row.Last_Updated,
@@ -299,7 +311,7 @@ export default function SubscriptionPlanTable({
           : 0;
 
       (["black", "cyan", "magenta", "yellow"] as const).forEach((color) => {
-        const monthlyPlan = row.calculatedFulfillmentPlan?.[color]?.[i] ?? 0;
+        const monthlyPlan = row.calculatedFulfillmentPlan?.monthly?.[color]?.[i] ?? 0;
         cartridgesPerMonth[i][color] += monthlyPlan;
         totalCostThisMonth += unitCost * monthlyPlan;
       });
