@@ -72,14 +72,21 @@ export default function VendorSummaryTable({ filtered, bias, colorFilter, manufa
 
       const options = getPriorityFields(color);
 
+      const colorKeyMap = {
+        Black: "Black_Full_Cartridges_Required_365d",
+        Cyan: "Cyan_Full_Cartridges_Required_365d",
+        Magenta: "Magenta_Full_Cartridges_Required_365d",
+        Yellow: "Yellow_Full_Cartridges_Required_365d",
+      };
+
       for (const opt of options) {
-        const qty = row[opt.qty];
+        const qty = row.fulfillment?.totals?.[colorKeyMap[color as keyof typeof colorKeyMap]] ?? 0;
         const price = row[opt.price];
         const supplier = row[opt.supplier];
         const sku = row[opt.sku];
         const styleUsed = row[opt.origin];
 
-        const qtyValid = typeof qty === "number" && qty > 0;
+        const qtyValid = qty > 0;
         const priceValid = typeof price === "number" && price > 0;
         const supplierValid = supplier && supplier !== "Not Reqd";
         const styleValid = styleUsed && styleUsed !== "Not Reqd";

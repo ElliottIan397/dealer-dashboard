@@ -7,6 +7,7 @@ import { generateContract } from "./generateContract";
 import Table1 from "./Table1";
 import groupBy from "lodash/groupBy";
 import { calculateMonthlyFulfillmentPlanV2, parse } from "@/app/utils";
+import { getDefaultMarkup } from "@/app/utils";
 import { useMemo } from "react";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
@@ -17,7 +18,7 @@ const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
 };
 
 interface Props {
-  filtered: McarpRow[];
+  filtered: (McarpRow & { fulfillment?: any; Twelve_Month_Transactional_SP?: number })[];
   bias: "O" | "R" | "N";
   selectedCustomer: string;
   monoCpp: number;
@@ -193,17 +194,18 @@ export default function SubscriptionPlanTable({
   const totalColor = transactionalDevices.reduce((sum, r) => sum + (r.Color_Annual_Volume ?? 0), 0);
   const totalVolume = totalMono + totalColor || 1;
 
-  const defaultMarkup =
-    transactionalRevenue < 1000
-      ? 0.25
-      : transactionalRevenue < 2000
-        ? 0.2
-        : transactionalRevenue < 3000
-          ? 0.15
-          : transactionalRevenue < 4000
-            ? 0.1
-            : 0.075;
+  //const defaultMarkup =
+  //transactionalRevenue < 1000
+  //? 0.25
+  //: transactionalRevenue < 2000
+  //  ? 0.2
+  //  : transactionalRevenue < 3000
+  //    ? 0.15
+  //    : transactionalRevenue < 4000
+  //      ? 0.1
+  //      : 0.075;
 
+  const defaultMarkup = getDefaultMarkup(transactionalRevenue);
   const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
   const markupAmount = transactionalRevenue * appliedMarkup;
 
@@ -801,33 +803,43 @@ export default function SubscriptionPlanTable({
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.entries(groupBy(filtered, d => d.Monitor))
+                      {Object.entries(groupBy(table1Data, d => d.Monitor))  //do not change this line - it will cause a regression
+
                         .filter(([customer]) =>
                           searchCustomer === "" ||
                           customer.toLowerCase().includes(searchCustomer.toLowerCase())
                         )
-                        .map(([customer, devices]: [string, McarpRow[]]) => {
+                        .map(([customer, devices]: [string, any[]]) => {
+
                           const totalVolume = devices.reduce(
                             (sum, r) => sum + (r.Black_Annual_Volume ?? 0) + (r.Color_Annual_Volume ?? 0),
                             0
                           );
-                          const transactionalRevenue = devices.reduce(
-                            (sum, r) => sum + getBiasField(r, "Twelve_Month_Transactional_SP", bias),
-                            0
-                          );
-                          const defaultMarkup = transactionalRevenue < 1000 ? 0.25 :
-                            transactionalRevenue < 5000 ? 0.2 : 0.15;
-                          const markupAmount = transactionalRevenue * defaultMarkup;
+                          const transactionalRevenue = devices
+                            .filter(r => r.Contract_Status === "T")
+                            .reduce((sum, r) => {
+                              const annualSP = r.Twelve_Month_Transactional_SP ?? 0;
+                              return sum + annualSP;
+                            }, 0);
+
+                          const defaultMarkup = getDefaultMarkup(transactionalRevenue);
 
                           const eswRateByRisk = { Low: 6, Moderate: 7, High: 8.5, Critical: 10 };
                           const eswTotal = devices.reduce(
                             (sum, r) => sum + (eswRateByRisk[r.Final_Risk_Level as keyof typeof eswRateByRisk] ?? 7.5) * 12,
                             0
                           );
-                          const subscriptionRevenue = transactionalRevenue + markupAmount + eswTotal;
+                          const appliedMarkup = defaultMarkup + (markupOverride ?? 0);
+                          const subscriptionRevenue = transactionalRevenue * (1 + appliedMarkup);
                           const avgMonthly = subscriptionRevenue / 12;
 
                           const riskWeights = { Low: 0, Moderate: 1, High: 2, Critical: 3 };
+
+                          console.log("DEBUG FLEET DEVICES", devices.map(d => ({
+  Serial: d.Serial_Number,
+  Risk: d.Final_Risk_Level
+})));
+
                           const avgRiskScore = devices.reduce(
                             (sum, r) => sum + (riskWeights[r.Final_Risk_Level as keyof typeof riskWeights] ?? 1),
                             0

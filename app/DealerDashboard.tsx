@@ -249,10 +249,12 @@ export default function DealerDashboard() {
     });
 
     return {
+      ...row,
       Monitor: row.Monitor,
       Serial_Number: row.Serial_Number,
       Printer_Model: row.Printer_Model,
       Device_Type: row.Device_Type,
+      Final_Risk_Level: row.Final_Risk_Level,
       Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
       Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
       Black_Full_Cartridges_Required_365d: blackCartridges,
@@ -315,6 +317,46 @@ export default function DealerDashboard() {
     Yellow_Yield_Estimate: row.Yellow_Yield_Estimate,
     Last_Updated: row.Last_Updated,
   }));
+
+const vendorTableData = filteredForVendor.map((row) => {
+  const fulfillment = calculateMonthlyFulfillmentPlanV2(row, selectedBias, selectedMonths);
+  return {
+    ...row,
+    fulfillment,
+  };
+});
+
+const enriched = filtered.map(row => {
+  const plan = calculateMonthlyFulfillmentPlanV2(row, selectedBias, selectedMonths);
+
+  const black = plan.monthly.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+  const cyan = plan.monthly.cyan.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+  const magenta = plan.monthly.magenta.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+  const yellow = plan.monthly.yellow.slice(0, selectedMonths).reduce((a, b) => a + b, 0);
+
+  const sp = (type: "Black" | "Cyan" | "Magenta" | "Yellow") => {
+  const key = `${selectedBias === "O" ? "" : selectedBias + "_"}${type}_Cartridge_SP`;
+  return (row as any)[key] ?? 0;
+};
+
+  const totalSP =
+    black * sp("Black") +
+    cyan * sp("Cyan") +
+    magenta * sp("Magenta") +
+    yellow * sp("Yellow");
+
+  return {
+    ...row,
+    Twelve_Month_Transactional_SP: totalSP,
+    Final_Risk_Level: row.Final_Risk_Level, // <- explicitly carry forward
+  };
+});
+
+console.log("DEBUG ENRICHED:", enriched.map(r => ({
+  Monitor: r.Monitor,
+  Contract_Status: r.Contract_Status,
+  Twelve_Month_Transactional_SP: r.Twelve_Month_Transactional_SP,
+})));
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -434,7 +476,7 @@ export default function DealerDashboard() {
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
           <VendorSummaryTable
-            filtered={filteredForVendor}
+            filtered={vendorTableData}
             bias={selectedBias}
             colorFilter={selectedColor}
             manufacturerFilter={selectedManufacturer}
@@ -468,12 +510,16 @@ export default function DealerDashboard() {
             />
           </div>
 
-          <SubscriptionPlanTable
-            filtered={
-              selectedCustomer === "All"
-                ? filtered
-                : filtered.filter(row => row.Monitor === selectedCustomer)
-            }
+
+
+<SubscriptionPlanTable
+  filtered={
+    selectedCustomer === "All"
+      ? enriched
+      : enriched.filter(row => row.Monitor === selectedCustomer)
+  }
+
+
             bias={selectedBias}
             selectedCustomer={selectedCustomer}
             setSelectedCustomer={setSelectedCustomer}

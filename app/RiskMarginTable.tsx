@@ -40,10 +40,10 @@ export default function RiskMarginTable({ filtered, bias }: Props) {
 
   const enrichedRows = filtered.map(row => {
     const revenue = row.Contract_Status === "T"
-  ? getBiasField(row, "Twelve_Month_Transactional_SP", bias)
-  : row.Contract_Total_Revenue ?? 0;
+      ? row.Twelve_Month_Transactional_SP ?? 0
+      : row.Contract_Total_Revenue ?? 0;
 
-const cost = getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias);
+    const cost = row.Twelve_Month_Fulfillment_Cost ?? 0;
     const gmDollar = revenue - cost;
     const offline = isStale(row.Last_Updated, latestDate, 5);
 
@@ -132,13 +132,13 @@ const cost = getBiasField(row, "Twelve_Month_Fulfillment_Cost", bias);
                   className={`inline-block w-3 h-3 rounded-full mr-2 align-middle ${row.Final_Risk_Level === "Critical"
                     ? "bg-red-500"
                     : row.Final_Risk_Level === "High"
-                    ? "bg-orange-400"
-                    : row.Final_Risk_Level === "Moderate"
-                    ? "bg-yellow-400"
-                    : row.Final_Risk_Level === "Low"
-                    ? "bg-green-500"
-                    : "bg-gray-400"
-                  }`}
+                      ? "bg-orange-400"
+                      : row.Final_Risk_Level === "Moderate"
+                        ? "bg-yellow-400"
+                        : row.Final_Risk_Level === "Low"
+                          ? "bg-green-500"
+                          : "bg-gray-400"
+                    }`}
                   title={row.Final_Risk_Level}
                 ></span>
                 {row.Final_Risk_Level}

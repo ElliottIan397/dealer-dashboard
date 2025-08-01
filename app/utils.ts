@@ -475,3 +475,11 @@ export function calculateMonthlyFulfillmentPlanV2(
     monthly: result
   };
 }
+
+export function getDefaultMarkup(transactionalRevenue: number): number {
+  if (transactionalRevenue < 1000) return 0.25;
+  if (transactionalRevenue < 2000) return 0.20;
+  if (transactionalRevenue < 3000) return 0.15;
+  if (transactionalRevenue < 4000) return 0.10;
+  return 0.075;
+}
