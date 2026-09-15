@@ -17,6 +17,16 @@ const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   return 0;
 };
 
+const getDeviceClass = (value?: string): "Class 1" | "Class 2" | null => {
+  if (value?.startsWith("Class 1")) return "Class 1";
+  if (value?.startsWith("Class 2")) return "Class 2";
+  return null;
+};
+
+const isHighUsageDevice = (value?: string): boolean => {
+  return value?.includes("High Usage") ?? false;
+};
+
 interface Props {
   filtered: (McarpRow & { fulfillment?: any; Twelve_Month_Transactional_SP?: number })[];
   bias: "O" | "R" | "N";
@@ -164,11 +174,12 @@ export default function SubscriptionPlanTable({
       yellowCartridges * getPrice("Sell", "Yellow");
 
 
-    return {
+   return {
       Monitor: row.Monitor,
       Serial_Number: row.Serial_Number,
       Printer_Model: row.Printer_Model,
       Device_Type: row.Device_Type,
+      Device_Class: row.Device_Class,
       Black_Annual_Volume: Math.round(row.Black_Annual_Volume * (selectedMonths / 12)),
       Color_Annual_Volume: Math.round(row.Color_Annual_Volume * (selectedMonths / 12)),
       Black_Full_Cartridges_Required_365d: blackCartridges,
@@ -225,7 +236,7 @@ export default function SubscriptionPlanTable({
   if (includeESW) {
     for (const device of transactionalDevices) {
       const riskLevel = device.Final_Risk_Level;
-      const deviceClass = device.Device_Class;
+      const deviceClass = getDeviceClass(device.Device_Class);
 
       if (!riskLevel || !deviceClass) {
         alert("Cannot calculate ESW: all devices must have a risk level and be tagged Class 1 or Class 2.");
@@ -912,7 +923,7 @@ export default function SubscriptionPlanTable({
 
               const rows = transactionalDevices.map((d) => {
                 const risk = d.Final_Risk_Level;
-                const deviceClass = d.Device_Class;
+                const deviceClass = getDeviceClass(d.Device_Class);
                 const rate =
                   deviceClass === "Class 2"
                     ? class2Rates[risk as keyof typeof class2Rates]
@@ -972,7 +983,7 @@ export default function SubscriptionPlanTable({
               <tbody>
                 {transactionalDevices.map((d, idx) => {
                   const risk = d.Final_Risk_Level;
-                  const deviceClass = d.Device_Class;
+                  const deviceClass = getDeviceClass(d.Device_Class);
                   const rate =
                     deviceClass === "Class 2"
                       ? class2Rates[risk as keyof typeof class2Rates]

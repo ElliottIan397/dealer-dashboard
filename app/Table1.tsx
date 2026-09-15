@@ -17,6 +17,7 @@ type Table1Row = {
   Serial_Number: string;
   Printer_Model: string;
   Device_Type: string;
+  Device_Class?: string;
   Black_Annual_Volume: number;
   Color_Annual_Volume: number;
   Black_Full_Cartridges_Required_365d: number;
@@ -127,7 +128,16 @@ export default function Table1({ data, bias, selectedMonths }: Props) {
                         {isStale(row.Last_Updated, latestDate, 5) && (
                           <span
                             className="w-2 h-2 bg-red-500 rounded-full"
-                            title={`Last updated: ${excelDateToJSDate(row.Last_Updated).toLocaleDateString()}`}
+                            title={`Last updated: ${excelDateToJSDate(
+                              row.Last_Updated
+                            ).toLocaleDateString()}`}
+                          ></span>
+                        )}
+
+                        {row.Device_Class?.includes("High Usage") && (
+                          <span
+                            className="w-2 h-2 bg-purple-500 rounded-full"
+                            title="High Usage Device"
                           ></span>
                         )}
                       </div>
