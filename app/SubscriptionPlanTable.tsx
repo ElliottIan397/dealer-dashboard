@@ -341,7 +341,7 @@ export default function SubscriptionPlanTable({
   const deviceUpperBound = Math.round(totalDevices * 1.1);
 
   const allDevicesTagged = transactionalDevices.every(
-    (d) => d.Device_Class === "Class 1" || d.Device_Class === "Class 2"
+    (d) => getDeviceClass(d.Device_Class) !== null
   );
 
   console.log("Device_Class check:", transactionalDevices.map(d => d.Device_Class));
