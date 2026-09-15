@@ -196,11 +196,17 @@ export default function SubscriptionPlanTable({
       magenta: parse(getBiasField(row, "M_Yield", bias)),
       yellow: parse(getBiasField(row, "Y_Yield", bias)),
     };
-    const plan = calculateMonthlyFulfillmentPlanV2(row, bias, selectedMonths);
+    const plan = calculateMonthlyFulfillmentPlanV2(
+      row,
+      bias,
+      selectedMonths,
+      highUsageConfig
+    );
 
     console.log("Yield Inputs:", yieldMap);
 
     console.log("Fulfillment Plan:", JSON.stringify(plan));
+
 
     // Step 2: sum cartridges needed in selected months
     const blackCartridges = plan.monthly.black.slice(0, selectedMonths).reduce((a, b) => a + b, 0);

@@ -153,6 +153,13 @@ interface FulfillmentPlan {
   yellow: number[];
 }
 
+export interface HighUsageProjectionConfig {
+  enabled: boolean;
+  usagePercent: number;
+  startDate: string;
+  endDate: string;
+}
+
 function getYieldMapForBias(row: any, bias: "O" | "R" | "N") {
   const prefix = `${bias}_`;
 
@@ -328,11 +335,97 @@ export function generateTable1Data(
 export function calculateMonthlyFulfillmentPlanV2(
   device: any,
   bias: 'O' | 'R' | 'N',
-  timeframeInMonths: number = 12
+  timeframeInMonths: number = 12,
+  highUsageConfig?: HighUsageProjectionConfig
 ) {
   const daysPerMonth = 365 / 12;
   const isColorDevice = device['Device_Type'] === 'Color';
   const colors = isColorDevice ? ['K', 'C', 'M', 'Y'] : ['K'];
+
+  const isHighUsageDevice =
+    device['Device_Class']?.includes('High Usage') ?? false;
+
+  const highUsageProjectionActive =
+    highUsageConfig?.enabled === true &&
+    isHighUsageDevice &&
+    highUsageConfig.usagePercent > 0 &&
+    highUsageConfig.startDate !== '' &&
+    highUsageConfig.endDate !== '';
+
+    const today = new Date();
+    const todayUTC = Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    );
+
+    const surgeStartDay = highUsageProjectionActive
+      ? Math.max(
+          0,
+          (Date.parse(`${highUsageConfig!.startDate}T00:00:00Z`) - todayUTC) /
+            86400000
+        )
+      : Infinity;
+
+    const surgeEndDay = highUsageProjectionActive
+      ? Math.max(
+          0,
+          (Date.parse(`${highUsageConfig!.endDate}T00:00:00Z`) - todayUTC) /
+            86400000 +
+            1
+        )
+      : Infinity;
+
+    const surgeMultiplier = highUsageProjectionActive
+      ? highUsageConfig!.usagePercent / 100
+      : 1;
+
+    const daysToConsume = (
+      startDay: number,
+      pagesToConsume: number,
+      normalDailyDepletion: number
+    ): number => {
+      if (pagesToConsume <= 0 || normalDailyDepletion <= 0) {
+        return Infinity;
+      }
+
+      let day = startDay;
+      let remainingPages = pagesToConsume;
+
+      // Normal usage before the surge.
+      if (day < surgeStartDay) {
+        const normalDaysAvailable = surgeStartDay - day;
+        const normalPagesAvailable =
+          normalDaysAvailable * normalDailyDepletion;
+
+        if (remainingPages <= normalPagesAvailable) {
+          return day + remainingPages / normalDailyDepletion;
+        }
+
+        remainingPages -= normalPagesAvailable;
+        day = surgeStartDay;
+      }
+
+      // Accelerated usage during the surge.
+      if (day < surgeEndDay) {
+        const surgeDailyDepletion =
+          normalDailyDepletion * surgeMultiplier;
+
+        const surgeDaysAvailable = surgeEndDay - day;
+        const surgePagesAvailable =
+          surgeDaysAvailable * surgeDailyDepletion;
+
+        if (remainingPages <= surgePagesAvailable) {
+          return day + remainingPages / surgeDailyDepletion;
+        }
+
+        remainingPages -= surgePagesAvailable;
+        day = surgeEndDay;
+      }
+
+      // Normal usage after the surge.
+      return day + remainingPages / normalDailyDepletion;
+    };  
 
   console.log(`✅ Table 4 active for device: ${device.Serial_Number}`);
 
@@ -425,16 +518,19 @@ export function calculateMonthlyFulfillmentPlanV2(
     }
 
 
-    const dailyDepletion = pagesLeft / daysLeft;
-    let pointer = daysLeft;
-    const timeLimit = timeframeInMonths * daysPerMonth;
-    let first = true;
+      const dailyDepletion = pagesLeft / daysLeft;
+
+      let pointer = highUsageProjectionActive
+        ? daysToConsume(0, pagesLeft, dailyDepletion)
+        : daysLeft;
+
+      const timeLimit = timeframeInMonths * daysPerMonth;
+      let first = true;
 
     while (pointer < timeLimit) {
       let thisYield: number;
 
       if (first) {
-        pointer = daysLeft;
         first = false;
         continue;
       } else {
@@ -452,7 +548,9 @@ export function calculateMonthlyFulfillmentPlanV2(
       const monthIdx = Math.min(Math.floor(pointer / daysPerMonth), 11);
       console.log(`📍 ${color} | pointer: ${pointer.toFixed(2)} | thisYield: ${thisYield.toFixed(2)} | adjDailyDepletion: ${adjustedDailyDepletion.toFixed(2)} | monthIdx: ${monthIdx}`);
       result[map.resultKey][monthIdx]++;
-      pointer += thisYield / adjustedDailyDepletion as any;
+      pointer = highUsageProjectionActive
+        ? daysToConsume(pointer, thisYield, adjustedDailyDepletion)
+        : pointer + thisYield / adjustedDailyDepletion;
       if (pointer > timeLimit) break;
       first = false;
     }
