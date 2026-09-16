@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { McarpRow } from "./types";
 import { safeCurrency } from "./utils";
 import { generateContract } from "./generateContract";
@@ -9,6 +9,9 @@ import groupBy from "lodash/groupBy";
 import { calculateMonthlyFulfillmentPlanV2, parse } from "@/app/utils";
 import { getDefaultMarkup } from "@/app/utils";
 import { useMemo } from "react";
+import HighUsageProjectionControls, {
+  HighUsageProjectionConfig,
+} from "./HighUsageProjectionControls";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -25,22 +28,6 @@ const getDeviceClass = (value?: string): "Class 1" | "Class 2" | null => {
 
 const isHighUsageDevice = (value?: string): boolean => {
   return value?.includes("High Usage") ?? false;
-};
-
-type HighUsageProjectionConfig = {
-  enabled: boolean;
-  usagePercent: number;
-  startDate: string;
-  endDate: string;
-};
-
-const HIGH_USAGE_STORAGE_KEY = "mcarp:highUsageProjection:uis_protect2";
-
-const DEFAULT_HIGH_USAGE_CONFIG: HighUsageProjectionConfig = {
-  enabled: false,
-  usagePercent: 250,
-  startDate: "",
-  endDate: "",
 };
 
 
@@ -66,6 +53,10 @@ interface Props {
   markupOverride: number | null;
   setMarkupOverride: React.Dispatch<React.SetStateAction<number | null>>;
   selectedMonths: number;
+  highUsageConfig: HighUsageProjectionConfig;
+  setHighUsageConfig: React.Dispatch<
+    React.SetStateAction<HighUsageProjectionConfig>
+  >;
 }
 
 const COSTS = {
@@ -98,56 +89,15 @@ export default function SubscriptionPlanTable({
   markupOverride,
   setMarkupOverride,
   selectedMonths,
+  highUsageConfig,
+  setHighUsageConfig,
 
-}: Props): React.JSX.Element {
+  }: Props): React.JSX.Element {
   const [showOpportunities, setShowOpportunities] = useState(false);
   const [searchCustomer, setSearchCustomer] = useState("");
   const [localSelectedCustomer, setLocalSelectedCustomer] = useState("All");
-
-  const [highUsageConfig, setHighUsageConfig] =
-    useState<HighUsageProjectionConfig>(DEFAULT_HIGH_USAGE_CONFIG);
-
-  const [highUsageConfigLoaded, setHighUsageConfigLoaded] =
-    useState(false);    
+    
   //const [bias, setBias] = useState<"O" | "R" | "N">("O");
-
-  useEffect(() => {
-    try {
-      const savedConfig = localStorage.getItem(HIGH_USAGE_STORAGE_KEY);
-
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-
-        setHighUsageConfig({
-          ...DEFAULT_HIGH_USAGE_CONFIG,
-          ...parsedConfig,
-        });
-      }
-    } catch (error) {
-      console.error(
-        "Unable to load High Usage Projection settings:",
-        error
-      );
-    } finally {
-      setHighUsageConfigLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!highUsageConfigLoaded) return;
-
-    try {
-      localStorage.setItem(
-        HIGH_USAGE_STORAGE_KEY,
-        JSON.stringify(highUsageConfig)
-      );
-    } catch (error) {
-      console.error(
-        "Unable to save High Usage Projection settings:",
-        error
-      );
-    }
-  }, [highUsageConfig, highUsageConfigLoaded]);
 
   const transactionalDevices = filtered.filter(row => row.Contract_Status === "T");
   const [showForm, setShowForm] = useState(false);
@@ -819,88 +769,10 @@ export default function SubscriptionPlanTable({
 
       {selectedCustomer !== "All" && showSummaryTable && (
         <div className="mt-10">
-          <div className="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-4">
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="highUsageEnabled"
-                  checked={highUsageConfig.enabled}
-                  onChange={(e) =>
-                    setHighUsageConfig((prev) => ({
-                      ...prev,
-                      enabled: e.target.checked,
-                    }))
-                  }
-                  className="h-4 w-4"
-                />
-                <label
-                  htmlFor="highUsageEnabled"
-                  className="font-semibold text-gray-800"
-                >
-                  High Usage Projection
-                </label>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
-                  Usage % of Normal
-                </label>
-                <input
-                  type="number"
-                  min="100"
-                  step="10"
-                  value={highUsageConfig.usagePercent}
-                  onChange={(e) =>
-                    setHighUsageConfig((prev) => ({
-                      ...prev,
-                      usagePercent: Number(e.target.value),
-                    }))
-                  }
-                  className="w-28 rounded border border-gray-300 bg-white px-2 py-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
-                  From
-                </label>
-                <input
-                  type="date"
-                  value={highUsageConfig.startDate}
-                  onChange={(e) =>
-                    setHighUsageConfig((prev) => ({
-                      ...prev,
-                      startDate: e.target.value,
-                    }))
-                  }
-                  className="rounded border border-gray-300 bg-white px-2 py-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
-                  Through
-                </label>
-                <input
-                  type="date"
-                  value={highUsageConfig.endDate}
-                  onChange={(e) =>
-                    setHighUsageConfig((prev) => ({
-                      ...prev,
-                      endDate: e.target.value,
-                    }))
-                  }
-                  className="rounded border border-gray-300 bg-white px-2 py-1"
-                />
-              </div>
-            </div>
-
-            <div className="mt-2 text-xs text-gray-500">
-              Applies only to devices designated High Usage. Projection settings do not
-              modify source meter data.
-            </div>
-          </div>
+          <HighUsageProjectionControls
+            config={highUsageConfig}
+            setConfig={setHighUsageConfig}
+          />
 
           <h2 className="text-xl font-semibold mb-4">Supplies Program Summary by Device</h2>
           <Table1

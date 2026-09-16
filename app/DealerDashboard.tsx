@@ -11,6 +11,9 @@ import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
 import { useMCARPData } from "./useMCARPData";
+import HighUsageProjectionControls, {
+  type HighUsageProjectionConfig,
+} from "./HighUsageProjectionControls";
 import {
   safeCurrency as formatCurrency,
   safePercent as formatPercent,
@@ -22,6 +25,15 @@ import { useSearchParams } from "next/navigation";
 //import { calculateMonthlyFulfillmentPlan } from "@/app/utils";
 import { calculateMonthlyFulfillmentPlanV2 } from "@/app/utils";
 import type { McarpRow } from "./types";
+
+const HIGH_USAGE_STORAGE_KEY = "mcarp:highUsageProjection:uis_protect2";
+
+const DEFAULT_HIGH_USAGE_CONFIG: HighUsageProjectionConfig = {
+  enabled: false,
+  usagePercent: 250,
+  startDate: "",
+  endDate: "",
+};
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -57,6 +69,50 @@ export default function DealerDashboard() {
   const [includeESW, setIncludeESW] = useState(false);
   const [markupOverride, setMarkupOverride] = useState<number | null>(null);
   const [selectedMonths, setSelectedMonths] = useState(12); // default to 12 months
+  const [highUsageConfig, setHighUsageConfig] =
+  useState<HighUsageProjectionConfig>(DEFAULT_HIGH_USAGE_CONFIG);
+
+  const [highUsageConfigLoaded, setHighUsageConfigLoaded] =
+    useState(false);
+
+  useEffect(() => {
+    try {
+      const savedConfig = localStorage.getItem(HIGH_USAGE_STORAGE_KEY);
+
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+
+        setHighUsageConfig({
+          ...DEFAULT_HIGH_USAGE_CONFIG,
+          ...parsedConfig,
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Unable to load High Usage Projection settings:",
+        error
+      );
+    } finally {
+      setHighUsageConfigLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!highUsageConfigLoaded) return;
+
+    try {
+      localStorage.setItem(
+        HIGH_USAGE_STORAGE_KEY,
+        JSON.stringify(highUsageConfig)
+      );
+    } catch (error) {
+      console.error(
+        "Unable to save High Usage Projection settings:",
+        error
+      );
+    }
+  }, [highUsageConfig, highUsageConfigLoaded]);
+    
   const manufacturerOptions = Array.from(
     new Set(data.map((row) => row.Manufacturer).filter(Boolean))
   )
@@ -125,7 +181,12 @@ export default function DealerDashboard() {
         const chunk = filtered.slice(i, i + chunkSize);
         const chunkResults = chunk.map(device => {
           try {
-            const result = calculateMonthlyFulfillmentPlanV2(device, selectedBias, selectedMonths);
+            const result = calculateMonthlyFulfillmentPlanV2(
+              device,
+              selectedBias,
+              selectedMonths,
+              highUsageConfig
+            );
             return {
               Serial_Number: device.Serial_Number,
               totals: result?.totals || {
@@ -163,7 +224,7 @@ export default function DealerDashboard() {
     return () => {
       isCancelled = true;
     };
-  }, [filtered, selectedBias, selectedMonths]);
+  }, [filtered, selectedBias, selectedMonths, highUsageConfig]);
   if (loading) return <div className="p-6 text-xl">Loading data...</div>;
 
   //const contractOnly = filtered.filter((row) => row.Contract_Status === "C");
@@ -188,7 +249,12 @@ export default function DealerDashboard() {
       magenta: parse(getBiasField(row, "M_Yield", selectedBias)),
       yellow: parse(getBiasField(row, "Y_Yield", selectedBias)),
     };
-    const plan = calculateMonthlyFulfillmentPlanV2(row, selectedBias, selectedMonths);
+    const plan = calculateMonthlyFulfillmentPlanV2(
+      row,
+      selectedBias,
+      selectedMonths,
+      highUsageConfig
+    );
 
     // console.log("Yield Inputs:", yieldMap);
 
@@ -319,7 +385,12 @@ export default function DealerDashboard() {
   }));
 
 const vendorTableData = filteredForVendor.map((row) => {
-  const fulfillment = calculateMonthlyFulfillmentPlanV2(row, selectedBias, selectedMonths);
+  const fulfillment = calculateMonthlyFulfillmentPlanV2(
+    row,
+    selectedBias,
+    selectedMonths,
+    highUsageConfig
+  );
   return {
     ...row,
     fulfillment,
@@ -474,7 +545,15 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
       )}
       {viewMode === "vendor" && (
         <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4">Vendor Projected Spend Summary</h2>
+          <HighUsageProjectionControls
+            config={highUsageConfig}
+            setConfig={setHighUsageConfig}
+          />
+
+          <h2 className="text-xl font-semibold mb-4">
+            Vendor Projected Spend Summary
+          </h2>
+
           <VendorSummaryTable
             filtered={vendorTableData}
             bias={selectedBias}
@@ -540,7 +619,9 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
             markupOverride={markupOverride}
             setMarkupOverride={setMarkupOverride}
             selectedMonths={selectedMonths}
-          />
+            highUsageConfig={highUsageConfig}
+            setHighUsageConfig={setHighUsageConfig}
+            />
         </div>
       )}
 
@@ -576,10 +657,22 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
 
           {selectedCustomer !== "All" && (
             <>
-              <div className="mt-10">
-                <h2 className="text-2xl font-bold mb-4">Supplies Program Summary by Device</h2>
-                <Table1 data={table1Data} bias={selectedBias} selectedMonths={selectedMonths} />
-              </div>
+            <div className="mt-10">
+              <HighUsageProjectionControls
+                config={highUsageConfig}
+                setConfig={setHighUsageConfig}
+              />
+
+              <h2 className="text-2xl font-bold mb-4">
+                Supplies Program Summary by Device
+              </h2>
+
+              <Table1
+                data={table1Data}
+                bias={selectedBias}
+                selectedMonths={selectedMonths}
+              />
+            </div>
 
 
               <div className="mt-10">
