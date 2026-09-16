@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 const getBiasField = (row: any, field: string, bias: "O" | "R" | "N") => {
   const biasKey = `${bias}_${field}`;
@@ -48,14 +48,30 @@ function isStale(lastUpdated: number, currentDate: Date, days: number): boolean 
 }
 
 export default function Table1({ data, bias, selectedMonths }: Props) {
+  const [deviceFilter, setDeviceFilter] = useState<
+    "all" | "highUsage" | "stale" | "both"
+  >("all");
   const computeGM = (sp: number, cost: number) => (sp > 0 ? (sp - cost) / sp : 0);
   const computeContractGM = (cost: number, rev: number) => (rev > 0 ? (rev - cost) / rev : 0);
 
   const formatCell = (value: number) =>
     value === 0 ? <span className="text-gray-400">-</span> : value.toLocaleString();
 
+  const latestDate = new Date();
+
+  const displayedData = data.filter((row) => {
+    const stale = isStale(row.Last_Updated, latestDate, 5);
+    const highUsage = row.Device_Class?.includes("High Usage") ?? false;
+
+    if (deviceFilter === "highUsage") return highUsage;
+    if (deviceFilter === "stale") return stale;
+    if (deviceFilter === "both") return highUsage && stale;
+
+    return true;
+  });
+
   const grouped = Object.entries(
-    data.reduce((acc: Record<string, Table1Row[]>, row) => {
+    displayedData.reduce((acc: Record<string, Table1Row[]>, row) => {
       if (!row) return acc;
       acc[row.Monitor] = acc[row.Monitor] || [];
       acc[row.Monitor].push(row);
@@ -63,11 +79,33 @@ export default function Table1({ data, bias, selectedMonths }: Props) {
     }, {})
   );
 
-  const latestDate = new Date();
+return (
+    <div>
+      <div className="mb-4 flex items-end gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Device Filter:
+          </label>
 
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border text-sm text-gray-900">
+          <select
+            value={deviceFilter}
+            onChange={(e) =>
+              setDeviceFilter(
+                e.target.value as "all" | "highUsage" | "stale" | "both"
+              )
+            }
+            className="p-2 border border-gray-300 rounded w-56"
+          >
+            <option value="all">All Devices</option>
+            <option value="highUsage">High Usage (Purple)</option>
+            <option value="stale">Stale Data (Red)</option>
+            <option value="both">High Usage + Stale</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border text-sm text-gray-900">
         <thead className="bg-gray-100 text-xs font-semibold">
           <tr>
             <th className="px-3 py-2 text-left">Customer</th>
@@ -186,5 +224,6 @@ export default function Table1({ data, bias, selectedMonths }: Props) {
         </tbody>
       </table>
     </div>
+  </div>
   );
 }
