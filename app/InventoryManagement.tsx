@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import FulfillmentEntry from "./FulfillmentEntry";
 
 type InventoryPosition = {
   monitor: string;
@@ -64,8 +65,8 @@ export default function InventoryManagement() {
   const [search, setSearch] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
 
-  const loadInventory = async () => {
-    setLoading(true);
+  const loadInventory = async (showLoading = true) => {
+      if (showLoading) setLoading(true);
     setError("");
 
     try {
@@ -83,8 +84,8 @@ export default function InventoryManagement() {
       console.error("Unable to load inventory", err);
       setError("Unable to load inventory data.");
     } finally {
-      setLoading(false);
-    }
+          if (showLoading) setLoading(false);
+        }
   };
 
   useEffect(() => {
@@ -185,6 +186,13 @@ export default function InventoryManagement() {
           alert={summary.exceptions > 0}
         />
       </div>
+
+      <FulfillmentEntry
+        positions={data.inventory}
+        onRecorded={() => {
+          void loadInventory(false);
+        }}
+      />
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
