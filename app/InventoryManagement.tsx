@@ -151,7 +151,7 @@ export default function InventoryManagement() {
       <div className="mt-10 rounded border border-red-300 bg-red-50 p-4">
         <p className="text-red-700">{error}</p>
         <button
-          onClick={loadInventory}
+          onClick={() => {   void loadInventory(); }}
           className="mt-3 rounded bg-red-700 px-4 py-2 text-white"
         >
           Try Again
@@ -225,7 +225,7 @@ export default function InventoryManagement() {
         </div>
 
         <button
-          onClick={loadInventory}
+          onClick={() => {   void loadInventory(); }}
           className="rounded bg-gray-800 px-4 py-2 text-white"
         >
           Refresh
