@@ -10,6 +10,7 @@ import Table4 from './Table4';
 import RiskMarginTable from "./RiskMarginTable";
 import VendorSummaryTable from "./VendorSummaryTable";
 import SubscriptionPlanTable from "./SubscriptionPlanTable";
+import InventoryManagement from "./InventoryManagement";
 import { useMCARPData } from "./useMCARPData";
 import HighUsageProjectionControls, {
   type HighUsageProjectionConfig,
@@ -56,7 +57,9 @@ export default function DealerDashboard() {
     setSelectedContractType,
   } = useMCARPData();
 
-  const [viewMode, setViewMode] = useState<"" | "risk" | "vendor" | "subscription">("");
+  const [viewMode, setViewMode] = useState<
+  "" | "risk" | "vendor" | "subscription" | "inventory"
+  >("");
   const [selectedBias, setSelectedBias] = useState<"O" | "R" | "N">("O");
   const [monoCpp, setMonoCpp] = useState(0.02);
   const [colorCpp, setColorCpp] = useState(0.06);
@@ -493,13 +496,23 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
           <label className="block text-sm font-medium text-gray-700 mb-1">Other Options:</label>
           <select
             value={viewMode}
-            onChange={(e) => setViewMode(e.target.value as "" | "risk" | "vendor" | "subscription")}
+            onChange={(e) =>
+              setViewMode(
+                e.target.value as
+                  | ""
+                  | "risk"
+                  | "vendor"
+                  | "subscription"
+                  | "inventory"
+              )
+            }
             className="p-2 border border-gray-300 rounded w-78"
           >
             <option value="">-- None --</option>
             <option value="risk">Show Margin & Risk Summary</option>
             <option value="vendor">Show Vendor Summary</option>
             <option value="subscription">Show Subscription Plan</option>
+            <option value="inventory">Show Operational Inventory</option>
           </select>
         </div>
 
@@ -625,6 +638,7 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
         </div>
       )}
 
+      {viewMode === "inventory" && <InventoryManagement />}
       {!viewMode && (
         <>
           <div className="mt-10">
