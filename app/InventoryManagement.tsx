@@ -31,6 +31,29 @@ type InventoryResponse = {
   transactions: InventoryTransaction[];
 };
 
+const formatIdentifier = (value: string) =>
+  value.replace(/\.0$/, "");
+
+const formatExcelDate = (value: number | string | null) => {
+  if (value === null || value === "") return "Not available";
+
+  const serial = Number(value);
+  if (!Number.isFinite(serial)) return String(value);
+
+  const date = new Date(
+    Date.UTC(1899, 11, 30) + serial * 24 * 60 * 60 * 1000
+  );
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(date);
+};
+
 export default function InventoryManagement() {
   const [data, setData] = useState<InventoryResponse>({
     inventory: [],
@@ -216,19 +239,19 @@ export default function InventoryManagement() {
           <tbody>
             {filteredInventory.map((row) => (
               <tr
-                key={`${row.monitor}-${row.serial_number}-${row.color}`}
+                key={`${row.monitor}-${formatIdentifier(row.serial_number)}-${row.color}`}
                 className="border-t border-gray-200"
               >
                 <td className="whitespace-nowrap px-4 py-3 font-medium">
-                  {row.serial_number}
+                  {formatIdentifier(row.serial_number)}
                 </td>
                 <td className="px-4 py-3">{row.color}</td>
-                <td className="whitespace-nowrap px-4 py-3">{row.sku}</td>
+                <td className="whitespace-nowrap px-4 py-3">{formatIdentifier(row.sku)}</td>
                 <td className="px-4 py-3 text-right font-semibold">
                   {row.on_hand_qty}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">
-                  {row.last_processed_replaced ?? "Not available"}
+                  {formatExcelDate(row.last_processed_replaced)}
                 </td>
                 <td className="px-4 py-3">
                   {row.reconciliation_required ? (
@@ -287,11 +310,11 @@ export default function InventoryManagement() {
                     {formatDate(transaction.event_date)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 font-medium">
-                    {transaction.serial_number}
+                    {formatIdentifier(transaction.serial_number)}
                   </td>
                   <td className="px-4 py-3">{transaction.color}</td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    {transaction.sku}
+                    {formatIdentifier(transaction.sku)}
                   </td>
                   <td className="px-4 py-3">{transaction.event_type}</td>
                   <td
