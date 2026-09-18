@@ -65,7 +65,17 @@ const formatExcelDate = (value: number | string | null) => {
     Date.UTC(1899, 11, 30) + serial * 24 * 60 * 60 * 1000
   );
 
-  const formatTransactionReference = (reference: string | null) => {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(date);
+};
+
+const formatTransactionReference = (reference: string | null) => {
   if (!reference) return "—";
 
   if (
@@ -79,16 +89,6 @@ const formatExcelDate = (value: number | string | null) => {
     /\b\d{5}(?:\.\d+)?\b/g,
     (value) => formatExcelDate(value)
   );
-};
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "UTC",
-  }).format(date);
 };
 
 export default function InventoryManagement() {
