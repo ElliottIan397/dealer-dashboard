@@ -9,6 +9,7 @@ type InventoryPosition = {
   color: string;
   sku: string;
   days_remaining: number | null;
+  cartridge_level: number | null;
   on_hand_qty: number;
   last_processed_replaced: number | string | null;
   reconciliation_required: boolean;
@@ -28,6 +29,24 @@ type InventoryTransaction = {
   reference: string | null;
 };
 
+function isRecentlyInstalled(
+  row: InventoryPosition,
+  transactions: InventoryTransaction[]
+) {
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+  return transactions.some((transaction) => {
+    const eventTime = new Date(transaction.event_date).getTime();
+
+    return (
+      transaction.event_type === "INSTALLATION" &&
+      transaction.serial_number === row.serial_number &&
+      transaction.color === row.color &&
+      eventTime >= sevenDaysAgo
+    );
+  });
+}
+
 type InventoryResponse = {
   inventory: InventoryPosition[];
   transactions: InventoryTransaction[];
@@ -45,6 +64,22 @@ const formatExcelDate = (value: number | string | null) => {
   const date = new Date(
     Date.UTC(1899, 11, 30) + serial * 24 * 60 * 60 * 1000
   );
+
+  const formatTransactionReference = (reference: string | null) => {
+  if (!reference) return "—";
+
+  if (
+    !reference.startsWith("EKM ") ||
+    !reference.includes("_Replaced advanced from")
+  ) {
+    return reference;
+  }
+
+  return reference.replace(
+    /\b\d{5}(?:\.\d+)?\b/g,
+    (value) => formatExcelDate(value)
+  );
+};
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -258,9 +293,13 @@ export default function InventoryManagement() {
                 <td className="px-4 py-3">{row.color}</td>
                 <td className="whitespace-nowrap px-4 py-3">{formatIdentifier(row.sku)}</td>
                 <td className="px-4 py-3 text-right">
-                  {row.days_remaining == null
-                    ? "—"
-                  : Math.round(Number(row.days_remaining))}
+                  {Number(row.days_remaining) === 0 &&
+                  Number(row.cartridge_level) === 1 &&
+                  isRecentlyInstalled(row, transactions)
+                    ? "Calculating"
+                    : row.days_remaining == null
+                      ? "—"
+                      : Math.round(Number(row.days_remaining))}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold">
                   {row.on_hand_qty}
@@ -346,7 +385,7 @@ export default function InventoryManagement() {
                     {transaction.source}
                   </td>
                   <td className="min-w-80 px-4 py-3">
-                    {transaction.reference || "—"}
+                    {formatTransactionReference(transaction.reference)}
                   </td>
                 </tr>
               ))}
