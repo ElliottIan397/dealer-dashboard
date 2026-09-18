@@ -8,6 +8,7 @@ type InventoryPosition = {
   serial_number: string;
   color: string;
   sku: string;
+  days_remaining: number | null;
   on_hand_qty: number;
   last_processed_replaced: number | string | null;
   reconciliation_required: boolean;
@@ -239,6 +240,7 @@ export default function InventoryManagement() {
               <th className="px-4 py-3">Serial Number</th>
               <th className="px-4 py-3">Color</th>
               <th className="px-4 py-3">SKU</th>
+              <th className="px-4 py-3 text-right">Days Remaining</th>
               <th className="px-4 py-3 text-right">On Hand</th>
               <th className="px-4 py-3">EKM Checkpoint</th>
               <th className="px-4 py-3">Status</th>
@@ -255,6 +257,11 @@ export default function InventoryManagement() {
                 </td>
                 <td className="px-4 py-3">{row.color}</td>
                 <td className="whitespace-nowrap px-4 py-3">{formatIdentifier(row.sku)}</td>
+                <td className="px-4 py-3 text-right">
+                  {row.days_remaining == null
+                    ? "—"
+                  : Math.round(Number(row.days_remaining))}
+                </td>
                 <td className="px-4 py-3 text-right font-semibold">
                   {row.on_hand_qty}
                 </td>
@@ -278,7 +285,7 @@ export default function InventoryManagement() {
             {filteredInventory.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-8 text-center text-gray-500"
                 >
                   No inventory positions match the selected filters.
