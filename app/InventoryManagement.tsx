@@ -295,7 +295,7 @@ export default function InventoryManagement() {
                 <td className="px-4 py-3 text-right">
                   {Number(row.days_remaining) === 0 &&
                   Number(row.cartridge_level) === 1 &&
-                  isRecentlyInstalled(row, transactions)
+                  isRecentlyInstalled(row, data.transactions)
                     ? "Calculating"
                     : row.days_remaining == null
                       ? "—"
