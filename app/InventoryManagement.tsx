@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import FulfillmentEntry from "./FulfillmentEntry";
 
 type InventoryPosition = {
   monitor: string;
@@ -133,10 +132,9 @@ export default function InventoryManagement() {
   >([]);
   const [queueLoading, setQueueLoading] = useState(true);
   const [queueError, setQueueError] = useState("");
+  const [sendingApproved, setSendingApproved] = useState(false);
+  const [sendResult, setSendResult] = useState("");
   const [reviewingRequirementId, setReviewingRequirementId] = useState<
-  number | null
-  >(null);
-  const [fulfillingRequirementId, setFulfillingRequirementId] = useState<
   number | null
   >(null);
 
@@ -224,54 +222,49 @@ const reviewFulfillmentRequirement = async (
   }
 };
 
-const recordApprovedFulfillment = async (requirementId: number) => {
-  const enteredReference = window.prompt(
-    "Enter the Friends fulfillment reference:"
-  );
+  const sendApprovedFulfillments = async () => {
+    const approvedCount = fulfillmentQueue.filter(
+      (item) => item.status === "APPROVED"
+    ).length;
 
-  if (enteredReference === null) return;
+    if (approvedCount === 0) return;
 
-  const reference = enteredReference.trim();
+    const confirmed = window.confirm(
+      `Send ${approvedCount} approved fulfillment request${
+        approvedCount === 1 ? "" : "s"
+      } to Friends?`
+    );
 
-  if (!reference) {
-    window.alert("A Friends fulfillment reference is required.");
-    return;
-  }
+    if (!confirmed) return;
 
-  const confirmed = window.confirm(
-    `Confirm requirement ${requirementId} was sent to Friends using reference "${reference}"?`
-  );
+    setSendingApproved(true);
+    setQueueError("");
+    setSendResult("");
 
-  if (!confirmed) return;
+    try {
+      const response = await fetch("/api/approved-fulfillment", {
+        method: "POST",
+      });
 
-  setFulfillingRequirementId(requirementId);
-  setQueueError("");
+      const result = await response.json();
 
-  try {
-    const response = await fetch("/api/approved-fulfillment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        requirement_id: requirementId,
-        reference,
-      }),
-    });
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to send approved fulfillments");
+      }
 
-    if (!response.ok) {
-      throw new Error(`Approved fulfillment failed: ${response.status}`);
+      setSendResult(result.message);
+      await Promise.all([
+        loadFulfillmentQueue(),
+        loadInventory(false),
+      ]);
+    } catch (err) {
+      console.error("Unable to send approved fulfillments", err);
+      setQueueError("Unable to send approved fulfillments.");
+    } finally {
+      setSendingApproved(false);
     }
+  };
 
-    window.location.reload();
-  } catch (err) {
-    console.error("Unable to record approved fulfillment", err);
-    setQueueError("Unable to record the approved fulfillment.");
-  } finally {
-    setFulfillingRequirementId(null);
-  }
-};
-  
   useEffect(() => {
     void loadInventory();
     void loadFulfillmentQueue();
@@ -372,27 +365,49 @@ const recordApprovedFulfillment = async (requirementId: number) => {
         />
       </div>
 
-      <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-xl font-semibold">
-              Fulfillment Approval Queue
-            </h3>
-            <p className="mt-1 text-sm text-gray-600">
-              Consumable requests awaiting review before shipment.
-            </p>
-          </div>
+<div>
+  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h3 className="text-xl font-semibold">
+        Fulfillment Approval Queue
+      </h3>
+      <p className="mt-1 text-sm text-gray-600">
+        Consumable requests awaiting review before shipment.
+      </p>
+    </div>
 
-          <button
-            onClick={() => {
-              void loadFulfillmentQueue();
-            }}
-            disabled={queueLoading}
-            className="rounded bg-gray-800 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {queueLoading ? "Refreshing..." : "Refresh Queue"}
-          </button>
-        </div>
+    <div className="flex gap-3">
+      <button
+        onClick={() => {
+          void loadFulfillmentQueue();
+        }}
+        disabled={queueLoading || sendingApproved}
+        className="rounded bg-gray-800 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {queueLoading ? "Refreshing..." : "Refresh Queue"}
+      </button>
+
+      <button
+        onClick={() => {
+          void sendApprovedFulfillments();
+        }}
+        disabled={
+          queueLoading ||
+          sendingApproved ||
+          !fulfillmentQueue.some((item) => item.status === "APPROVED")
+        }
+        className="rounded bg-blue-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {sendingApproved ? "Sending..." : "Send Approved Fulfillments"}
+      </button>
+    </div>
+  </div>
+
+  {sendResult && (
+    <div className="rounded border border-green-200 bg-green-50 p-4 text-green-800">
+      {sendResult}
+    </div>
+  )}
 
         {queueError ? (
           <div className="rounded border border-red-300 bg-red-50 p-4 text-red-700">
@@ -464,21 +479,7 @@ const recordApprovedFulfillment = async (requirementId: number) => {
                       <div className="flex gap-2">
                         {item.status === "APPROVED" ? (
                           <>
-                            <button
-                              onClick={() =>
-                                void recordApprovedFulfillment(item.requirement_id)
-                              }
-                              disabled={
-                                fulfillingRequirementId === item.requirement_id ||
-                                reviewingRequirementId === item.requirement_id
-                              }
-                              className="rounded bg-blue-700 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {fulfillingRequirementId === item.requirement_id
-                                ? "Recording..."
-                                : "Record Sent"}
-                            </button>
-                    
+
                             <button
                               onClick={() =>
                                 void reviewFulfillmentRequirement(
@@ -486,10 +487,7 @@ const recordApprovedFulfillment = async (requirementId: number) => {
                                   "HOLD"
                                 )
                               }
-                              disabled={
-                                fulfillingRequirementId === item.requirement_id ||
-                                reviewingRequirementId === item.requirement_id
-                              }
+                              disabled={reviewingRequirementId === item.requirement_id}
                               className="rounded bg-amber-600 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               Hold
@@ -518,13 +516,6 @@ const recordApprovedFulfillment = async (requirementId: number) => {
           </div>
         )}
       </div>
-
-      <FulfillmentEntry
-        positions={data.inventory}
-        onRecorded={() => {
-          void loadInventory(false);
-        }}
-      />
 
       <div className="flex flex-wrap items-end gap-4">
         <div>
