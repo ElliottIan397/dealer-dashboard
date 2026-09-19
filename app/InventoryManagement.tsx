@@ -133,6 +133,9 @@ export default function InventoryManagement() {
   >([]);
   const [queueLoading, setQueueLoading] = useState(true);
   const [queueError, setQueueError] = useState("");
+  const [reviewingRequirementId, setReviewingRequirementId] = useState<
+  number | null
+  >(null);
 
   const loadInventory = async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -180,6 +183,44 @@ export default function InventoryManagement() {
     }
   };
 
+const reviewFulfillmentRequirement = async (
+  requirementId: number,
+  action: "APPROVE" | "HOLD"
+) => {
+  const confirmed = window.confirm(
+    `${action === "APPROVE" ? "Approve" : "Place on hold"} fulfillment requirement ${requirementId}?`
+  );
+
+  if (!confirmed) return;
+
+  setReviewingRequirementId(requirementId);
+  setQueueError("");
+
+  try {
+    const response = await fetch("/api/fulfillment-review", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        requirement_id: requirementId,
+        action,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Fulfillment review failed: ${response.status}`);
+    }
+
+    await loadFulfillmentQueue();
+  } catch (err) {
+    console.error("Unable to review fulfillment requirement", err);
+    setQueueError("Unable to update the fulfillment requirement.");
+  } finally {
+    setReviewingRequirementId(null);
+  }
+};
+  
   useEffect(() => {
     void loadInventory();
     void loadFulfillmentQueue();
@@ -327,6 +368,7 @@ export default function InventoryManagement() {
                   <th className="px-4 py-3 text-right">Quantity</th>
                   <th className="px-4 py-3">Ship To</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -366,6 +408,39 @@ export default function InventoryManagement() {
                       <span className="rounded bg-amber-100 px-2 py-1 font-medium text-amber-800">
                         {item.status.replaceAll("_", " ")}
                       </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex gap-2">
+                        {item.status !== "APPROVED" && (
+                          <button
+                            onClick={() =>
+                              void reviewFulfillmentRequirement(
+                                item.requirement_id,
+                                "APPROVE"
+                              )
+                            }
+                            disabled={reviewingRequirementId === item.requirement_id}
+                            className="rounded bg-green-700 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Approve
+                          </button>
+                        )}
+                    
+                        {item.status !== "HELD" && (
+                          <button
+                            onClick={() =>
+                              void reviewFulfillmentRequirement(
+                                item.requirement_id,
+                                "HOLD"
+                              )
+                            }
+                            disabled={reviewingRequirementId === item.requirement_id}
+                            className="rounded bg-amber-600 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Hold
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
