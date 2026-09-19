@@ -136,6 +136,9 @@ export default function InventoryManagement() {
   const [reviewingRequirementId, setReviewingRequirementId] = useState<
   number | null
   >(null);
+  const [fulfillingRequirementId, setFulfillingRequirementId] = useState<
+  number | null
+  >(null);
 
   const loadInventory = async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -218,6 +221,54 @@ const reviewFulfillmentRequirement = async (
     setQueueError("Unable to update the fulfillment requirement.");
   } finally {
     setReviewingRequirementId(null);
+  }
+};
+
+const recordApprovedFulfillment = async (requirementId: number) => {
+  const enteredReference = window.prompt(
+    "Enter the Friends fulfillment reference:"
+  );
+
+  if (enteredReference === null) return;
+
+  const reference = enteredReference.trim();
+
+  if (!reference) {
+    window.alert("A Friends fulfillment reference is required.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Confirm requirement ${requirementId} was sent to Friends using reference "${reference}"?`
+  );
+
+  if (!confirmed) return;
+
+  setFulfillingRequirementId(requirementId);
+  setQueueError("");
+
+  try {
+    const response = await fetch("/api/approved-fulfillment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        requirement_id: requirementId,
+        reference,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Approved fulfillment failed: ${response.status}`);
+    }
+
+    window.location.reload();
+  } catch (err) {
+    console.error("Unable to record approved fulfillment", err);
+    setQueueError("Unable to record the approved fulfillment.");
+  } finally {
+    setFulfillingRequirementId(null);
   }
 };
   
@@ -411,7 +462,40 @@ const reviewFulfillmentRequirement = async (
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex gap-2">
-                        {item.status !== "APPROVED" && (
+                        {item.status === "APPROVED" ? (
+                          <>
+                            <button
+                              onClick={() =>
+                                void recordApprovedFulfillment(item.requirement_id)
+                              }
+                              disabled={
+                                fulfillingRequirementId === item.requirement_id ||
+                                reviewingRequirementId === item.requirement_id
+                              }
+                              className="rounded bg-blue-700 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {fulfillingRequirementId === item.requirement_id
+                                ? "Recording..."
+                                : "Record Sent"}
+                            </button>
+                    
+                            <button
+                              onClick={() =>
+                                void reviewFulfillmentRequirement(
+                                  item.requirement_id,
+                                  "HOLD"
+                                )
+                              }
+                              disabled={
+                                fulfillingRequirementId === item.requirement_id ||
+                                reviewingRequirementId === item.requirement_id
+                              }
+                              className="rounded bg-amber-600 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Hold
+                            </button>
+                          </>
+                        ) : (
                           <button
                             onClick={() =>
                               void reviewFulfillmentRequirement(
@@ -423,21 +507,6 @@ const reviewFulfillmentRequirement = async (
                             className="rounded bg-green-700 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Approve
-                          </button>
-                        )}
-                    
-                        {item.status !== "HELD" && (
-                          <button
-                            onClick={() =>
-                              void reviewFulfillmentRequirement(
-                                item.requirement_id,
-                                "HOLD"
-                              )
-                            }
-                            disabled={reviewingRequirementId === item.requirement_id}
-                            className="rounded bg-amber-600 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Hold
                           </button>
                         )}
                       </div>
