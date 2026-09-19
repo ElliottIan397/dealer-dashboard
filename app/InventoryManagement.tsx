@@ -52,6 +52,34 @@ type InventoryResponse = {
   transactions: InventoryTransaction[];
 };
 
+type FulfillmentQueueItem = {
+  requirement_id: number;
+  triggered_at: string;
+  needed_by_date: string | null;
+  serial_number: string;
+  model: string | null;
+  delivery_label: string;
+  color: string;
+  detected_sku: string;
+  recommended_sku: string;
+  substitution_review_required: boolean;
+  quantity: number;
+  source_request_level: number | null;
+  source_request_days_left: number | null;
+  status: string;
+  location_code: string;
+  location_name: string;
+  address_1: string;
+  address_2: string | null;
+  city: string;
+  state: string;
+  postal_code: string;
+};
+
+type FulfillmentQueueResponse = {
+  queue: FulfillmentQueueItem[];
+};
+
 const formatIdentifier = (value: string) =>
   value.replace(/\.0$/, "");
 
@@ -100,6 +128,11 @@ export default function InventoryManagement() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
+  const [fulfillmentQueue, setFulfillmentQueue] = useState<
+    FulfillmentQueueItem[]
+  >([]);
+  const [queueLoading, setQueueLoading] = useState(true);
+  const [queueError, setQueueError] = useState("");
 
   const loadInventory = async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -124,8 +157,32 @@ export default function InventoryManagement() {
         }
   };
 
+  const loadFulfillmentQueue = async () => {
+    setQueueLoading(true);
+    setQueueError("");
+
+    try {
+      const response = await fetch("/api/fulfillment-queue", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Fulfillment queue request failed: ${response.status}`);
+      }
+
+      const result: FulfillmentQueueResponse = await response.json();
+      setFulfillmentQueue(Array.isArray(result.queue) ? result.queue : []);
+    } catch (err) {
+      console.error("Unable to load fulfillment queue", err);
+      setQueueError("Unable to load the fulfillment approval queue.");
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
   useEffect(() => {
-    loadInventory();
+    void loadInventory();
+    void loadFulfillmentQueue();
   }, []);
 
   const filteredInventory = useMemo(() => {
@@ -221,6 +278,101 @@ export default function InventoryManagement() {
           value={summary.exceptions}
           alert={summary.exceptions > 0}
         />
+      </div>
+
+      <div>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold">
+              Fulfillment Approval Queue
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Consumable requests awaiting review before shipment.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              void loadFulfillmentQueue();
+            }}
+            disabled={queueLoading}
+            className="rounded bg-gray-800 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {queueLoading ? "Refreshing..." : "Refresh Queue"}
+          </button>
+        </div>
+
+        {queueError ? (
+          <div className="rounded border border-red-300 bg-red-50 p-4 text-red-700">
+            {queueError}
+          </div>
+        ) : queueLoading ? (
+          <div className="rounded border border-gray-200 p-6 text-gray-500">
+            Loading fulfillment queue...
+          </div>
+        ) : fulfillmentQueue.length === 0 ? (
+          <div className="rounded border border-green-200 bg-green-50 p-4 text-green-800">
+            No fulfillment requests are awaiting review.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded border border-gray-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="px-4 py-3">Requested</th>
+                  <th className="px-4 py-3">Serial Number</th>
+                  <th className="px-4 py-3">Delivery Label</th>
+                  <th className="px-4 py-3">Color</th>
+                  <th className="px-4 py-3">Recommended SKU</th>
+                  <th className="px-4 py-3 text-right">Quantity</th>
+                  <th className="px-4 py-3">Ship To</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fulfillmentQueue.map((item) => (
+                  <tr
+                    key={item.requirement_id}
+                    className="border-t border-gray-200 align-top"
+                  >
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {formatDate(item.triggered_at)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 font-medium">
+                      {formatIdentifier(item.serial_number)}
+                    </td>
+                    <td className="px-4 py-3">{item.delivery_label}</td>
+                    <td className="px-4 py-3">{item.color}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {formatIdentifier(item.recommended_sku)}
+                      {item.substitution_review_required && (
+                        <div className="mt-1 text-xs font-medium text-amber-700">
+                          Substitution review required
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      {item.quantity}
+                    </td>
+                    <td className="min-w-64 px-4 py-3">
+                      <div className="font-medium">{item.location_name}</div>
+                      <div>{item.address_1}</div>
+                      {item.address_2 && <div>{item.address_2}</div>}
+                      <div>
+                        {item.city}, {item.state} {item.postal_code}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <span className="rounded bg-amber-100 px-2 py-1 font-medium text-amber-800">
+                        {item.status.replaceAll("_", " ")}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <FulfillmentEntry
