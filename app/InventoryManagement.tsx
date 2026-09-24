@@ -306,11 +306,15 @@ const reviewFulfillmentRequirement = async (
         stockFilter === "all" ||
         (stockFilter === "positive" && row.on_hand_qty > 0) ||
         (stockFilter === "zero" && row.on_hand_qty === 0) ||
-        (stockFilter === "exceptions" && row.reconciliation_required);
+        (stockFilter === "exceptions" && row.reconciliation_required) ||
+        (stockFilter === "highUsage" &&
+          highUsageSerials.has(
+            formatIdentifier(row.serial_number).trim().toUpperCase()
+          ));
 
       return matchesSearch && matchesStock;
     });
-  }, [data.inventory, search, stockFilter]);
+  }, [data.inventory, search, stockFilter, highUsageSerials]);
 
   const summary = useMemo(() => {
     const positivePositions = data.inventory.filter(
@@ -574,6 +578,7 @@ const reviewFulfillmentRequirement = async (
             className="w-56 rounded border border-gray-300 p-2"
           >
             <option value="all">All Positions</option>
+            <option value="highUsage">High Usage Devices</option>
             <option value="positive">On Hand Greater Than Zero</option>
             <option value="zero">Zero On Hand</option>
             <option value="exceptions">Reconciliation Required</option>
