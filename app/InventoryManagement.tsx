@@ -608,7 +608,18 @@ const reviewFulfillmentRequirement = async (
                 className="border-t border-gray-200"
               >
                 <td className="whitespace-nowrap px-4 py-3 font-medium">
-                  {formatIdentifier(row.serial_number)}
+                  <div className="flex items-center gap-2">
+                    {formatIdentifier(row.serial_number)}
+
+                    {highUsageSerials.has(
+                      formatIdentifier(row.serial_number).trim().toUpperCase()
+                    ) && (
+                      <span
+                        className="h-2 w-2 rounded-full bg-purple-500"
+                        title="High Usage Device"
+                      />
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3">{row.color}</td>
                 <td className="whitespace-nowrap px-4 py-3">{formatIdentifier(row.sku)}</td>
