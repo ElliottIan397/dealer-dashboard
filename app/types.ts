@@ -7,7 +7,7 @@ export type McarpRow = {
   Device_Type: string;
   Subscription_Flag?: string;
   viewMode?: string;
-  Device_Class?: "Class 1" | "Class 2";
+  Device_Class?: string;
   
   // Table 1 fields
   Black_Annual_Volume: number;

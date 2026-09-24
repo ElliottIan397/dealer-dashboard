@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import type { McarpRow } from "./types";
 
 type InventoryPosition = {
   monitor: string;
@@ -118,7 +119,28 @@ const formatTransactionReference = (reference: string | null) => {
   );
 };
 
-export default function InventoryManagement() {
+type InventoryManagementProps = {
+  devices: McarpRow[];
+};
+
+export default function InventoryManagement({
+  devices,
+}: InventoryManagementProps) {
+    const highUsageSerials = useMemo(
+    () =>
+      new Set(
+        devices
+          .filter((device) =>
+            device.Device_Class?.includes("High Usage")
+          )
+          .map((device) =>
+            formatIdentifier(String(device.Serial_Number))
+              .trim()
+              .toUpperCase()
+          )
+      ),
+    [devices]
+  );
   const [data, setData] = useState<InventoryResponse>({
     inventory: [],
     transactions: [],
@@ -447,7 +469,18 @@ const reviewFulfillmentRequirement = async (
                       {formatDate(item.triggered_at)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-medium">
-                      {formatIdentifier(item.serial_number)}
+                      <div className="flex items-center gap-2">
+                        {formatIdentifier(item.serial_number)}
+
+                        {highUsageSerials.has(
+                          formatIdentifier(item.serial_number).trim().toUpperCase()
+                        ) && (
+                          <span
+                            className="h-2 w-2 rounded-full bg-purple-500"
+                            title="High Usage Device"
+                          />
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">{item.delivery_label}</td>
                     <td className="px-4 py-3">{item.color}</td>

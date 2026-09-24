@@ -638,7 +638,7 @@ console.log("DEBUG ENRICHED:", enriched.map(r => ({
         </div>
       )}
 
-      {viewMode === "inventory" && <InventoryManagement />}
+      {viewMode === "inventory" && <InventoryManagement devices={data} />}
       {!viewMode && (
         <>
           <div className="mt-10">
