@@ -27,6 +27,9 @@ DECLARE
   v_requirement_reason text;
   v_already_queued boolean;
   v_queue_action text := 'NONE';
+  v_queue_source text;
+  v_queue_reference text;
+  v_link_ekm_request boolean := false;
 BEGIN
   p_monitor := NULLIF(BTRIM(p_monitor), '');
   p_serial_number := NULLIF(BTRIM(p_serial_number), '');
@@ -153,97 +156,155 @@ BEGIN
 
     IF NOT FOUND THEN
       v_queue_action := 'NO_CURRENT_EKM_REQUEST';
-
-    ELSIF v_request.fulfillment_requirement_id IS NOT NULL THEN
-      SELECT fr.status, fr.reason
-        INTO v_requirement_status, v_requirement_reason
-      FROM fulfillment_requirements fr
-      WHERE fr.id = v_request.fulfillment_requirement_id;
-
-      v_requirement_id := v_request.fulfillment_requirement_id;
-
-      IF v_requirement_status = 'CANCELLED'
-         AND v_requirement_reason LIKE
-           '%Inventory adjustment raised on-hand above zero%' THEN
-        UPDATE fulfillment_requirements fr
-        SET status = 'PENDING_REVIEW',
-            reason = CONCAT_WS(
-              ' | ',
-              NULLIF(fr.reason, ''),
-              'Reopened after inventory adjustment reduced on-hand to zero'
-            ),
-            updated_at = NOW()
-        WHERE fr.id = v_requirement_id;
-
-        v_queue_action := 'REOPENED_REQUIREMENT';
-      ELSE
-        v_queue_action := 'REQUIREMENT_ALREADY_LINKED';
-      END IF;
-
     ELSE
-      BEGIN
-        SELECT
-          q.requirement_id,
-          q.already_queued
-        INTO
-          v_requirement_id,
-          v_already_queued
-        FROM queue_fulfillment_requirement(
-          p_monitor => v_request.monitor,
-          p_serial_number => v_request.serial_number,
-          p_color => v_request.color,
-          p_detected_sku => COALESCE(
-            NULLIF(BTRIM(v_request.order_sku), ''),
-            v_inventory.sku
-          ),
-          p_source_reference => v_request.source_reference,
-          p_triggered_at => v_request.request_date,
-          p_needed_by_date => CASE
-            WHEN v_request.request_days_left IS NULL THEN NULL
-            ELSE v_request.request_date::date
-              + GREATEST(
-                  0,
-                  ROUND(v_request.request_days_left)::integer
-                )
-          END,
-          p_reason => COALESCE(
-            NULLIF(BTRIM(v_request.request_reason), ''),
-            'EKM replenishment requirement'
-          ),
-          p_source => 'EKM_CONSUMABLE_REQUEST',
-          p_recommended_sku => COALESCE(
-            NULLIF(BTRIM(v_request.order_sku), ''),
-            v_inventory.sku
-          ),
-          p_quantity => 1
-        ) q;
+      SELECT fr.id, fr.status
+        INTO v_requirement_id, v_requirement_status
+      FROM fulfillment_requirements fr
+      WHERE fr.monitor = p_monitor
+        AND fr.serial_number = p_serial_number
+        AND LOWER(fr.color) = LOWER(p_color)
+        AND fr.status IN (
+          'PENDING_REVIEW',
+          'HELD',
+          'APPROVED',
+          'RELEASED'
+        )
+      ORDER BY fr.id DESC
+      LIMIT 1;
 
-        UPDATE fulfillment_requirements fr
-        SET source_order_description = v_request.order_description,
-            source_request_level = v_request.request_level,
-            source_request_days_left = v_request.request_days_left,
-            updated_at = NOW()
-        WHERE fr.id = v_requirement_id;
+      IF FOUND THEN
+        v_queue_action := 'OPEN_REQUIREMENT_ALREADY_EXISTS';
+      ELSE
+        SELECT fr.id
+          INTO v_requirement_id
+        FROM fulfillment_requirements fr
+        WHERE fr.monitor = p_monitor
+          AND fr.serial_number = p_serial_number
+          AND LOWER(fr.color) = LOWER(p_color)
+          AND fr.status = 'CANCELLED'
+          AND fr.source = 'INVENTORY_ADJUSTMENT'
+          AND fr.reason LIKE
+            '%Inventory adjustment raised on-hand above zero%'
+        ORDER BY fr.id DESC
+        LIMIT 1;
 
-        UPDATE ekm_consumable_requests e
-        SET fulfillment_requirement_id = v_requirement_id,
-            queue_error = NULL,
-            updated_at = NOW()
-        WHERE e.id = v_request.id;
+        IF FOUND THEN
+          UPDATE fulfillment_requirements fr
+          SET status = 'PENDING_REVIEW',
+              reason = CONCAT_WS(
+                ' | ',
+                NULLIF(fr.reason, ''),
+                'Reopened after inventory adjustment reduced on-hand to zero'
+              ),
+              updated_at = NOW()
+          WHERE fr.id = v_requirement_id;
 
-        v_queue_action := CASE
-          WHEN v_already_queued THEN 'REQUIREMENT_ALREADY_QUEUED'
-          ELSE 'QUEUED_REQUIREMENT'
-        END;
+          v_queue_action := 'REOPENED_REQUIREMENT';
+        ELSE
+          v_requirement_id := NULL;
+          v_requirement_status := NULL;
+          v_requirement_reason := NULL;
 
-      EXCEPTION WHEN OTHERS THEN
-        UPDATE ekm_consumable_requests e
-        SET queue_error = SQLERRM,
-            updated_at = NOW()
-        WHERE e.id = v_request.id;
+          IF v_request.fulfillment_requirement_id IS NULL THEN
+            v_queue_source := 'EKM_CONSUMABLE_REQUEST';
+            v_queue_reference := v_request.source_reference;
+            v_link_ekm_request := true;
+          ELSE
+            SELECT fr.status, fr.reason
+              INTO v_requirement_status, v_requirement_reason
+            FROM fulfillment_requirements fr
+            WHERE fr.id = v_request.fulfillment_requirement_id;
 
-        v_queue_action := 'QUEUE_ERROR: ' || SQLERRM;
-      END;
+            IF v_requirement_status = 'FULFILLED' THEN
+              v_queue_source := 'INVENTORY_ADJUSTMENT';
+              v_queue_reference :=
+                'INVENTORY-ADJUSTMENT-' || v_transaction_id;
+              v_link_ekm_request := false;
+            ELSIF v_requirement_status = 'CANCELLED' THEN
+              v_queue_action := 'LINKED_REQUIREMENT_CANCELLED';
+            ELSE
+              v_queue_action := 'REQUIREMENT_ALREADY_LINKED';
+            END IF;
+          END IF;
+
+          IF v_queue_source IS NOT NULL THEN
+            BEGIN
+              SELECT
+                q.requirement_id,
+                q.already_queued
+              INTO
+                v_requirement_id,
+                v_already_queued
+              FROM queue_fulfillment_requirement(
+                p_monitor => v_request.monitor,
+                p_serial_number => v_request.serial_number,
+                p_color => v_request.color,
+                p_detected_sku => COALESCE(
+                  NULLIF(BTRIM(v_request.order_sku), ''),
+                  v_inventory.sku
+                ),
+                p_source_reference => v_queue_reference,
+                p_triggered_at => CASE
+                  WHEN v_queue_source = 'INVENTORY_ADJUSTMENT'
+                    THEN NOW()
+                  ELSE v_request.request_date
+                END,
+                p_needed_by_date => CASE
+                  WHEN v_request.request_days_left IS NULL THEN NULL
+                  ELSE CURRENT_DATE
+                    + GREATEST(
+                        0,
+                        ROUND(v_request.request_days_left)::integer
+                      )
+                END,
+                p_reason => CASE
+                  WHEN v_queue_source = 'INVENTORY_ADJUSTMENT'
+                    THEN 'Inventory corrected to zero: ' || p_reason
+                  ELSE COALESCE(
+                    NULLIF(BTRIM(v_request.request_reason), ''),
+                    'EKM replenishment requirement'
+                  )
+                END,
+                p_source => v_queue_source,
+                p_recommended_sku => COALESCE(
+                  NULLIF(BTRIM(v_request.order_sku), ''),
+                  v_inventory.sku
+                ),
+                p_quantity => 1
+              ) q;
+
+              UPDATE fulfillment_requirements fr
+              SET source_order_description = v_request.order_description,
+                  source_request_level = v_request.request_level,
+                  source_request_days_left = v_request.request_days_left,
+                  updated_at = NOW()
+              WHERE fr.id = v_requirement_id;
+
+              IF v_link_ekm_request THEN
+                UPDATE ekm_consumable_requests e
+                SET fulfillment_requirement_id = v_requirement_id,
+                    queue_error = NULL,
+                    updated_at = NOW()
+                WHERE e.id = v_request.id;
+              END IF;
+
+              v_queue_action := CASE
+                WHEN v_already_queued
+                  THEN 'REQUIREMENT_ALREADY_QUEUED'
+                ELSE 'QUEUED_REQUIREMENT'
+              END;
+
+            EXCEPTION WHEN OTHERS THEN
+              UPDATE ekm_consumable_requests e
+              SET queue_error = SQLERRM,
+                  updated_at = NOW()
+              WHERE e.id = v_request.id;
+
+              v_queue_action := 'QUEUE_ERROR: ' || SQLERRM;
+            END;
+          END IF;
+        END IF;
+      END IF;
     END IF;
   END IF;
 
