@@ -159,6 +159,9 @@ export default function InventoryManagement({
   const [reviewingRequirementId, setReviewingRequirementId] = useState<
   number | null
   >(null);
+    const [adjustingPositionKey, setAdjustingPositionKey] = useState<
+    string | null
+  >(null);
 
   const loadInventory = async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -287,6 +290,100 @@ const reviewFulfillmentRequirement = async (
     }
   };
 
+  const adjustInventory = async (row: InventoryPosition) => {
+    const positionKey =
+      `${row.monitor}-${formatIdentifier(row.serial_number)}-${row.color}`;
+
+    const enteredQuantity = window.prompt(
+      `Enter the corrected on-hand quantity for ` +
+        `${formatIdentifier(row.serial_number)} / ${row.color}.\n\n` +
+        `Current quantity: ${row.on_hand_qty}`,
+      String(row.on_hand_qty)
+    );
+
+    if (enteredQuantity === null) return;
+
+    const quantityText = enteredQuantity.trim();
+
+    if (!/^\d+$/.test(quantityText)) {
+      window.alert("Corrected quantity must be a whole number of zero or greater.");
+      return;
+    }
+
+    const correctedQuantity = Number(quantityText);
+
+    if (correctedQuantity > 100) {
+      window.alert("Corrected quantity cannot exceed 100.");
+      return;
+    }
+
+    if (correctedQuantity === row.on_hand_qty) {
+      window.alert("The corrected quantity is the same as the current quantity.");
+      return;
+    }
+
+    const enteredReason = window.prompt(
+      "Enter the reason for this inventory adjustment:"
+    );
+
+    if (enteredReason === null) return;
+
+    const reason = enteredReason.trim();
+
+    if (!reason) {
+      window.alert("An adjustment reason is required.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Confirm inventory adjustment:\n\n` +
+        `${formatIdentifier(row.serial_number)} / ${row.color}\n` +
+        `${formatIdentifier(row.sku)}\n` +
+        `${row.on_hand_qty} → ${correctedQuantity}\n\n` +
+        `Reason: ${reason}`
+    );
+
+    if (!confirmed) return;
+
+    setAdjustingPositionKey(positionKey);
+    setError("");
+
+    try {
+      const response = await fetch("/api/inventory-adjustment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          serial_number: row.serial_number,
+          color: row.color,
+          corrected_quantity: correctedQuantity,
+          reason,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to adjust inventory");
+      }
+
+      await Promise.all([
+        loadInventory(false),
+        loadFulfillmentQueue(),
+      ]);
+
+      window.alert(
+        `Inventory updated from ${result.old_qty} to ${result.new_qty}.`
+      );
+    } catch (err) {
+      console.error("Unable to adjust inventory", err);
+      setError("Unable to adjust inventory.");
+    } finally {
+      setAdjustingPositionKey(null);
+    }
+  };
+  
   useEffect(() => {
     void loadInventory();
     void loadFulfillmentQueue();
@@ -604,6 +701,7 @@ const reviewFulfillmentRequirement = async (
               <th className="px-4 py-3 text-right">On Hand</th>
               <th className="px-4 py-3">EKM Checkpoint</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -654,13 +752,30 @@ const reviewFulfillmentRequirement = async (
                     </span>
                   )}
                 </td>
+                                <td className="whitespace-nowrap px-4 py-3">
+                  <button
+                    onClick={() => {
+                      void adjustInventory(row);
+                    }}
+                    disabled={
+                      adjustingPositionKey ===
+                      `${row.monitor}-${formatIdentifier(row.serial_number)}-${row.color}`
+                    }
+                    className="rounded bg-blue-700 px-3 py-1.5 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {adjustingPositionKey ===
+                    `${row.monitor}-${formatIdentifier(row.serial_number)}-${row.color}`
+                      ? "Adjusting..."
+                      : "Adjust"}
+                  </button>
+                </td>
               </tr>
             ))}
 
             {filteredInventory.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-4 py-8 text-center text-gray-500"
                 >
                   No inventory positions match the selected filters.
