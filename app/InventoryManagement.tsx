@@ -434,6 +434,49 @@ const reviewFulfillmentRequirement = async (
     };
   }, [data.inventory]);
 
+  const getCurrentPagesLeft = (
+    serialNumber: string,
+    color: string
+  ): number | null => {
+    const normalizedSerial = formatIdentifier(serialNumber)
+      .trim()
+      .toUpperCase();
+
+    const device = devices.find(
+      (row) =>
+        formatIdentifier(String(row.Serial_Number))
+          .trim()
+          .toUpperCase() === normalizedSerial
+    );
+
+    if (!device) return null;
+
+    let pagesLeft: number | null | undefined;
+
+    switch (color.trim().toLowerCase()) {
+      case "black":
+        pagesLeft = device.Black_Pages_Left;
+        break;
+      case "cyan":
+        pagesLeft = device.Cyan_Pages_Left;
+        break;
+      case "magenta":
+        pagesLeft = device.Magenta_Pages_Left;
+        break;
+      case "yellow":
+        pagesLeft = device.Yellow_Pages_Left;
+        break;
+      default:
+        return null;
+    }
+
+    const numericValue = Number(pagesLeft);
+
+    return pagesLeft == null || !Number.isFinite(numericValue)
+      ? null
+      : Math.max(0, Math.round(numericValue));
+  };
+  
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -554,6 +597,7 @@ const reviewFulfillmentRequirement = async (
                   <th className="px-4 py-3">Delivery Label</th>
                   <th className="px-4 py-3">Color</th>
                   <th className="px-4 py-3">Recommended SKU</th>
+                  <th className="px-4 py-3 text-right">Pages Left</th>
                   <th className="px-4 py-3 text-right">Quantity</th>
                   <th className="px-4 py-3">Ship To</th>
                   <th className="px-4 py-3">Status</th>
@@ -592,6 +636,12 @@ const reviewFulfillmentRequirement = async (
                           Substitution review required
                         </div>
                       )}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      {getCurrentPagesLeft(
+                        item.serial_number,
+                        item.color
+                      ) ?? "\u2014"}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       {item.quantity}
