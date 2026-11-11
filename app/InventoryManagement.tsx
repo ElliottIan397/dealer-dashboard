@@ -148,6 +148,7 @@ export default function InventoryManagement({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [transactionSearch, setTransactionSearch] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
   const [fulfillmentQueue, setFulfillmentQueue] = useState<
     FulfillmentQueueItem[]
@@ -413,6 +414,18 @@ const reviewFulfillmentRequirement = async (
     });
   }, [data.inventory, search, stockFilter, highUsageSerials]);
 
+  const filteredTransactions = useMemo(() => {
+    const term = transactionSearch.trim().toLowerCase();
+  
+    if (!term) return data.transactions;
+  
+    return data.transactions.filter(
+      (transaction) =>
+        transaction.serial_number.toLowerCase().includes(term) ||
+        transaction.sku.toLowerCase().includes(term)
+    );
+  }, [data.transactions, transactionSearch]);
+  
   const summary = useMemo(() => {
     const positivePositions = data.inventory.filter(
       (row) => row.on_hand_qty > 0
@@ -837,9 +850,23 @@ const reviewFulfillmentRequirement = async (
       </div>
 
       <div>
+
         <h3 className="mb-3 text-xl font-semibold">
           Inventory Transaction History
         </h3>
+        
+        <div className="mb-4 max-w-md">
+          <label className="mb-1 block text-sm text-gray-700">
+            Search Transaction Serial or SKU
+          </label>
+          <input
+            type="text"
+            value={transactionSearch}
+            onChange={(event) => setTransactionSearch(event.target.value)}
+            placeholder="Enter serial number or SKU"
+            className="w-full rounded border border-gray-300 px-3 py-2"
+          />
+        </div>
 
         <div className="overflow-x-auto rounded border border-gray-200">
           <table className="min-w-full text-sm">
@@ -856,7 +883,7 @@ const reviewFulfillmentRequirement = async (
               </tr>
             </thead>
             <tbody>
-              {data.transactions.map((transaction) => (
+              {filteredTransactions.map((transaction) => (
                 <tr
                   key={transaction.id}
                   className="border-t border-gray-200"
